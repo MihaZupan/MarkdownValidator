@@ -17,42 +17,50 @@ namespace ReferenceValidator
             }
             else
             {
-                string rootDirectory = args.Length == 1 ? args[0] : "src";
-                PrintDiagnosticLine($"Using directory: `{Path.GetFullPath(rootDirectory)}`");
-
-                if (!Directory.Exists(rootDirectory))
+                if (args[0].OrdinalContains("-h") || args[0].Contains('?'))
                 {
-                    PrintCriticalError($"Could not find the root directory `{rootDirectory}`");
+                    PrintUsage();
+                    ErrorsFound = true;
                 }
                 else
                 {
-                    Report report = Validator.Validate(rootDirectory);
-                    ErrorsFound = report.HasErrors;
+                    string rootDirectory = args.Length == 1 ? args[0] : "src";
+                    PrintDiagnosticLine($"Using directory: `{Path.GetFullPath(rootDirectory)}`");
 
-                    PrintDiagnosticLine($"Indexed {report.AllFiles} files, {report.MarkdownFiles} of which are markdown files");
-
-                    if (report.Warnings.Count != 0)
+                    if (!Directory.Exists(rootDirectory))
                     {
-                        PrintDiagnosticLine($"\nFound {report.Warnings.Count} warning{(report.Warnings.Count % 100 == 1 ? "" : "s")}:");
-                        foreach (var warning in report.Warnings)
-                        {
-                            PrintWarning(warning);
-                        }
+                        PrintCriticalError($"Could not find the root directory `{rootDirectory}`");
                     }
                     else
                     {
-                        PrintColor("All references are good!\n", ConsoleColor.Green);
-                    }
+                        Report report = Validator.Validate(rootDirectory);
+                        ErrorsFound = report.HasErrors;
 
-                    string reportPath = args.Length > 1
-                        ? Path.GetFullPath(rootDirectory, args[1])
-                        : Path.Combine(Environment.CurrentDirectory, "report.json");
+                        PrintDiagnosticLine($"Indexed {report.AllFiles} files, {report.MarkdownFiles} of which are markdown files");
 
-                    if (args.Length < 2 || args[1] != "noreport")
-                    {
-                        PrintDiagnosticLine("Saving report to: " + Path.GetFullPath(reportPath));
-                        string json = JsonConvert.SerializeObject(report, Formatting.Indented);
-                        File.WriteAllText(reportPath, json);
+                        if (report.Warnings.Count != 0)
+                        {
+                            PrintDiagnosticLine($"\nFound {report.Warnings.Count} warning{(report.Warnings.Count % 100 == 1 ? "" : "s")}:");
+                            foreach (var warning in report.Warnings)
+                            {
+                                PrintWarning(warning);
+                            }
+                        }
+                        else
+                        {
+                            PrintColor("All references are good!\n", ConsoleColor.Green);
+                        }
+
+                        string reportPath = args.Length > 1
+                            ? Path.GetFullPath(rootDirectory, args[1])
+                            : Path.Combine(Environment.CurrentDirectory, "report.json");
+
+                        if (args.Length < 2 || args[1] != "noreport")
+                        {
+                            PrintDiagnosticLine("Saving report to: " + Path.GetFullPath(reportPath));
+                            string json = JsonConvert.SerializeObject(report, Formatting.Indented);
+                            File.WriteAllText(reportPath, json);
+                        }
                     }
                 }
             }

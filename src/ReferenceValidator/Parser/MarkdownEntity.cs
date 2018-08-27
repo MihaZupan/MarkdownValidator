@@ -26,6 +26,8 @@ namespace ReferenceValidator.Parser
                 if (CleanValue.Contains('#'))
                     CleanValue = CleanValue.SubstringBefore('#');
                 CleanValue = CleanValue.Replace('\\', '/');
+                if (CleanValue.EndsWith('>'))
+                    CleanValue = CleanValue.TrimEnd('>');
                 return;
             }
 
