@@ -13,7 +13,7 @@ namespace ReferenceValidator
     {
         public static Report Validate(string rootDirectory)
         {
-            rootDirectory = Path.GetFullPath(rootDirectory);
+            rootDirectory = Path.GetFullPath(rootDirectory) + '/';
             int pathPrefixSize = rootDirectory.Length;
             List<string> files = GetAllFiles(rootDirectory, out List<string> subdirectories);
 

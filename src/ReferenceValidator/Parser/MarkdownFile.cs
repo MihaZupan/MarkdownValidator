@@ -79,7 +79,6 @@ namespace ReferenceValidator.Parser
                             path.OrdinalContains("203.0.113.")  ||  // RFC5737
                             (path.Contains('<') && path.Contains('>'))) // e.g. something.com/bot<token>/<file_path>
                             continue;
-                        if (path.Contains('>')) path = path.Trim('>');
                         ExternalLinks.Add(entity);
                         break;
                 }

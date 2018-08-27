@@ -6,7 +6,7 @@ namespace ReferenceValidator
 {
     class Program
     {
-        private static bool ErrorsFound = true;
+        private static bool ErrorsFound = false;
 
         static void Main(string[] args)
         {
@@ -17,23 +17,17 @@ namespace ReferenceValidator
             }
             else
             {
-                if (args[0].OrdinalContains("-h") || args[0].Contains('?'))
+                if (PopulateArgs(ref args))
                 {
-                    PrintUsage();
-                    ErrorsFound = true;
-                }
-                else
-                {
-                    string rootDirectory = args.Length == 1 ? args[0] : "src";
-                    PrintDiagnosticLine($"Using directory: `{Path.GetFullPath(rootDirectory)}`");
+                    PrintDiagnosticLine($"Using directory: `{Path.GetFullPath(args[0])}`");
 
-                    if (!Directory.Exists(rootDirectory))
+                    if (!Directory.Exists(args[0]))
                     {
-                        PrintCriticalError($"Could not find the root directory `{rootDirectory}`");
+                        PrintCriticalError($"Could not find the root directory `{args[0]}`");
                     }
                     else
                     {
-                        Report report = Validator.Validate(rootDirectory);
+                        Report report = Validator.Validate(args[0]);
                         ErrorsFound = report.HasErrors;
 
                         PrintDiagnosticLine($"Indexed {report.AllFiles} files, {report.MarkdownFiles} of which are markdown files");
@@ -51,15 +45,11 @@ namespace ReferenceValidator
                             PrintColor("All references are good!\n", ConsoleColor.Green);
                         }
 
-                        string reportPath = args.Length > 1
-                            ? Path.GetFullPath(rootDirectory, args[1])
-                            : Path.Combine(Environment.CurrentDirectory, "report.json");
-
-                        if (args.Length < 2 || args[1] != "noreport")
+                        if (args[1] != "noreport")
                         {
-                            PrintDiagnosticLine("Saving report to: " + Path.GetFullPath(reportPath));
+                            PrintDiagnosticLine("Saving report to: " + Path.GetFullPath(args[1]));
                             string json = JsonConvert.SerializeObject(report, Formatting.Indented);
-                            File.WriteAllText(reportPath, json);
+                            File.WriteAllText(args[1], json);
                         }
                     }
                 }
@@ -67,6 +57,31 @@ namespace ReferenceValidator
 
             if (ErrorsFound)
                 Environment.ExitCode = 1;
+        }
+
+        private static bool PopulateArgs(ref string[] args)
+        {
+            if (args.Length == 0)
+            {
+                args = new string[] { "" };
+            }
+            if (args.Length == 1)
+            {
+                args = new string[] { args[0], ""};
+            }
+
+            if (args[0] == string.Empty) args[0] = Path.Combine(Environment.CurrentDirectory, "src");
+            else if (args[0].OrdinalContains("-h") || args[0].Contains('?'))
+            {
+                PrintUsage();
+                ErrorsFound = true;
+            }
+            else args[0] = Path.GetFullPath(args[0]).Trim('"', '\'');
+
+            if (args[1] == string.Empty) args[1] = Path.Combine(Environment.CurrentDirectory, "report.json");
+            else if (args[1] != "noreport") args[1] = Path.GetFullPath(args[1]).Trim('"', '\'');
+
+            return !ErrorsFound;
         }
 
         private static void PrintUsage()
