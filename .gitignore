@@ -1,0 +1,6 @@
+.vs
+bin
+obj
+
+test-data
+report.json
