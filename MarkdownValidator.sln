@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5742E325-B53A-450C-AB2D-E82C90E8A06D}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.travis.yml = .travis.yml
+		Dockerfile = Dockerfile
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{07DBE5D6-A279-47A7-BD03-A5A82E9C6270}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4852AF3C-1608-422B-91FA-854C0E13F92A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidatorTests", "test\MarkdownValidatorTests\MarkdownValidatorTests.csproj", "{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator", "src\MarkdownValidator\MarkdownValidator.csproj", "{9E885201-FBEB-4656-9394-919A95409AA9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.Standalone", "src\MarkdownValidator.Standalone\MarkdownValidator.Standalone.csproj", "{6DC3E432-A010-4AC4-AE88-D034C112F296}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E885201-FBEB-4656-9394-919A95409AA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E885201-FBEB-4656-9394-919A95409AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E885201-FBEB-4656-9394-919A95409AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E885201-FBEB-4656-9394-919A95409AA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D} = {4852AF3C-1608-422B-91FA-854C0E13F92A}
+		{9E885201-FBEB-4656-9394-919A95409AA9} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
+		{6DC3E432-A010-4AC4-AE88-D034C112F296} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2453E80D-F679-4574-B13C-79556F121B35}
+	EndGlobalSection
+EndGlobal

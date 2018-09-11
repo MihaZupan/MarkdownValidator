@@ -1,6 +1,6 @@
 .vs
 bin
 obj
+packages
 
 test-data
-report.json

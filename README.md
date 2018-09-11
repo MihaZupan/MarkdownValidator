@@ -1,18 +1,15 @@
-# MarkdownReferenceValidator
-A dotnet program that tests all file/fragment/link references in .md files
+# Markdown Validator
 
-## Usage
+Is an efficient .NET library and a set of derived tools for finding broken links,
+broken intra and inter-file references (links to headings, other files/directories in the project)
+and other useful warnings in projects that make use of markdown.
 
-ReferenceValidator [rootDirectory] [reportPath]
-* `rootDirectory` is the directory that contains markdown files, defaults to `WORKDIR\src`
-* `reportPath` is the location for the report json, defaults to `WORKDIR\report.json`
+Unlike other tools, that check the links after markdown is already converted into html,
+this one works with raw markdown.
 
-Both arguments are optional.
+* Standalone tool
+  * comes with an option to look for file system changes and update warnings whenever you save a file
 
-You can disable generating the report json file by passing `noreport` as `reportPath`.
-
-## Errors
-
-If the validator cought something it shouldn't,
-or it missed something terrible,
-please open an issue on this repository.
+**ToDo** 
+* Visual Studio extension that gives you warnings in real-time
+* Docker image that is simple to deploy and use with CI
