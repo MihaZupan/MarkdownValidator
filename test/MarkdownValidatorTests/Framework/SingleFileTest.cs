@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
@@ -41,5 +42,8 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                 Assert.Equal(Value,     actual.Value);
             }
         }
+
+        public static void AssertGlobalWarning(string source, WarningID id, string value = "")
+            => AssertWarnings(source, (id, 0, SourceSpan.Empty.Start, SourceSpan.Empty.End, value));
     }
 }

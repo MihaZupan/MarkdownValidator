@@ -21,9 +21,6 @@
     <Reference Include="Markdig">
       <HintPath>..\..\..\markdig\src\Markdig\bin\Debug\netstandard2.0\Markdig.dll</HintPath>
     </Reference>
-    <Reference Include="System">
-      <HintPath>System</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

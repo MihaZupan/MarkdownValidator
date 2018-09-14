@@ -5,7 +5,6 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Tests.Framework;
 using MihaZupan.MarkdownValidator.Warnings;
@@ -28,40 +27,34 @@ namespace MihaZupan.MarkdownValidator.Tests
         public void HugeFile()
         {
             string source = "Text" + new string('\n', HugeLineCount);
-            AssertGlobalWarning(source, WarningID.HugeMarkdownFile, $"{HugeLineCount} >= {HugeLineCount}");
+            SingleFileTest.AssertGlobalWarning(source, WarningID.HugeMarkdownFile, $"{HugeLineCount} >= {HugeLineCount}");
 
             source = "Text" + new string('\n', HugeLineCount * 2);
-            AssertGlobalWarning(source, WarningID.HugeMarkdownFile, $"{HugeLineCount * 2} >= {HugeLineCount}");
+            SingleFileTest.AssertGlobalWarning(source, WarningID.HugeMarkdownFile, $"{HugeLineCount * 2} >= {HugeLineCount}");
         }
 
         [Fact]
         public void EmptyFile()
         {
-            AssertGlobalWarning(string.Empty, WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(string.Empty, WarningID.EmptyMarkdownFile);
         }
 
         [Fact]
         public void EmptyFile_WhitespaceOnly()
         {
-            AssertGlobalWarning(new string(' ', 5), WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(new string(' ', 5), WarningID.EmptyMarkdownFile);
         }
 
         [Fact]
         public void EmptyFile_NewLinesOnly()
         {
-            AssertGlobalWarning(new string('\n', 5), WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(new string('\n', 5), WarningID.EmptyMarkdownFile);
         }
 
         [Fact]
         public void EmptyFile_WhiteSpaceAndNewLines()
         {
-            AssertGlobalWarning(" \n \n \n ", WarningID.EmptyMarkdownFile);
-        }
-
-        private void AssertGlobalWarning(string source, WarningID id, string value = "")
-        {
-            SingleFileTest.AssertWarnings(source,
-                (id, 0, SourceSpan.Empty.Start, SourceSpan.Empty.End, value));
+            SingleFileTest.AssertGlobalWarning(" \n \n \n ", WarningID.EmptyMarkdownFile);
         }
     }
 }

@@ -13,6 +13,9 @@ namespace MihaZupan.MarkdownValidator.Warnings
     /// </summary>
     public enum WarningID
     {
+        //
+        // Suggestions
+        //
         Suggestion = -1000000,
 
         SameLabelAndTargetReference,
@@ -21,7 +24,6 @@ namespace MihaZupan.MarkdownValidator.Warnings
         //
         // Warnings
         //
-
         Warning = 0,
 
         EmptyMarkdownFile,
@@ -30,11 +32,11 @@ namespace MihaZupan.MarkdownValidator.Warnings
         EmptyHeading,
         EmptyReference,
         EmptyLinkContent,
+        HeadingEndsWithWhitespace,
 
         //
         // Errors
         //
-
         Error = 1000000,
 
         UnresolvedReference,

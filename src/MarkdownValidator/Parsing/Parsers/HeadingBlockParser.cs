@@ -37,6 +37,14 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             var headerUrl = '#' + LinkHelper.UrilizeAsGfm(headerText);
 
+            if (headerUrl.EndsWith('-'))
+            {
+                context.ReportWarning(
+                    WarningID.HeadingEndsWithWhitespace,
+                    rawText,
+                    "Heading ends with a whitespace");
+            }
+
             string relative = context.GetRelativePath(headerUrl);
             if (context.ParsingResult.HeadingDefinitions.ContainsAny(h =>
                 h.GlobalReference.Equals(relative, StringComparison.OrdinalIgnoreCase),
