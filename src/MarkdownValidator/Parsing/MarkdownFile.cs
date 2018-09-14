@@ -2,14 +2,11 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using Markdig;
 using Markdig.Syntax;
-using Markdig.Syntax.Inlines;
 using MihaZupan.MarkdownValidator.Configuration;
-using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
@@ -17,29 +14,29 @@ namespace MihaZupan.MarkdownValidator.Parsing
     {
         public readonly string FullPath;
         public readonly string RelativePath;
-        public readonly string RelativeLowercasePath;
+        public readonly string HtmlPath;
 
         public readonly Config Configuration;
         public ParsingResult ParsingResult { get; private set; }
+        public readonly ParsingContext ParsingContext;
 
-        private readonly ParsingController ParsingController;
-        internal readonly ParsingContext ParsingContext;
-
-        internal MarkdownFile(string fullPath, string relativePath, string source, MarkdownPipeline pipeline, ParsingController parsingController)
+        internal MarkdownFile(string fullPath, string relativePath, string source, Config configuration)
         {
             FullPath = fullPath;
             RelativePath = relativePath;
-            RelativeLowercasePath = relativePath.ToLower();
-            ParsingController = parsingController;
-            Configuration = parsingController.Configuration;
+            int extensionIndex = RelativePath.LastIndexOf('.');
+            HtmlPath = extensionIndex == -1 ?
+                RelativePath + ".html" :
+                RelativePath.Substring(0, extensionIndex) + ".html";
+            Configuration = configuration;
             ParsingContext = new ParsingContext(this);
-            Parse(source, pipeline);
+            Parse(source);
         }
 
-        internal ParsingResultGlobalDiff Update(string source, MarkdownPipeline pipeline)
+        internal ParsingResultGlobalDiff Update(string source)
         {
             var previous = ParsingResult;
-            Parse(source, pipeline);
+            Parse(source);
             return new ParsingResultGlobalDiff(previous, ParsingResult);
         }
         internal ParsingResultGlobalDiff Update()
@@ -50,47 +47,18 @@ namespace MihaZupan.MarkdownValidator.Parsing
             return new ParsingResultGlobalDiff(previous, ParsingResult);
         }
 
-        private void Parse(string source, MarkdownPipeline pipeline)
+        private void Parse(string source)
         {
-            ParsingResult = new ParsingResult(source, pipeline);
+            ParsingResult = new ParsingResult(source, Configuration.GetNewPipeline());
             Parse();
         }
 
         private void Parse()
         {
-            Stack<ContainerBlock> blockContainers = new Stack<ContainerBlock>();
-            Stack<ContainerInline> inlineContainers = new Stack<ContainerInline>();
-            blockContainers.Push(ParsingResult.SyntaxTree);
-
-            ParsingController.Parse(ParsingResult.SyntaxTree, this);
-
-            while (blockContainers.Count > 0)
+            Configuration.ParsingController.Parse(ParsingResult.SyntaxTree, this);
+            foreach (var markdownObject in ParsingResult.SyntaxTree.Descendants())
             {
-                var container = blockContainers.Pop();
-                foreach (var descendant in container.Descendants())
-                {
-                    if (descendant is ContainerBlock blockContainer)
-                    {
-                        blockContainers.Push(blockContainer);
-                    }
-                    else if (descendant is ContainerInline inlineContainer)
-                    {
-                        inlineContainers.Push(inlineContainer);
-                    }
-                    ParsingController.Parse(descendant, this);
-                }
-            }
-            while (inlineContainers.Count > 0)
-            {
-                var container = inlineContainers.Pop();
-                foreach (var descendant in container.Descendants())
-                {
-                    if (descendant is ContainerInline inlineContainer)
-                    {
-                        inlineContainers.Push(inlineContainer);
-                    }
-                    ParsingController.Parse(descendant, this);
-                }
+                Configuration.ParsingController.Parse(markdownObject, this);
             }
 
             ParsingResult.Finalize(ParsingContext);

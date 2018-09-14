@@ -2,15 +2,15 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using Markdig;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 
 namespace MihaZupan.MarkdownValidator
@@ -22,18 +22,6 @@ namespace MihaZupan.MarkdownValidator
         private void Unlock() => Monitor.Exit(_contextLock);
 
         private readonly Config Configuration;
-        //private readonly ExternalLinkContext ExternalLinkContext;
-        private MarkdownPipeline GetNewPipeline()
-        {
-            var builder = Configuration.PipelineProvider?.GetNewPipeline() ?? new MarkdownPipelineBuilder();
-
-            // Add default extensions
-            return builder
-                .UsePreciseSourceLocation()
-                //.UseAutoIdentifiers(Markdig.Extensions.AutoIdentifiers.AutoIdentifierOptions.None)
-                .Build();
-        }
-        private readonly ParsingController ParsingController;
 
         // Used to keep track of files, dictionaries and any other user-defined referencable entity in the context
         private readonly HashSet<string> IndexedEntities = new HashSet<string>();
@@ -41,7 +29,7 @@ namespace MihaZupan.MarkdownValidator
         // Indexed markdown files based on relative paths
         private readonly Dictionary<string, MarkdownFile> IndexedMarkdownFiles = new Dictionary<string, MarkdownFile>();
         private readonly HashSet<MarkdownFile> UnfinishedMarkdownFiles = new HashSet<MarkdownFile>();
-        private readonly LinkedList<AsyncProgress> AsyncOperations = new LinkedList<AsyncProgress>();
+        private readonly Dictionary<MarkdownFile, LinkedList<AsyncProgress>> AsyncOperations = new Dictionary<MarkdownFile, LinkedList<AsyncProgress>>();
 
         // Dictionary names, file names, fragment identifiers and a corresponding list of markdown files that reference them
         // Each reference shouldn't get too many files pointing at it, so using a HashSet here is not necesarry
@@ -49,14 +37,34 @@ namespace MihaZupan.MarkdownValidator
         private readonly Dictionary<string, (ReferenceDefinition Reference, LinkedList<MarkdownFile> Files)> ContextReferenceableEntities =
             new Dictionary<string, (ReferenceDefinition Reference, LinkedList<MarkdownFile> Files)>(StringComparer.OrdinalIgnoreCase);
 
-        private void RemoveContextReferencableEntity(string entity)
+        private void RemoveContextReferencableEntity(string entity, MarkdownFile ignoreFile = null)
         {
             var files = ContextReferenceableEntities[entity].Files;
             ContextReferenceableEntities.Remove(entity);
             foreach (var file in files)
             {
+                if (file == ignoreFile)
+                    continue;
+
                 file.ParsingResult.UnprocessedReferences.AddFirst(entity);
                 UnfinishedMarkdownFiles.Add(file);
+            }
+        }
+        private void AddAsyncOperations(MarkdownFile file)
+        {
+            if (file.ParsingResult.AsyncOperations.Count == 0)
+                return;
+
+            if (AsyncOperations.TryGetValue(file, out LinkedList<AsyncProgress> asyncOperations))
+            {
+                foreach (var asyncOperation in file.ParsingResult.AsyncOperations)
+                {
+                    asyncOperations.AddLast(asyncOperation);
+                }
+            }
+            else
+            {
+                AsyncOperations.Add(file, file.ParsingResult.AsyncOperations);
             }
         }
 
@@ -83,21 +91,34 @@ namespace MihaZupan.MarkdownValidator
         }
         private void AddMarkdownFileToInternalContext(MarkdownFile file)
         {
-            foreach (var definedReference in file.ParsingResult.GlobalReferenceDefinitions)
+            if (!IndexedEntities.Contains(file.RelativePath))
+            {
+                IndexedEntities.Add(file.RelativePath);
+                ContextReferenceableEntities.Add(
+                    file.RelativePath,
+                    (null, new LinkedList<MarkdownFile>()));
+            }
+            ContextReferenceableEntities.Add(
+                file.HtmlPath,
+                (null, new LinkedList<MarkdownFile>()));
+
+            foreach (var definedReference in file.ParsingResult.HeadingDefinitions)
             {
                 ContextReferenceableEntities.Add(
                     definedReference.GlobalReference,
                     (definedReference, new LinkedList<MarkdownFile>()));
             }
-            foreach (var operation in file.ParsingResult.AsyncOperations)
-            {
-                AsyncOperations.AddLast(operation);
-            }
+
+            AddAsyncOperations(file);
             UnfinishedMarkdownFiles.Add(file);
         }
         private void RemoveMarkdownFileFromInternalContext(MarkdownFile file)
         {
-            foreach (var referenceDefinition in file.ParsingResult.GlobalReferenceDefinitions)
+            RemoveContextReferencableEntity(file.RelativePath);
+            ContextReferenceableEntities.Remove(file.RelativePath);
+            ContextReferenceableEntities.Remove(file.HtmlPath);
+
+            foreach (var referenceDefinition in file.ParsingResult.HeadingDefinitions)
             {
                 RemoveContextReferencableEntity(referenceDefinition.GlobalReference);
             }
@@ -108,28 +129,27 @@ namespace MihaZupan.MarkdownValidator
                     entity.Files.Remove(file);
                 }
             }
+            AsyncOperations.Remove(file);
             UnfinishedMarkdownFiles.Remove(file);
         }
         private void UpdateInternalContext(MarkdownFile file, ParsingResultGlobalDiff diff)
         {
-            foreach (var removedReferenceDefinition in diff.RemovedReferenceDefinitions)
+            foreach (var removedHeadingDefinition in diff.RemovedHeadingDefinitions)
             {
-                RemoveContextReferencableEntity(removedReferenceDefinition.GlobalReference);
+                RemoveContextReferencableEntity(removedHeadingDefinition.GlobalReference, file);
             }
-            foreach (var definedReference in diff.NewReferenceDefinitions)
+            foreach (var definedHeading in diff.NewHeadingDefinitions)
             {
                 ContextReferenceableEntities.Add(
-                    definedReference.GlobalReference,
-                    (definedReference, new LinkedList<MarkdownFile>()));
+                    definedHeading.GlobalReference,
+                    (definedHeading, new LinkedList<MarkdownFile>()));
             }
             foreach (var referencedEntity in diff.RemovedReferences)
             {
                 ContextReferenceableEntities[referencedEntity].Files.Remove(file);
             }
-            foreach (var operation in file.ParsingResult.AsyncOperations)
-            {
-                AsyncOperations.AddLast(operation);
-            }
+
+            AddAsyncOperations(file);
             UnfinishedMarkdownFiles.Add(file);
         }
 
@@ -138,7 +158,10 @@ namespace MihaZupan.MarkdownValidator
         public ValidationContext(Config configuration)
         {
             Configuration = configuration;
-            ParsingController = new ParsingController(Configuration);
+            Configuration.Initialize();
+            ContextReferenceableEntities.Add(
+                Path.GetFileName(Configuration.RootWorkingDirectory),
+                (null, new LinkedList<MarkdownFile>()));
         }
 
         public bool UpdateMarkdownFile(string path, string source)
@@ -146,7 +169,7 @@ namespace MihaZupan.MarkdownValidator
             Lock();
             if (IndexedMarkdownFiles.TryGetValue(path, out MarkdownFile markdownFile))
             {
-                ParsingResultGlobalDiff diff = markdownFile.Update(source, GetNewPipeline());
+                ParsingResultGlobalDiff diff = markdownFile.Update(source);
                 UpdateInternalContext(markdownFile, diff);
                 Unlock(); // Lock the entire update context in case there are multiple update calls on the same file
                 return true;
@@ -156,17 +179,10 @@ namespace MihaZupan.MarkdownValidator
         }
         public bool AddMarkdownFile(string fullPath, string path, string source)
         {
-            MarkdownFile markdownFile = new MarkdownFile(fullPath, path, source, GetNewPipeline(), ParsingController);
+            MarkdownFile markdownFile = new MarkdownFile(fullPath, path, source, Configuration);
             Lock();
             if (!IndexedMarkdownFiles.ContainsKey(markdownFile.RelativePath))
             {
-                if (!IndexedEntities.Contains(markdownFile.RelativePath))
-                {
-                    IndexedEntities.Add(markdownFile.RelativePath);
-                    ContextReferenceableEntities.Add(
-                        markdownFile.RelativeLowercasePath,
-                        (null, new LinkedList<MarkdownFile>()));
-                }
                 IndexedMarkdownFiles.Add(markdownFile.RelativePath, markdownFile);
                 AddMarkdownFileToInternalContext(markdownFile);
                 Unlock();
@@ -182,7 +198,7 @@ namespace MihaZupan.MarkdownValidator
             {
                 IndexedEntities.Add(path);
                 ContextReferenceableEntities.Add(
-                    path.ToLower(),
+                    path,
                     (null, new LinkedList<MarkdownFile>()));
                 Unlock();
                 return true;
@@ -200,13 +216,11 @@ namespace MihaZupan.MarkdownValidator
                 {
                     MarkdownFile markdownFile = IndexedMarkdownFiles[path];
                     IndexedMarkdownFiles.Remove(path);
-                    RemoveContextReferencableEntity(markdownFile.RelativeLowercasePath);
-                    ContextReferenceableEntities.Remove(markdownFile.RelativeLowercasePath);
                     RemoveMarkdownFileFromInternalContext(markdownFile);
                 }
                 else
                 {
-                    RemoveContextReferencableEntity(path.ToLower());
+                    RemoveContextReferencableEntity(path);
                 }
                 Unlock();
                 return true;
@@ -226,29 +240,45 @@ namespace MihaZupan.MarkdownValidator
         public ValidationReport Validate(bool getFullReport)
         {
             Lock();
-            // Update markdown files for which a re-parsing has been requested by a completed async action
-            List<AsyncProgress> finishedProgresses = new List<AsyncProgress>();
+
+            // Check async operations and reparse updated files
             int suggestedWait = -1;
-            var node = AsyncOperations.First;
-            while (node != null)
+            List<MarkdownFile> filesToReparse = new List<MarkdownFile>();
+            foreach (var asyncOperations in AsyncOperations.Values)
             {
-                var next = node.Next;
-                var progress = node.Value;
-                suggestedWait = Math.Max(suggestedWait, progress.SuggestedWait);
+                if (asyncOperations.Count == 0)
+                    continue;
 
-                if (!progress.Finished && getFullReport)
-                    progress.MRE.WaitOne();
+                bool reparse = false;
 
-                if (progress.Finished)
+                var node = asyncOperations.First;
+                MarkdownFile file = node.Value.File;
+
+                while (node != null)
                 {
-                    if (!finishedProgresses.ContainsAny(p => p.File == progress.File))
+                    var next = node.Next;
+                    var progress = node.Value;
+                    suggestedWait = Math.Max(suggestedWait, progress.SuggestedWait);
+
+                    if (!progress.Finished && getFullReport)
+                        progress.MRE.WaitOne();
+
+                    if (progress.Finished)
                     {
-                        finishedProgresses.Add(progress);
-                        ReparseMarkdownFile(progress.File);
+                        reparse = true;
+                        asyncOperations.Remove(node);
                     }
-                    AsyncOperations.Remove(node);
+                    node = next;
                 }
-                node = next;
+
+                if (reparse)
+                    filesToReparse.Add(file);
+            }
+            foreach (var file in filesToReparse)
+            {
+                ReparseMarkdownFile(file);
+                if (AsyncOperations[file].Count == 0)
+                    AsyncOperations.Remove(file);
             }
 
             ValidationReport report = new ValidationReport(AsyncOperations.Count == 0, suggestedWait);
@@ -271,13 +301,29 @@ namespace MihaZupan.MarkdownValidator
             {
                 foreach (var reference in file.ParsingResult.UnprocessedReferences)
                 {
-                    foreach (var referencePoint in file.ParsingResult.References[reference])
+                    if (reference.StartsWith('^'))
                     {
-                        report.AddWarning(
-                            WarningID.UnresolvedReference,
-                            new WarningLocation(file, referencePoint),
-                            "Unresolved reference `{0}`.",
-                            referencePoint.RawReference);
+                        foreach (var referencePoint in file.ParsingResult.References[reference])
+                        {
+                            report.AddWarning(
+                                WarningID.UnresolvedFootnoteReference,
+                                new WarningLocation(file, referencePoint),
+                                referencePoint.RawReference,
+                                "Unresolved footnote reference `{0}`",
+                                referencePoint.RawReference);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var referencePoint in file.ParsingResult.References[reference])
+                        {
+                            report.AddWarning(
+                                WarningID.UnresolvedReference,
+                                new WarningLocation(file, referencePoint),
+                                referencePoint.RawReference,
+                                "Unresolved reference `{0}`",
+                                referencePoint.RawReference);
+                        }
                     }
                 }
             }

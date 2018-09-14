@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Parsing;
@@ -21,6 +21,6 @@ namespace MihaZupan.MarkdownValidator.Configuration
             Parsers.Add(parser);
         }
 
-        public int Warnings_HugeFile_LineCount = 2500;
+        public int Warnings_HugeFile_LineCount = 1500;
     }
 }

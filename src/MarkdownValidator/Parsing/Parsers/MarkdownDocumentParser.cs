@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
@@ -22,10 +22,18 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             var document = context.Object as MarkdownDocument;
             context.SetWarningSource(WarningSource.InternalParser);
 
-            if (document.LineCount > context.Configuration.Parsing.Warnings_HugeFile_LineCount)
+            if (document.Count == 0)
             {
                 context.ReportGeneralWarning(
-                    WarningID.HugeFile,
+                    WarningID.EmptyMarkdownFile,
+                    string.Empty,
+                    "Empty markdown file");
+            }
+            else if (document.LineCount >= context.Configuration.Parsing.Warnings_HugeFile_LineCount)
+            {
+                context.ReportGeneralWarning(
+                    WarningID.HugeMarkdownFile,
+                    $"{document.LineCount} >= {context.Configuration.Parsing.Warnings_HugeFile_LineCount}",
                     "Markdown file is huge! Consider moving some content into other files.");
             }
         }

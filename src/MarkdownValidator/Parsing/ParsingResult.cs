@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig;
@@ -19,17 +19,17 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public string Source;
         public MarkdownDocument SyntaxTree;
 
-        internal int LastLinkDelimiterIndex = -1;
-        internal int LastLinkInlineIndex = -1;
+        internal int LastLiteralInlineIndex = -1;
+        public Dictionary<Type, object> ExternalParserStorage = new Dictionary<Type, object>();
 
         public List<Warning> ParserWarnings { get; private set; } = new List<Warning>();
-        public List<ReferenceDefinition> GlobalReferenceDefinitions = new List<ReferenceDefinition>();
+        public List<ReferenceDefinition> HeadingDefinitions = new List<ReferenceDefinition>();
         public List<ReferenceDefinition> LocalReferenceDefinitions = new List<ReferenceDefinition>();
 
         public readonly Dictionary<string, List<Reference>> References = new Dictionary<string, List<Reference>>(StringComparer.OrdinalIgnoreCase);
         public LinkedList<string> UnprocessedReferences { get; internal set; } = new LinkedList<string>();
 
-        public readonly List<AsyncProgress> AsyncOperations = new List<AsyncProgress>();
+        public readonly LinkedList<AsyncProgress> AsyncOperations = new LinkedList<AsyncProgress>();
 
         public ParsingResult(string source, MarkdownPipeline pipeline)
         {
@@ -46,7 +46,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             context.SetWarningSource(WarningSource.ParserFinalize);
 
-            Dictionary<string, ReferenceDefinition> definedReferences = new Dictionary<string, ReferenceDefinition>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, ReferenceDefinition> definedReferences
+                = new Dictionary<string, ReferenceDefinition>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var definition in LocalReferenceDefinitions)
             {
@@ -55,7 +56,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     context.ReportWarning(
                         WarningID.DuplicateReferenceDefinition,
                         definition,
-                        "Duplicate reference definition `{0}` - already defined on line {1}.",
+                        "Duplicate reference definition `{0}` - already defined on line {1}",
                         definition.RawReference,
                         (definedReferences[definition.RawReference].Line + 1).ToString());
                 }
@@ -72,10 +73,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 }
                 else if (reference.RawReference.Contains(':'))
                 {
-                    // Hand over links to the ExternalLinkContext
-
+                    context.ProcessLinkReference(reference);
                 }
-                else
+                else if (reference.GlobalReference != string.Empty)
                 {
                     UnprocessedReferences.AddLast(reference.GlobalReference);
                 }
@@ -88,15 +88,19 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     context.ReportWarning(
                         WarningID.UnusedDefinedReference,
                         definition,
-                        "Unused defined reference `{0}`.",
+                        "Unused defined reference `{0}`",
                         definition.RawReference);
                 }
             }
 
             // Release some resources
-            Source = null;
-            SyntaxTree = null;
-            //LocalReferenceDefinitions = null;
+            if (AsyncOperations.Count == 0) // If there are any async operations left, source might be needed
+            {
+                Source = null;
+                SyntaxTree = null;
+            }
+            LocalReferenceDefinitions = null;
+            ExternalParserStorage = null;
         }
         public void AddReference(Reference referencedEntity)
         {

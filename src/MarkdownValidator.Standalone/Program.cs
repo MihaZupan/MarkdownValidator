@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace MihaZupan.MarkdownValidator.Standalone
 {
@@ -26,11 +27,13 @@ namespace MihaZupan.MarkdownValidator.Standalone
                 location = Environment.CurrentDirectory;
 
             location = "Wiki";
+            location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
+            //location = "test";
 
             location = Path.GetFullPath(location);
 
             var config = new Config(location);
-            config.Parsing.Warnings_HugeFile_LineCount = 500;
+            config.Parsing.Warnings_HugeFile_LineCount = 600;
             config.Parsing.CodeBlocks.AddParser(new TelegramBotCodeBlockParser());
 
             Validator = new MarkdownValidator(config);
@@ -38,10 +41,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
 
             FSWatcher.Renamed += (s, e) =>
             {
-                bool isMarkdownFile = Path.GetExtension(e.FullPath).Length > 0 &&
-                    e.FullPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
-
-                if (isMarkdownFile)
+                if (IsMarkdownFile(e.FullPath))
                 {
                     Validator.RemoveMarkdownFile(e.FullPath);
                     Validator.AddMarkdownFile(e.FullPath, GetSource(e.FullPath));
@@ -56,10 +56,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
             };
             FSWatcher.Deleted += (s, e) =>
             {
-                bool isMarkdownFile = Path.GetExtension(e.FullPath).Length > 0 &&
-                    e.FullPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
-
-                if (isMarkdownFile)
+                if (IsMarkdownFile(e.FullPath))
                 {
                     Validator.RemoveMarkdownFile(e.FullPath);
                 }
@@ -72,10 +69,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
             };
             FSWatcher.Created += (s, e) =>
             {
-                bool isMarkdownFile = Path.GetExtension(e.FullPath).Length > 0 &&
-                    e.FullPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
-
-                if (isMarkdownFile)
+                if (IsMarkdownFile(e.FullPath))
                 {
                     Validator.AddMarkdownFile(e.FullPath, GetSource(e.FullPath));
                 }
@@ -88,10 +82,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
             };
             FSWatcher.Changed += (s, e) =>
             {
-                bool isMarkdownFile = Path.GetExtension(e.FullPath).Length > 0 &&
-                    e.FullPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
-
-                if (isMarkdownFile)
+                if (IsMarkdownFile(e.FullPath))
                 {
                     Validator.UpdateMarkdownFile(e.FullPath, GetSource(e.FullPath));
                     Update();
@@ -111,7 +102,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
                 }
                 foreach (var file in Directory.GetFiles(directory))
                 {
-                    if (file.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+                    if (IsMarkdownFile(file))
                     {
                         Validator.AddMarkdownFile(file, GetSource(file));
                     }
@@ -126,12 +117,19 @@ namespace MihaZupan.MarkdownValidator.Standalone
             while (true) Console.ReadKey(true);
         }
 
+        private static Timer UpdateTimer = new Timer(UpdateCallback);
         static void Update()
         {
             lock (Validator)
             {
+                UpdateTimer.Change(50, Timeout.Infinite);
+            }
+        }
+        static void UpdateCallback(object state)
+        {
+            lock (Validator)
+            {
                 var report = Validator.Validate();
-
                 Console.Clear();
 
                 if (report.Warnings.Count == 0)
@@ -141,24 +139,31 @@ namespace MihaZupan.MarkdownValidator.Standalone
                 }
 
                 int maxDocumentLength = report.Warnings.Max(w => w.Location.RelativeFilePath.Length);
-                int spaceToAdd = Math.Max(0, maxDocumentLength - 8);
+                maxDocumentLength = Math.Max(8, maxDocumentLength);
 
                 var color = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Severity\tDocument" + new string(' ', spaceToAdd) + "\tLine\tMessage");
+                Console.WriteLine("Severity\tDocument" + new string(' ', maxDocumentLength - 8) + "\tLine\tMessage");
                 Console.ForegroundColor = color;
 
                 foreach (var warning in report.Warnings)
                 {
                     Console.WriteLine("{0}\t{1}\t{2}\t{3}",
-                        warning.IsError ? "Error\t" : "Warning\t",
+                        warning.IsError ? "Error\t" : (warning.IsSuggestion ? "Suggestion" : "Warning\t"),
                         warning.Location.RelativeFilePath.PadRight(maxDocumentLength, ' '),
-                        warning.Location.Line + 1,
+                        warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.Line + 1).ToString(),
                         warning.Message);
                 }
+
+                if (!report.IsComplete)
+                    UpdateTimer.Change(report.SuggestedWait, Timeout.Infinite);
             }
         }
 
+        static bool IsMarkdownFile(string path)
+        {
+            return path.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
+        }
         static string GetSource(string path)
         {
             using (var fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

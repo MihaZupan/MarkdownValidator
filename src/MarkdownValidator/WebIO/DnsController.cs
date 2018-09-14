@@ -5,10 +5,17 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-namespace MihaZupan.MarkdownValidator.Parsing
+using MihaZupan.MarkdownValidator.Configuration;
+
+namespace MihaZupan.MarkdownValidator.WebIO
 {
-    public interface IParser
+    public sealed class DnsController
     {
-        void Initialize(ParserRegistrationContext context);
+        private readonly Config Configuration;
+
+        internal DnsController(Config configuration)
+        {
+            Configuration = configuration;
+        }
     }
 }

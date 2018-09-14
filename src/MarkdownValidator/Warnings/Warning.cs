@@ -2,28 +2,32 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using System;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
-    public class Warning : IEquatable<Warning>
+    public sealed class Warning : IEquatable<Warning>
     {
         public readonly WarningLocation Location;
         public readonly WarningID ID;
         public readonly WarningSource Source;
+        public readonly string Value;
         public readonly string Message;
         public readonly bool IsError;
+        public readonly bool IsSuggestion;
 
-        internal Warning(WarningID id, WarningLocation location, string message, WarningSource source)
+        internal Warning(WarningID id, WarningLocation location, string value, string message, WarningSource source)
         {
             Location = location;
             ID = id;
             Source = source;
+            Value = value;
             Message = message;
             IsError = id >= WarningID.Error;
+            IsSuggestion = id < WarningID.Warning;
         }
 
         public bool Equals(Warning other)
@@ -33,6 +37,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
                 other.ID.Equals(ID) &&
                 other.Location.Equals(Location) &&
                 other.Source.Equals(Source) &&
+                other.Value.OrdinalEquals(Value) &&
                 other.Message.OrdinalEquals(Message);
         }
         public override int GetHashCode()

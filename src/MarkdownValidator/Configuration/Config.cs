@@ -2,9 +2,12 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using Markdig;
+using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.WebIO;
 using System;
 using System.IO;
 
@@ -18,8 +21,10 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <param name="rootWorkingDirectory">The root directory for all files and directories referenced in your markdown files. See <see cref="RootWorkingDirectory"/></param>
         public Config(string rootWorkingDirectory)
         {
-            if (string.IsNullOrEmpty(rootWorkingDirectory))
+            if (rootWorkingDirectory is null)
                 throw new ArgumentNullException(nameof(rootWorkingDirectory));
+            if (rootWorkingDirectory == string.Empty)
+                throw new ArgumentException(nameof(rootWorkingDirectory) + " must not be empty");
 
             RootWorkingDirectory = Path.GetFullPath(rootWorkingDirectory);
         }
@@ -33,6 +38,9 @@ namespace MihaZupan.MarkdownValidator.Configuration
         public string RootWorkingDirectory;
         internal string GetRelativePath(string fullPath)
         {
+            if (fullPath.Equals(RootWorkingDirectory, StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+
             return fullPath.Substring(RootWorkingDirectory.Length + 1);
         }
         internal string GetRelativePath(string sourceFile, string reference)
@@ -44,7 +52,9 @@ namespace MihaZupan.MarkdownValidator.Configuration
             else if (reference.StartsWith('#'))
                 relative = sourceFile + reference;
             else if (reference.StartsWith('/'))
-                relative = RootWorkingDirectory + reference;
+                return RootWorkingDirectory + reference;
+            else if (reference.OrdinalEquals("."))
+                relative = Path.GetDirectoryName(sourceFile);
             else
                 relative = Path.Combine(Path.GetDirectoryName(sourceFile), reference);
 
@@ -55,7 +65,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
          /// </summary>
         internal void EnsurePathIsValidForContext(string path, out string fullPath, out string relativePath)
         {
-            fullPath = Path.GetFullPath(path);
+            fullPath = Path.GetFullPath(path, RootWorkingDirectory);
             if (fullPath.StartsWith(RootWorkingDirectory, StringComparison.Ordinal))
             {
                 relativePath = GetRelativePath(fullPath);
@@ -70,7 +80,29 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// A custom <see cref="Markdig.MarkdownPipeline"/> provider
         /// </summary>
         public IPipelineProvider PipelineProvider = null;
+        internal MarkdownPipeline GetNewPipeline()
+        {
+            var builder = PipelineProvider?.GetNewPipeline() ?? new MarkdownPipelineBuilder();
+
+            // Add default extensions
+            return builder
+                .UsePreciseSourceLocation()
+                .UseAutoLinks()
+                .UseFootnotes()
+                .Build();
+        }
+
         public ParsingConfig Parsing = new ParsingConfig();
         public WebIOConfig WebIO = new WebIOConfig();
+
+        internal void Initialize()
+        {
+            ParsingController = new ParsingController(this);
+            WebIOController = new WebIOController(this);
+            LinkReferenceProcessor = new LinkReferenceProcessor(this);
+        }
+        internal ParsingController ParsingController;
+        internal WebIOController WebIOController;
+        internal LinkReferenceProcessor LinkReferenceProcessor;
     }
 }

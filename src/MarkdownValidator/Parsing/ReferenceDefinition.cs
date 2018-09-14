@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
@@ -23,7 +23,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public ReferenceDefinition(MarkdownFile sourceFile, LinkReferenceDefinition link)
             : this(
                   link.Label,
-                  sourceFile.Configuration.GetRelativePath(sourceFile.RelativeLowercasePath, link.Label),
+                  sourceFile.Configuration.GetRelativePath(sourceFile.RelativePath, link.Label),
                   link.Span,
                   link.Line,
                   sourceFile)
@@ -44,7 +44,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         }
         public bool Equals(ReferenceDefinition other)
         {
-            if (!other.Equals(this)) return false;
+            if (!other.Equals((Reference)this)) return false;
             return SourceFile == other.SourceFile;
         }
     }

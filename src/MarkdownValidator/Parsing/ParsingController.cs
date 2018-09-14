@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
@@ -28,9 +28,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
             // Internal parsers
             new MarkdownDocumentParser().Initialize(registration);
+            new LiteralInlineParser().Initialize(registration);
             new LinkInlineParser().Initialize(registration);
-            new LinkDelimiterInlineParser().Initialize(registration);
-            new LinkReferenceDefinitionGroupParser().Initialize(registration);
+            new LinkReferenceDefinitionParser().Initialize(registration);
             new HeadingBlockParser().Initialize(registration);
             new CodeBlockParser().Initialize(registration);
 

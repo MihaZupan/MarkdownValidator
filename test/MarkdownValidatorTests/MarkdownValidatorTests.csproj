@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>7.2</LangVersion>
+    <RootNamespace>MihaZupan.MarkdownValidator.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MarkdownValidator\MarkdownValidator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Markdig">
+      <HintPath>..\..\..\markdig\src\Markdig\bin\Debug\netstandard2.0\Markdig.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

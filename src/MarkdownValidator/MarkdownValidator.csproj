@@ -5,15 +5,24 @@
     <RootNamespace>MihaZupan.MarkdownValidator</RootNamespace>
     <AssemblyName>MarkdownValidator</AssemblyName>
     <LangVersion>7.2</LangVersion>
+    <Authors>MihaZupan</Authors>
+    <Company>MihaZupan</Company>
+    <Copyright>Copyright © Miha Zupan 2018</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/MihaZupan/MarkdownValidator/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/MihaZupan/MarkdownValidator</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MihaZupan/MarkdownValidator.git</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Extensible library for markdown analysis and validation.</Description>
+    <PackageTags>markdown;markdown-parser;validation;documentation;documentation-tool</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="ExternalLinks\" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Markdig">
       <HintPath>..\..\..\markdig\src\Markdig\bin\Debug\netstandard2.0\Markdig.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>System</HintPath>
     </Reference>
   </ItemGroup>
 

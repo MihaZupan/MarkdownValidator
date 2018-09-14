@@ -2,7 +2,7 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
@@ -11,15 +11,15 @@ using System;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
-    public class WarningLocation : IEquatable<WarningLocation>
+    public sealed class WarningLocation : IEquatable<WarningLocation>
     {
         public readonly string FullFilePath;
         public readonly string RelativeFilePath;
         /// <summary>
         /// Zero-based line index of the warning location in the source file
         /// </summary>
-        public readonly int Line;
-        public readonly SourceSpan Span;
+        public readonly int Line = -1;
+        public readonly SourceSpan Span = SourceSpan.Empty;
         public readonly bool RefersToEntireFile = true;
 
         internal WarningLocation(MarkdownFile file, Reference reference)
@@ -30,9 +30,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         /// </summary>
         internal WarningLocation(MarkdownFile file, int line, SourceSpan span)
             : this(file.FullPath, file.RelativePath, line, span)
-        {
-            RefersToEntireFile = line == 0 && file.ParsingResult.SyntaxTree.Span.Equals(span);
-        }
+        { }
         /// <summary>
         /// The warning applies to the entire file
         /// </summary>

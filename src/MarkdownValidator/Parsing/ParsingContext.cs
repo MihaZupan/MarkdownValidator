@@ -2,20 +2,24 @@
     Copyright (c) Miha Zupan. All rights reserved.
     This file is a part of the Markdown Validator project
     It is licensed under the Simplified BSD License (BSD 2-clause).
-    For more information visit
+    For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
+using System;
+using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
-    public class ParsingContext
+    public sealed class ParsingContext
     {
         public Config Configuration => SourceFile.Configuration;
         public string RelativePath => SourceFile.RelativePath;
+
+        public Dictionary<Type, object> ExternalParserStorage => ParsingResult.ExternalParserStorage;
 
         // Only available to internal parsers
         internal readonly MarkdownFile SourceFile;
@@ -30,9 +34,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
             SourceFile = sourceFile;
         }
         internal void Update(MarkdownObject objectToParse)
-        {            
+        {
             Object = objectToParse;
-            Source = new StringSlice(SourceFile.ParsingResult.Source, objectToParse.Span.Start, objectToParse.Span.End);
+            Source = new StringSlice(SourceFile.ParsingResult.Source, Object.Span.Start, Object.Span.End);
         }
         internal void SetWarningSource(WarningSource warningSource)
         {
@@ -41,18 +45,21 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public string GetRelativePath(string reference)
             => Configuration.GetRelativePath(SourceFile.RelativePath, reference);
+        public string GetRelativeHtmlPath(string reference)
+            => Configuration.GetRelativePath(SourceFile.HtmlPath, reference);
         
         public void RegisterAsyncOperation(AsyncProgress progress)
-            => ParsingResult.AsyncOperations.Add(progress);
+            => ParsingResult.AsyncOperations.AddLast(progress);
 
+        #region Report Warning
         /// <summary>
         /// Report a general warning about the file
         /// </summary>
         /// <param name="id">ID of the warning.</param>
         /// <param name="messageFormat">Message or message format string</param>
         /// <param name="messageArgs">Optional arguments for messageFormat</param>
-        public void ReportGeneralWarning(WarningID id, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, new WarningLocation(SourceFile), string.Format(messageFormat, messageArgs));
+        public void ReportGeneralWarning(WarningID id, string value, string messageFormat, params string[] messageArgs)
+            => ReportWarning(id, new WarningLocation(SourceFile), value, string.Format(messageFormat, messageArgs));
 
         /// <summary>
         /// Report a warning that applies to the entire parsed object
@@ -60,8 +67,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <param name="id">ID of the warning.</param>
         /// <param name="messageFormat">Message or message format string</param>
         /// <param name="messageArgs">Optional arguments for messageFormat</param>
-        public void ReportWarning(WarningID id, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, Object.Line, Object.Span, string.Format(messageFormat, messageArgs));
+        public void ReportWarning(WarningID id, string value, string messageFormat, params string[] messageArgs)
+            => ReportWarning(id, Object.Line, Object.Span, value, string.Format(messageFormat, messageArgs));
 
         /// <summary>
         /// Report a warning that applies to the entire reference
@@ -71,7 +78,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <param name="messageFormat">Message or message format string</param>
         /// <param name="messageArgs">Optional arguments for messageFormat</param>
         internal void ReportWarning(WarningID id, Reference reference, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, new WarningLocation(SourceFile, reference), string.Format(messageFormat, messageArgs));
+            => ReportWarning(id, new WarningLocation(SourceFile, reference), reference.RawReference, string.Format(messageFormat, messageArgs));
 
         /// <summary>
         /// Report a warning about a specific span of source
@@ -80,15 +87,20 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <param name="line">The starting line of the warning span</param>
         /// <param name="span">Span of the source that the warning points at</param>
         /// <param name="message">The message for the warning</param>
-        public void ReportWarning(WarningID id, int line, SourceSpan span, string message)
-            => ReportWarning(id, new WarningLocation(SourceFile, line, span), message);
+        public void ReportWarning(WarningID id, int line, SourceSpan span, string value, string message)
+            => ReportWarning(id, new WarningLocation(SourceFile, line, span), value, message);
 
-        private void ReportWarning(WarningID id, WarningLocation location, string message)
+        private void ReportWarning(WarningID id, WarningLocation location, string value, string message)
             => SourceFile.ParsingResult.ParserWarnings.Add(
                 new Warning(
                     id,
                     location,
+                    value,
                     message,
                     WarningSource));
+        #endregion
+
+        internal void ProcessLinkReference(Reference reference)
+            => Configuration.LinkReferenceProcessor.ProcessLinkReference(this, reference);
     }
 }
