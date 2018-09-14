@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using MihaZupan.MarkdownValidator.Warnings;
 
@@ -25,15 +26,33 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             if (!link.UrlSpan.Value.IsEmpty &&
                 (link.UrlSpan.Value.Start < link.Span.Start || link.UrlSpan.Value.End > link.Span.End))
             {
-                string label = link.Label ?? (link.FirstChild as LiteralInline)?.Content.ToString();
+                string label;
+                SourceSpan span;
+                if (link.Label != null)
+                {
+                    label = link.Label;
+                    span = link.LabelSpan.Value;
+                }
+                else
+                {
+                    label = (link.FirstChild as LiteralInline).Content.ToString();
+                    span = link.FirstChild.Span;
+                }
 
-                context.ParsingResult.AddReference(
-                    new Reference(
-                        label,
-                        context.GetRelativePath(label),
-                        link.Span,
-                        link.Line,
-                        link.IsImage));
+                if (context.TryGetRelativePath(label, out string relative))
+                {
+                    context.ParsingResult.AddReference(
+                        new Reference(
+                            label,
+                            relative,
+                            link.Span,
+                            link.Line,
+                            link.IsImage));
+                }
+                else
+                {
+                    context.ReportPathOutOfContext(label, link.Line, span);
+                }
             }
             else
             {
@@ -46,13 +65,20 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 }
                 else
                 {
-                    context.ParsingResult.AddReference(
-                        new Reference(
-                            link.Url,
-                            context.GetRelativePath(link.Url),
-                            link.Span,
-                            link.Line,
-                            link.IsImage));
+                    if (context.TryGetRelativePath(link.Url, out string relative))
+                    {
+                        context.ParsingResult.AddReference(
+                            new Reference(
+                                link.Url,
+                                relative,
+                                link.Span,
+                                link.Line,
+                                link.IsImage));
+                    }
+                    else
+                    {
+                        context.ReportPathOutOfContext(link.Url, link.Line, link.UrlSpan.Value);
+                    }
                 }
 
                 if (link.FirstChild == null)

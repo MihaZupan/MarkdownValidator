@@ -12,12 +12,13 @@ namespace MihaZupan.MarkdownValidator.Warnings
     [Flags]
     public enum WarningSource
     {
-        InternalParser = 1,
-        ExternalParser = 2,
-        CodeBlockParser = 4,
+        InternalParser = 1 << 0,
+        ExternalParser = 1 << 1,
+        CodeBlockParser = 1 << 2,
 
-        ParserFinalize = InternalParser | 8,
-        Validator = InternalParser | 16,
+        LinkReferenceProcessor = InternalParser | 1 << 20,
+        ParserFinalize = InternalParser | 1 << 21,
+        Validator = InternalParser | 1 << 22,
 
         InternalCodeBlockParser = InternalParser | CodeBlockParser,
         ExternalCodeBlockParser = ExternalParser | CodeBlockParser,

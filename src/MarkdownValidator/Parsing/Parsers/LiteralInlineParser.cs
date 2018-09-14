@@ -244,13 +244,21 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         }
         private void AddReference(ParsingContext context, string reference, int line, int end, bool isImage)
         {
-            context.ParsingResult.AddReference(
-                new Reference(
-                    reference,
-                    context.GetRelativeHtmlPath(reference),
-                    new SourceSpan(context.Object.Span.Start, end),
-                    line,
-                    isImage));
+            SourceSpan span = new SourceSpan(context.Object.Span.Start, end);
+            if (context.TryGetRelativePath(reference, out string relative))
+            {
+                context.ParsingResult.AddReference(
+                    new Reference(
+                        reference,
+                        relative,
+                        span,
+                        line,
+                        isImage));
+            }
+            else
+            {
+                context.ReportPathOutOfContext(reference, line, span);
+            }
         }
     }
 }

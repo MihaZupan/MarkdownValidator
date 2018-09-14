@@ -36,29 +36,40 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Note that paths you provide don't have to actually exist on disk</para>
         /// </summary>
         public string RootWorkingDirectory;
-        internal string GetRelativePath(string fullPath)
+        internal bool TryGetRelativePath(string fullPath, out string relativePath)
         {
-            if (fullPath.Equals(RootWorkingDirectory, StringComparison.OrdinalIgnoreCase))
-                return string.Empty;
-
-            return fullPath.Substring(RootWorkingDirectory.Length + 1);
+            if (fullPath.StartsWith(RootWorkingDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                if (fullPath.Length == RootWorkingDirectory.Length)
+                    relativePath = string.Empty;
+                else relativePath = fullPath.Substring(RootWorkingDirectory.Length + 1);
+                return true;
+            }
+            else
+            {
+                relativePath = null;
+                return false;
+            }
         }
-        internal string GetRelativePath(string sourceFile, string reference)
+        internal bool TryGetRelativePath(string sourceFile, string reference, out string relativePath)
         {
             string relative;
 
             if (reference.OrdinalContains(':'))
-                return reference;
+            {
+                relativePath = reference;
+                return true;
+            }
             else if (reference.StartsWith('#'))
                 relative = sourceFile + reference;
             else if (reference.StartsWith('/'))
-                return RootWorkingDirectory + reference;
+                relative = reference.Substring(0, reference.Length - 1);
             else if (reference.OrdinalEquals("."))
                 relative = Path.GetDirectoryName(sourceFile);
             else
                 relative = Path.Combine(Path.GetDirectoryName(sourceFile), reference);
 
-            return GetRelativePath(Path.GetFullPath(relative, RootWorkingDirectory));
+            return TryGetRelativePath(Path.GetFullPath(relative, RootWorkingDirectory), out relativePath);
         }
         /// <summary>
          /// Throws <see cref="PathNotInContextException"/>
@@ -66,14 +77,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
         internal void EnsurePathIsValidForContext(string path, out string fullPath, out string relativePath)
         {
             fullPath = Path.GetFullPath(path, RootWorkingDirectory);
-            if (fullPath.StartsWith(RootWorkingDirectory, StringComparison.Ordinal))
-            {
-                relativePath = GetRelativePath(fullPath);
-            }
-            else
-            {
+            if (!TryGetRelativePath(fullPath, out relativePath))
                 throw new ArgumentException($"{path} is not a child path of the root working directory of the context");
-            }
         }
 
         /// <summary>

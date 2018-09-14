@@ -16,9 +16,6 @@ namespace MihaZupan.MarkdownValidator.WebIO
         internal WebIOController(Config configuration)
         {
             Configuration = configuration;
-            DNS = new DnsController(configuration);
         }
-
-        public readonly DnsController DNS;
     }
 }

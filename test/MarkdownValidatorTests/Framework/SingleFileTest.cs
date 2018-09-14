@@ -6,7 +6,6 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
-using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
@@ -14,18 +13,11 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 {
     static class SingleFileTest
     {
-        public static void AssertNoWarnings(string source)
-            => AssertWarnings(source);
-
         public static void AssertWarnings(
             string source,
             params (WarningID ID, int Line, int Start, int End, string Value)[] warnings)
         {
-            Config configuration = new Config("TestDirectory");
-
-            MarkdownValidator validator = new MarkdownValidator(configuration);
-            validator.AddMarkdownFile("TestDirectory/Test0.md", source);
-            var report = validator.ValidateFully();
+            var report = ValidationReportProvider.GetReport(("Test0.md", source));
 
             Assert.True(report.IsComplete);
 
@@ -36,12 +28,15 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                 var actual = report.Warnings[i];
 
                 Assert.Equal(ID,        actual.ID);
-                Assert.Equal(Line - 1,  actual.Location.Line);
+                Assert.Equal(Line,      actual.Location.Line + 1);
                 Assert.Equal(Start,     actual.Location.Span.Start);
                 Assert.Equal(End,       actual.Location.Span.End);
                 Assert.Equal(Value,     actual.Value);
             }
         }
+
+        public static void AssertNoWarnings(string source)
+            => AssertWarnings(source);
 
         public static void AssertGlobalWarning(string source, WarningID id, string value = "")
             => AssertWarnings(source, (id, 0, SourceSpan.Empty.Start, SourceSpan.Empty.End, value));

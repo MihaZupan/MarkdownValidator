@@ -45,7 +45,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     "Heading ends with a whitespace");
             }
 
-            string relative = context.GetRelativePath(headerUrl);
+            context.TryGetRelativePath(headerUrl, out string relative);
             if (context.ParsingResult.HeadingDefinitions.ContainsAny(h =>
                 h.GlobalReference.Equals(relative, StringComparison.OrdinalIgnoreCase),
                 out ReferenceDefinition definition))
@@ -67,10 +67,11 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                         heading.Line,
                         context.SourceFile));
 
+                context.TryGetRelativeHtmlPath(headerUrl, out string relativeHtml);
                 context.ParsingResult.HeadingDefinitions.Add(
                     new ReferenceDefinition(
                         rawText,
-                        context.GetRelativeHtmlPath(headerUrl),
+                        relativeHtml,
                         heading.Span,
                         heading.Line,
                         context.SourceFile));

@@ -43,10 +43,20 @@ namespace MihaZupan.MarkdownValidator.Parsing
             WarningSource = warningSource;
         }
 
-        public string GetRelativePath(string reference)
-            => Configuration.GetRelativePath(SourceFile.RelativePath, reference);
-        public string GetRelativeHtmlPath(string reference)
-            => Configuration.GetRelativePath(SourceFile.HtmlPath, reference);
+        public bool TryGetRelativePath(string reference, out string relativePath)
+            => Configuration.TryGetRelativePath(SourceFile.RelativePath, reference, out relativePath);
+        public bool TryGetRelativeHtmlPath(string reference, out string relativePath)
+            => Configuration.TryGetRelativePath(SourceFile.HtmlPath, reference, out relativePath);
+
+        public void ReportPathOutOfContext(string path, int line, SourceSpan span)
+        {
+            ReportWarning(
+                WarningID.PathNotInContext,
+                line,
+                span,
+                path,
+                $"Path `{path}` is not in the validator's working directory");
+        }
         
         public void RegisterAsyncOperation(AsyncProgress progress)
             => ParsingResult.AsyncOperations.AddLast(progress);

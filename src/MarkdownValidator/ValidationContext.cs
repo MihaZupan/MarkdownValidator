@@ -10,7 +10,6 @@ using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 
 namespace MihaZupan.MarkdownValidator
@@ -159,9 +158,7 @@ namespace MihaZupan.MarkdownValidator
         {
             Configuration = configuration;
             Configuration.Initialize();
-            ContextReferenceableEntities.Add(
-                Path.GetFileName(Configuration.RootWorkingDirectory),
-                (null, new LinkedList<MarkdownFile>()));
+            ContextReferenceableEntities.Add(string.Empty, (null, new LinkedList<MarkdownFile>()));
         }
 
         public bool UpdateMarkdownFile(string path, string source)
@@ -231,8 +228,10 @@ namespace MihaZupan.MarkdownValidator
         public void Clear()
         {
             Lock();
+            AsyncOperations.Clear();
             IndexedEntities.Clear();
             IndexedMarkdownFiles.Clear();
+            UnfinishedMarkdownFiles.Clear();
             ContextReferenceableEntities.Clear();
             Unlock();
         }

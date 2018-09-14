@@ -20,14 +20,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             SourceFile = sourceFile;
         }
-        public ReferenceDefinition(MarkdownFile sourceFile, LinkReferenceDefinition link)
-            : this(
-                  link.Label,
-                  sourceFile.Configuration.GetRelativePath(sourceFile.RelativePath, link.Label),
-                  link.Span,
-                  link.Line,
-                  sourceFile)
-        { }
 
         public override int GetHashCode()
         {

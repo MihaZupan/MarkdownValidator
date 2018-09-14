@@ -39,6 +39,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         //
         Error = 1000000,
 
+        PathNotInContext,
         UnresolvedReference,
         UnresolvedFootnoteReference,
         DuplicateReferenceDefinition,

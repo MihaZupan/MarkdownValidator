@@ -20,17 +20,34 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         {
             var referenceDefinition = context.Object as LinkReferenceDefinition;
 
-            context.ParsingResult.LocalReferenceDefinitions.Add(
+            if (context.TryGetRelativePath(referenceDefinition.Label, out string relativeLabel))
+            {
+                context.ParsingResult.LocalReferenceDefinitions.Add(
                     new ReferenceDefinition(
-                        context.SourceFile,
-                        referenceDefinition));
+                        referenceDefinition.Label,
+                        relativeLabel,
+                        referenceDefinition.Span,
+                        referenceDefinition.Line,
+                        context.SourceFile));
 
-            context.ParsingResult.AddReference(
-                new Reference(
-                    referenceDefinition.Url,
-                    context.GetRelativePath(referenceDefinition.Url),
-                    referenceDefinition.Span,
-                    referenceDefinition.Line));
+                if (context.TryGetRelativePath(referenceDefinition.Url, out string relativeUrl))
+                {
+                    context.ParsingResult.AddReference(
+                        new Reference(
+                            referenceDefinition.Url,
+                            relativeUrl,
+                            referenceDefinition.Span,
+                            referenceDefinition.Line));
+                }
+                else
+                {
+                    context.ReportPathOutOfContext(referenceDefinition.Url, referenceDefinition.Line, referenceDefinition.UrlSpan);
+                }
+            }
+            else
+            {
+                context.ReportPathOutOfContext(referenceDefinition.Label, referenceDefinition.Line, referenceDefinition.LabelSpan);
+            }
         }
     }
 }

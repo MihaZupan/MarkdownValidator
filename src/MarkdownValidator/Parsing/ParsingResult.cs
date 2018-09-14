@@ -62,6 +62,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 }
             }
 
+            context.SetWarningSource(WarningSource.LinkReferenceProcessor);
+
             foreach (var referenceList in References.Values)
             {
                 var reference = referenceList.First();
@@ -80,6 +82,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     UnprocessedReferences.AddLast(reference.GlobalReference);
                 }
             }
+
+            context.SetWarningSource(WarningSource.ParserFinalize);
 
             foreach (var definition in definedReferences.Values)
             {
