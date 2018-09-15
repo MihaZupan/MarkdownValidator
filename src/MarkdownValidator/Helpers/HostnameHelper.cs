@@ -13,13 +13,12 @@ namespace MihaZupan.MarkdownValidator
     {
         public static bool IsDocumentationHostname(string hostname)
         {
-            if (hostname.OrdinalContains("...")) // http://...
-                return true;
-
-            if (hostname.IsAny(StringComparison.OrdinalIgnoreCase,
+            if (hostname.ContainsAny(StringComparison.OrdinalIgnoreCase,
                 "example.com",  // RFC2606
                 "example.org",  // RFC2606
-                "example.net")) // RFC2606
+                "example.net",  // RFC2606
+                "2001:DB8::",   // RFC3849
+                "..."))         // http://...
                 return true;
 
             if (hostname.EndsWith(".example", StringComparison.OrdinalIgnoreCase)) // RFC2606
@@ -29,9 +28,6 @@ namespace MihaZupan.MarkdownValidator
                 "192.0.2.",     // RFC5737
                 "198.51.100.",  // RFC5737
                 "203.0.113."))  // RFC5737
-                return true;
-
-            if (hostname.StartsWith("2001:DB8::", StringComparison.OrdinalIgnoreCase)) // RFC3849
                 return true;
 
             return false;

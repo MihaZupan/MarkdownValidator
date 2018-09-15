@@ -42,7 +42,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 context.ReportWarning(
                     WarningID.HeadingEndsWithWhitespace,
                     rawText,
-                    "Heading ends with a whitespace");
+                    "Heading `{0}` ends with a whitespace",
+                    rawText);
             }
 
             context.TryGetRelativePath(headerUrl, out string relative);

@@ -23,17 +23,19 @@ namespace MihaZupan.MarkdownValidator.Standalone
         static void Main(string[] args)
         {
             string location = args.Length == 0 ? "" : args[0];
-            if (location == "")
-                location = Environment.CurrentDirectory;
 
-            location = "Wiki";
+            //location = "Wiki";
             location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
+            //location = Path.Combine(Environment.CurrentDirectory, "../../../../../");
             //location = "test";
 
-            location = Path.GetFullPath(location);
+            if (location == "")
+                location = Environment.CurrentDirectory;
+            else
+                location = Path.GetFullPath(location);
 
             var config = new Config(location);
-            config.Parsing.Warnings_HugeFile_LineCount = 600;
+            config.Parsing.Warnings_HugeFile_LineCount = 1000;
             config.Parsing.CodeBlocks.AddParser(new TelegramBotCodeBlockParser());
 
             Validator = new MarkdownValidator(config);
@@ -134,23 +136,19 @@ namespace MihaZupan.MarkdownValidator.Standalone
 
                 if (report.Warnings.Count == 0)
                 {
-                    Console.WriteLine("All is good");
+                    WriteLineWithColor("All is good", ConsoleColor.Green);
                     return;
                 }
 
-                int maxDocumentLength = report.Warnings.Max(w => w.Location.RelativeFilePath.Length);
-                maxDocumentLength = Math.Max(8, maxDocumentLength);
+                int maxNameLength = Math.Max(8, report.Warnings.Max(w => w.Location.RelativeFilePath.Length));
 
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Severity\tDocument" + new string(' ', maxDocumentLength - 8) + "\tLine\tMessage");
-                Console.ForegroundColor = color;
+                WriteLineWithColor("Severity\tDocument" + new string(' ', maxNameLength - 8) + "\tLine\tMessage", ConsoleColor.Green);
 
-                foreach (var warning in report.Warnings)
+                foreach (var warning in report.Warnings.OrderBy(w => w.Location).ThenBy(w => w.ID))
                 {
                     Console.WriteLine("{0}\t{1}\t{2}\t{3}",
                         warning.IsError ? "Error\t" : (warning.IsSuggestion ? "Suggestion" : "Warning\t"),
-                        warning.Location.RelativeFilePath.PadRight(maxDocumentLength, ' '),
+                        warning.Location.RelativeFilePath.PadRight(maxNameLength, ' '),
                         warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.Line + 1).ToString(),
                         warning.Message);
                 }
@@ -170,6 +168,14 @@ namespace MihaZupan.MarkdownValidator.Standalone
             {
                 return new StreamReader(fs).ReadToEndAsync().Result;
             }
+        }
+
+        static void WriteLineWithColor(string line, ConsoleColor color)
+        {
+            var previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(line);
+            Console.ForegroundColor = previousColor;
         }
     }
 }

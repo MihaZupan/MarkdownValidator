@@ -113,6 +113,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
         #endregion
 
         internal void ProcessLinkReference(Reference reference)
-            => Configuration.LinkReferenceProcessor.ProcessLinkReference(this, reference);
+            => Configuration.UrlProcessor.ProcessUrl(this, reference);
     }
 }

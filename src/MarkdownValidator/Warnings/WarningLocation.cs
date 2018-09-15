@@ -11,7 +11,7 @@ using System;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
-    public sealed class WarningLocation : IEquatable<WarningLocation>
+    public sealed class WarningLocation : IEquatable<WarningLocation>, IComparable<WarningLocation>
     {
         public readonly string FullFilePath;
         public readonly string RelativeFilePath;
@@ -82,6 +82,31 @@ namespace MihaZupan.MarkdownValidator.Warnings
                 other.Span.Equals(Span) &&
                 other.FullFilePath.OrdinalEquals(FullFilePath) &&
                 other.RelativeFilePath.Length == RelativeFilePath.Length;
+        }
+
+        public int CompareTo(WarningLocation other)
+        {
+            // Separate warnings that refer to the entire file
+            int compare = RefersToEntireFile.CompareTo(other.RefersToEntireFile);
+
+            if (compare == 0)
+            {
+                // Sort by name
+                compare = RelativeFilePath.CompareTo(other.RelativeFilePath);
+
+                if (compare == 0)
+                {
+                    // Sort by line number
+                    compare = Line.CompareTo(other.Line);
+
+                    if (compare == 0)
+                    {
+                        // Sort by position in the file
+                        compare = Span.Start.CompareTo(other.Span.Start);
+                    }
+                }
+            }
+            return compare;
         }
     }
 }

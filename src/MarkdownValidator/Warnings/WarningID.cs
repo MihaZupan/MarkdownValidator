@@ -20,6 +20,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
 
         SameLabelAndTargetReference,
         HugeMarkdownFile,
+        UrlHostnameIsIP,
 
         //
         // Warnings
@@ -45,7 +46,8 @@ namespace MihaZupan.MarkdownValidator.Warnings
         UnresolvedFootnoteReference,
         DuplicateReferenceDefinition,
         DuplicateHeadingDefinition,
-        InvalidEmailFormat,
+        InvalidEmailFormat, // Unused
+        InvalidUrlFormat,
         ReferenceContainsLineBreak,
         InvalidReferenceNesting,
     }

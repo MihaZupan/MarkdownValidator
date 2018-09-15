@@ -7,6 +7,7 @@
 */
 using Markdig;
 using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using MihaZupan.MarkdownValidator.WebIO;
 using System;
 using System.IO;
@@ -26,7 +27,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
             if (rootWorkingDirectory == string.Empty)
                 throw new ArgumentException(nameof(rootWorkingDirectory) + " must not be empty");
 
-            RootWorkingDirectory = Path.GetFullPath(rootWorkingDirectory);
+            RootWorkingDirectory = Path.GetFullPath(rootWorkingDirectory).TrimEnd('\\', '/');
         }
 
         /// <summary>
@@ -104,10 +105,10 @@ namespace MihaZupan.MarkdownValidator.Configuration
         {
             ParsingController = new ParsingController(this);
             WebIOController = new WebIOController(this);
-            LinkReferenceProcessor = new LinkReferenceProcessor(this);
+            UrlProcessor = new UrlProcessor(this);
         }
         internal ParsingController ParsingController;
         internal WebIOController WebIOController;
-        internal LinkReferenceProcessor LinkReferenceProcessor;
+        internal UrlProcessor UrlProcessor;
     }
 }

@@ -26,7 +26,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             context.SetWarningSource(WarningSource.InternalParser);
 
             ReferenceInt lastIndex = GetLastIndex(context);
-            if (literal.Span.Start <= lastIndex)
+            if (literal.Span.Start < lastIndex)
                 return;
 
             lastIndex.Value = literal.Span.End;
