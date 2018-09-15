@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -25,7 +26,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                 Validator.Clear();
                 foreach (var (Name, Source) in files)
                 {
-                    Validator.AddMarkdownFile(Path.Combine(RootDirectory, Name), Source);
+                    Validator.AddMarkdownFile(Path.Combine(RootDirectory, Name), CleanSource(Source));
                 }
                 return Validator.ValidateFully();
             }
@@ -37,7 +38,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                 Validator.Clear();
                 foreach (var (Name, Source) in files)
                 {
-                    Validator.AddMarkdownFile(Path.Combine(RootDirectory, Name), Source);
+                    Validator.AddMarkdownFile(Path.Combine(RootDirectory, Name), CleanSource(Source));
                 }
                 foreach (var entity in entities)
                 {
@@ -45,6 +46,15 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                 }
                 return Validator.ValidateFully();
             }
+        }
+
+        private static string CleanSource(string source)
+        {
+            if (source.IndexOf("\r\n", StringComparison.Ordinal) != -1)
+            {
+                return source.Replace("\r\n", "\n", StringComparison.Ordinal);
+            }
+            else return source;
         }
     }
 }

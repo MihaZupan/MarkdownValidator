@@ -55,7 +55,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         {
             string relative;
 
-            if (reference.OrdinalContains(':'))
+            if (reference.Contains(':'))
             {
                 relativePath = reference;
                 return true;

@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
+using MihaZupan.MarkdownValidator.Warnings;
 
 namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
@@ -19,6 +20,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseLinkReferenceDefinition(ParsingContext context)
         {
             var referenceDefinition = context.Object as LinkReferenceDefinition;
+            context.SetWarningSource(WarningSource.InternalParser);
 
             if (context.TryGetRelativePath(referenceDefinition.Label, out string relativeLabel))
             {

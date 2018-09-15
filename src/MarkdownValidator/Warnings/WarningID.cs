@@ -28,6 +28,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
 
         EmptyMarkdownFile,
         UnusedDefinedReference,
+        UnusedDefinedFootnote,
         EmptyCodeBlock,
         EmptyHeading,
         EmptyReference,

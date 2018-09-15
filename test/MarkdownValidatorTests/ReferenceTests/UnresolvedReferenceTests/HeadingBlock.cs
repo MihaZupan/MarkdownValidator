@@ -9,63 +9,61 @@ using MihaZupan.MarkdownValidator.Tests.Framework;
 using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
-namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
+namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnresolvedReferenceTests
 {
-    public class LinkReference
+    public class HeadingBlock
     {
         [Fact]
-        public void NoWarning_Single()
+        public void NoWarning_InlineLink()
         {
             string source = @"
-[test]
-
-[test]: .
+# text
+[stuff](#text)
 ";
             SingleFileTest.AssertNoWarnings(source);
         }
 
         [Fact]
-        public void NoWarning_Multiple()
+        public void NoWarning_LinkReference()
         {
             string source = @"
-[test]
 [stuff]
-[test]
+# text
 
-[test]: .
-[stuff]: .
+[stuff]: #text
 ";
             SingleFileTest.AssertNoWarnings(source);
         }
 
         [Fact]
-        public void Duplicated_Single()
+        public void UnresolvedHeadingReference_InlineLink()
         {
-            string source = @"
-[test]
-
-[test]: .
-[test]: .
-";
+            string source = @"[stuff](#text)";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateReferenceDefinition, 5, 19, 27, "test"));
+                (WarningID.UnresolvedReference, 1, 0, 13, "#text"));
         }
 
         [Fact]
-        public void Duplicated_Multiple()
+        public void UnresolvedHeadingReference_LinkReference()
         {
             string source = @"
-[stuff]
-[test]
+[foo][stuff]
 
-[test]: .
-[stuff]: .
-[stuff]: .
-[test]: .
+[stuff]: #text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateReferenceDefinition, 7, 38, 47, "stuff"),
-                (WarningID.DuplicateReferenceDefinition, 8, 49, 57, "test"));
+                (WarningID.UnresolvedReference, 4, 15, 28, "#text"));
+        }
+
+        [Fact]
+        public void UnresolvedHeadingReference_DifferentLevels()
+        {
+            string source = @"
+## text
+[stuff](##text)
+";
+            SingleFileTest.AssertWarnings(source,
+                (WarningID.UnresolvedReference, 3, 9, 23, "##text"));
         }
     }
 }

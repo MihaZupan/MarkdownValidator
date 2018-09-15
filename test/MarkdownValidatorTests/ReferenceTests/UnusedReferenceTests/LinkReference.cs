@@ -9,63 +9,69 @@ using MihaZupan.MarkdownValidator.Tests.Framework;
 using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
-namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
+namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnusedReferenceTests
 {
     public class LinkReference
     {
         [Fact]
-        public void NoWarning_Single()
+        public void NoWarning_InlineLink()
         {
             string source = @"
-[test]
+[bar][foo]
 
-[test]: .
+[foo]: .
 ";
             SingleFileTest.AssertNoWarnings(source);
         }
 
         [Fact]
-        public void NoWarning_Multiple()
+        public void NoWarning_SameNameInlineLine()
         {
             string source = @"
-[test]
-[stuff]
-[test]
+[foo]
 
-[test]: .
-[stuff]: .
+[foo]: .
 ";
             SingleFileTest.AssertNoWarnings(source);
         }
 
         [Fact]
-        public void Duplicated_Single()
+        public void UnusedLinkReference_Single()
         {
-            string source = @"
-[test]
-
-[test]: .
-[test]: .
-";
+            string source = @"[foo]: .";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateReferenceDefinition, 5, 19, 27, "test"));
+                (WarningID.UnusedDefinedReference, 1, 0, 7, "foo"));
         }
 
         [Fact]
-        public void Duplicated_Multiple()
+        public void UnusedLinkReference_Mixed()
         {
             string source = @"
-[stuff]
-[test]
+[foo]
 
-[test]: .
+[foo]: .
+[bar]: .
+[bar]
+
 [stuff]: .
-[stuff]: .
-[test]: .
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateReferenceDefinition, 7, 38, 47, "stuff"),
-                (WarningID.DuplicateReferenceDefinition, 8, 49, 57, "test"));
+                (WarningID.UnusedDefinedReference, 8, 33, 42, "stuff"));
+        }
+
+        [Fact]
+        public void UnusedLinkReference_Multiple()
+        {
+            string source = @"
+[bar]
+
+[foo]: .
+[bar]: .
+[stuff]: .
+";
+            SingleFileTest.AssertWarnings(source,
+                (WarningID.UnusedDefinedReference, 4, 8, 15, "foo"),
+                (WarningID.UnusedDefinedReference, 6, 26, 35, "stuff"));
         }
     }
 }

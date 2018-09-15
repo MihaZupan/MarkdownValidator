@@ -28,9 +28,10 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
 text
 
 []: .
-text";
+text
+";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 4, 10, 11, string.Empty));
+                (WarningID.EmptyReference, 4, 7, 8, string.Empty));
         }
 
         [Fact]
@@ -41,10 +42,11 @@ text";
 text
 
 []: .
-text";
+text
+";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 2, 2, 3, string.Empty),
-                (WarningID.EmptyReference, 5, 17, 18, string.Empty));
+                (WarningID.EmptyReference, 2, 1, 2, string.Empty),
+                (WarningID.EmptyReference, 5, 13, 14, string.Empty));
         }
     }
 }

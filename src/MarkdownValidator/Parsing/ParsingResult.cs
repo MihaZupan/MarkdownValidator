@@ -19,8 +19,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public string Source;
         public MarkdownDocument SyntaxTree;
 
-        internal int LastLiteralInlineIndex = -1;
-        public Dictionary<Type, object> ExternalParserStorage = new Dictionary<Type, object>();
+        public Dictionary<Type, object> ParserStorage = new Dictionary<Type, object>();
 
         public List<Warning> ParserWarnings { get; private set; } = new List<Warning>();
         public List<ReferenceDefinition> HeadingDefinitions = new List<ReferenceDefinition>();
@@ -44,7 +43,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public void Finalize(ParsingContext context)
         {
-            context.SetWarningSource(WarningSource.ParserFinalize);
+            context.SetWarningSource(WarningSource.ParsingResultFinalize);
 
             Dictionary<string, ReferenceDefinition> definedReferences
                 = new Dictionary<string, ReferenceDefinition>(StringComparer.OrdinalIgnoreCase);
@@ -83,7 +82,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 }
             }
 
-            context.SetWarningSource(WarningSource.ParserFinalize);
+            context.SetWarningSource(WarningSource.ParsingResultFinalize);
 
             foreach (var definition in definedReferences.Values)
             {
@@ -104,7 +103,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 SyntaxTree = null;
             }
             LocalReferenceDefinitions = null;
-            ExternalParserStorage = null;
+            ParserStorage = null;
         }
         public void AddReference(Reference referencedEntity)
         {

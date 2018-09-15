@@ -19,7 +19,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public Config Configuration => SourceFile.Configuration;
         public string RelativePath => SourceFile.RelativePath;
 
-        public Dictionary<Type, object> ExternalParserStorage => ParsingResult.ExternalParserStorage;
+        public Dictionary<Type, object> ParserStorage => ParsingResult.ParserStorage;
 
         // Only available to internal parsers
         internal readonly MarkdownFile SourceFile;
@@ -36,7 +36,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal void Update(MarkdownObject objectToParse)
         {
             Object = objectToParse;
-            Source = new StringSlice(SourceFile.ParsingResult.Source, Object.Span.Start, Object.Span.End);
+            Source = Object is null
+                ? StringSlice.Empty
+                : new StringSlice(SourceFile.ParsingResult.Source, Object.Span.Start, Object.Span.End);
         }
         internal void SetWarningSource(WarningSource warningSource)
         {

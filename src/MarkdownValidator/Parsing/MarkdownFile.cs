@@ -61,6 +61,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 Configuration.ParsingController.Parse(markdownObject, this);
             }
 
+            Configuration.ParsingController.Finalize(this);
             ParsingResult.Finalize(ParsingContext);
         }
     }

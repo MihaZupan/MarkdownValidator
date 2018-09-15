@@ -25,10 +25,11 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             var literal = context.Object as LiteralInline;
             context.SetWarningSource(WarningSource.InternalParser);
 
-            if (literal.Span.Start <= context.ParsingResult.LastLiteralInlineIndex)
+            ReferenceInt lastIndex = GetLastIndex(context);
+            if (literal.Span.Start <= lastIndex)
                 return;
 
-            context.ParsingResult.LastLiteralInlineIndex = literal.Span.End;
+            lastIndex.Value = literal.Span.End;
 
             bool lineBreaks = false;
             bool isImage = false;
@@ -66,7 +67,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 else return;
 
                 // Update the processed index to avoid parsing the same literals multiple times
-                context.ParsingResult.LastLiteralInlineIndex = literal.Span.End;
+                lastIndex.Value = literal.Span.End;
             }
 
             string name;
@@ -92,7 +93,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     }
                     else return;
                     // Update the processed index to avoid parsing the same literals multiple times
-                    context.ParsingResult.LastLiteralInlineIndex = literal.Span.End;
+                    lastIndex.Value = literal.Span.End;
                 }
                 while (!literal.Contains(']', out localIndex));
                 if (localIndex != 0)
@@ -145,7 +146,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     literal = literal.NextSibling.NextSibling as LiteralInline;
                 }
                 // Update the processed index to avoid parsing the same literals multiple times
-                context.ParsingResult.LastLiteralInlineIndex = literal.Span.End;
+                lastIndex.Value = literal.Span.End;
 
                 // The 'abc' part is already stored in name, make sure it's not empty
                 if (name.Length == 0)
@@ -181,7 +182,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                         }
                         else return;
                         // Update the processed index to avoid parsing the same literals multiple times
-                        context.ParsingResult.LastLiteralInlineIndex = literal.Span.End;
+                        lastIndex.Value = literal.Span.End;
                     }
                     while (!literal.Contains(']', out localIndex));
                     if (localIndex != 0)
@@ -258,6 +259,21 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             else
             {
                 context.ReportPathOutOfContext(reference, line, span);
+            }
+        }
+
+        private static readonly Type StorageKey = typeof(LiteralInlineParser);
+        private static ReferenceInt GetLastIndex(ParsingContext context)
+        {
+            if (context.ParserStorage.TryGetValue(StorageKey, out object obj))
+            {
+                return (ReferenceInt)obj;
+            }
+            else
+            {
+                var index = new ReferenceInt(-1);
+                context.ParserStorage.Add(StorageKey, index);
+                return index;
             }
         }
     }

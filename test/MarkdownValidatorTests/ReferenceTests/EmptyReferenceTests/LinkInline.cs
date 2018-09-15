@@ -41,10 +41,11 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
         {
             string source = @"
 [text]()
-text[text]()text";
+text[text]()text
+";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 2, 2, 9, string.Empty),
-                (WarningID.EmptyReference, 3, 16, 23, string.Empty));
+                (WarningID.EmptyReference, 2, 1, 8, string.Empty),
+                (WarningID.EmptyReference, 3, 14, 21, string.Empty));
         }
     }
 }

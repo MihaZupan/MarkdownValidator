@@ -78,9 +78,9 @@ namespace MihaZupan.MarkdownValidator.Tests
    ##  stuff  
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.HeadingEndsWithWhitespace, 2, 4, 12, "### text "),
-                (WarningID.HeadingEndsWithWhitespace, 3, 15, 22, "# text2 "),
-                (WarningID.HeadingEndsWithWhitespace, 4, 28, 38, "##  stuff  "));
+                (WarningID.HeadingEndsWithWhitespace, 2, 3, 11, "### text "),
+                (WarningID.HeadingEndsWithWhitespace, 3, 13, 20, "# text2 "),
+                (WarningID.HeadingEndsWithWhitespace, 4, 25, 35, "##  stuff  "));
         }
     }
 }

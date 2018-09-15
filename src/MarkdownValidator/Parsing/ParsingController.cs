@@ -19,6 +19,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
         private readonly Dictionary<Type, List<Action<ParsingContext>>> Parsers =
             new Dictionary<Type, List<Action<ParsingContext>>>();
 
+        private readonly List<Action<ParsingContext>> RegisteredFinalizers =
+            new List<Action<ParsingContext>>();
+
         internal readonly Config Configuration;
 
         public ParsingController(Config configuration)
@@ -32,6 +35,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             new LinkInlineParser().Initialize(registration);
             new LinkReferenceDefinitionParser().Initialize(registration);
             new HeadingBlockParser().Initialize(registration);
+            new FootnoteParser().Initialize(registration);
             new CodeBlockParser().Initialize(registration);
 
             foreach (var parser in Configuration.Parsing.Parsers)
@@ -51,6 +55,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 Parsers.Add(type, new List<Action<ParsingContext>>() { action });
             }
         }
+        public void RegisterFinalizer(Action<ParsingContext> action)
+            => RegisteredFinalizers.Add(action);
 
         public void Parse(MarkdownObject objectToParse, MarkdownFile sourceFile)
         {
@@ -63,6 +69,16 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     context.SetWarningSource(WarningSource.ExternalParser);
                     parserAction(context);
                 }
+            }
+        }
+        public void Finalize(MarkdownFile sourceFile)
+        {
+            ParsingContext context = sourceFile.ParsingContext;
+            context.Update(null);
+            foreach (var finalizer in RegisteredFinalizers)
+            {
+                context.SetWarningSource(WarningSource.ExternalParserFinalize);
+                finalizer(context);
             }
         }
     }

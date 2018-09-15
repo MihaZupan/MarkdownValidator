@@ -23,5 +23,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public void Register(Type type, Action<ParsingContext> action)
             => ParsingController.Register(type, action);
+
+        public void RegisterFinalizer(Action<ParsingContext> action)
+            => ParsingController.RegisterFinalizer(action);
     }
 }

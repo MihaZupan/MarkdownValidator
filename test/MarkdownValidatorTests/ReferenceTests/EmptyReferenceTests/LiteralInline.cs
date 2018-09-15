@@ -34,10 +34,11 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
         {
             string source = @"
 []
-text[]text";
+text[]text
+";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 2, 2, 3, string.Empty),
-                (WarningID.EmptyReference, 3, 10, 11, string.Empty));
+                (WarningID.EmptyReference, 2, 1, 2, string.Empty),
+                (WarningID.EmptyReference, 3, 8, 9, string.Empty));
         }
 
         [Fact]
@@ -63,12 +64,13 @@ text[]text";
         {
             string source = @"
 [test][]
-text[stuff][]text";
+text[stuff][]text
+";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.UnresolvedReference, 2, 2, 7, "test"),
-                (WarningID.UnresolvedReference, 3, 16, 22, "stuff"),
-                (WarningID.EmptyReference, 2, 8, 9, string.Empty),
-                (WarningID.EmptyReference, 3, 23, 24, string.Empty));
+                (WarningID.UnresolvedReference, 2, 1, 6, "test"),
+                (WarningID.UnresolvedReference, 3, 14, 20, "stuff"),
+                (WarningID.EmptyReference, 2, 7, 8, string.Empty),
+                (WarningID.EmptyReference, 3, 21, 22, string.Empty));
         }
     }
 }
