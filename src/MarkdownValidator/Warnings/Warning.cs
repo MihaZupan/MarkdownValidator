@@ -6,10 +6,12 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using System;
+using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
-    public sealed class Warning : IEquatable<Warning>
+    [DebuggerDisplay("{ID}, {Location.Line}, {Location.Span.Start}-{Location.Span.End}, {Value}")]
+    public sealed class Warning : IEquatable<Warning>, IComparable<Warning>
     {
         public readonly WarningLocation Location;
         public readonly WarningID ID;
@@ -59,6 +61,39 @@ namespace MihaZupan.MarkdownValidator.Warnings
             }
             return false;
         }
+
+        public int CompareTo(Warning other)
+        {
+            // Sort by location
+            int compare = Location.CompareTo(other.Location);
+
+            if (compare == 0)
+            {
+                // Sort by ID
+                compare = ID.CompareTo(other.ID);
+
+                if (compare == 0)
+                {
+                    // Sort by message
+                    compare = Message.CompareTo(other.Message);
+
+                    if (compare == 0)
+                    {
+                        // Sort by Value
+                        compare = Value.CompareTo(other.Value);
+
+                        if (compare == 0)
+                        {
+                            // Sort by source
+                            compare = Source.CompareTo(other.Source);
+                        }
+                    }
+                }
+            }
+
+            return compare;
+        }
+
         public static bool operator ==(Warning a, Warning b)
         {
             if (a is null) return b is null;

@@ -23,12 +23,16 @@ namespace MihaZupan.MarkdownValidator
         private readonly Config Configuration;
 
         // Used to keep track of files, dictionaries and any other user-defined referencable entity in the context
-        private readonly HashSet<string> IndexedEntities = new HashSet<string>();
+        private readonly HashSet<string> IndexedEntities =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // Indexed markdown files based on relative paths
-        private readonly Dictionary<string, MarkdownFile> IndexedMarkdownFiles = new Dictionary<string, MarkdownFile>();
-        private readonly HashSet<MarkdownFile> UnfinishedMarkdownFiles = new HashSet<MarkdownFile>();
-        private readonly Dictionary<MarkdownFile, LinkedList<AsyncProgress>> AsyncOperations = new Dictionary<MarkdownFile, LinkedList<AsyncProgress>>();
+        private readonly Dictionary<string, MarkdownFile> IndexedMarkdownFiles =
+            new Dictionary<string, MarkdownFile>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<MarkdownFile> UnfinishedMarkdownFiles =
+            new HashSet<MarkdownFile>();
+        private readonly Dictionary<MarkdownFile, LinkedList<AsyncProgress>> AsyncOperations =
+            new Dictionary<MarkdownFile, LinkedList<AsyncProgress>>();
 
         // Dictionary names, file names, fragment identifiers and a corresponding list of markdown files that reference them
         // Each reference shouldn't get too many files pointing at it, so using a HashSet here is not necesarry
@@ -203,17 +207,16 @@ namespace MihaZupan.MarkdownValidator
             Unlock();
             return false;
         }
-        public bool RemoveEntityFromIndex(string path, bool isMarkdownFile)
+        public bool RemoveEntityFromIndex(string path)
         {
             Lock();
             if (IndexedEntities.Contains(path))
             {
                 IndexedEntities.Remove(path);
-                if (isMarkdownFile)
+                if (IndexedMarkdownFiles.TryGetValue(path, out MarkdownFile file))
                 {
-                    MarkdownFile markdownFile = IndexedMarkdownFiles[path];
                     IndexedMarkdownFiles.Remove(path);
-                    RemoveMarkdownFileFromInternalContext(markdownFile);
+                    RemoveMarkdownFileFromInternalContext(file);
                 }
                 else
                 {
@@ -239,6 +242,17 @@ namespace MihaZupan.MarkdownValidator
         public ValidationReport Validate(bool getFullReport)
         {
             Lock();
+
+            if (IndexedMarkdownFiles.Count == 0)
+            {
+                var emptyReport = ValidationReport.Empty.AddWarning(
+                    WarningID.EmptyContext,
+                    new WarningLocation(string.Empty, string.Empty),
+                    string.Empty,
+                    "You should consider writing some Markdown");
+                Unlock();
+                return emptyReport;
+            }
 
             // Check async operations and reparse updated files
             int suggestedWait = -1;

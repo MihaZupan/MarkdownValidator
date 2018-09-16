@@ -31,13 +31,13 @@ namespace MihaZupan.MarkdownValidator
         /// </summary>
         public readonly List<Warning> Warnings = new List<Warning>();
 
-        internal ValidationReport(bool complete, int suggestedWait)
+        internal ValidationReport(bool complete, int suggestedWait = -1)
         {
             IsComplete = complete;
             SuggestedWait = IsComplete ? -1 : suggestedWait;
         }
 
-        internal void AddWarning(WarningID id, WarningLocation location, string value, string messageFormat, params string[] messageArgs)
+        internal ValidationReport AddWarning(WarningID id, WarningLocation location, string value, string messageFormat, params string[] messageArgs)
         {
             Warnings.Add(
                 new Warning(
@@ -46,6 +46,7 @@ namespace MihaZupan.MarkdownValidator
                     value,
                     string.Format(messageFormat, messageArgs),
                     WarningSource.Validator));
+            return this;
         }
 
         public (List<Warning> removed, List<Warning> added) Diff(ValidationReport previousReport)
@@ -53,7 +54,7 @@ namespace MihaZupan.MarkdownValidator
             return DiffHelper.Diff(previousReport.Warnings, Warnings);
         }
 
-        public static readonly ValidationReport Empty = new ValidationReport(true, 0);
+        public static ValidationReport Empty => new ValidationReport(true);
 
         public override int GetHashCode() => base.GetHashCode();
         public override bool Equals(object obj)

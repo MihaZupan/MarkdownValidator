@@ -50,32 +50,19 @@ namespace MihaZupan.MarkdownValidator.Standalone
 
             FSWatcher.Renamed += (s, e) =>
             {
+                Validator.RemoveEntity(e.FullPath);
                 if (IsMarkdownFile(e.FullPath))
                 {
-                    Validator.RemoveMarkdownFile(e.FullPath);
                     Validator.AddMarkdownFile(e.FullPath, GetSource(e.FullPath));
                 }
                 else
                 {
-                    Validator.RemoveEntity(e.FullPath);
                     Validator.AddEntity(e.FullPath);
                 }
 
                 Update();
             };
-            FSWatcher.Deleted += (s, e) =>
-            {
-                if (IsMarkdownFile(e.FullPath))
-                {
-                    Validator.RemoveMarkdownFile(e.FullPath);
-                }
-                else
-                {
-                    Validator.RemoveEntity(e.FullPath);
-                }
-
-                Update();
-            };
+            FSWatcher.Deleted += (s, e) => Validator.RemoveEntity(e.FullPath);
             FSWatcher.Created += (s, e) =>
             {
                 if (IsMarkdownFile(e.FullPath))

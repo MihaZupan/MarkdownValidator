@@ -27,16 +27,14 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                 Validator.Clear();
                 foreach (var (Name, Source) in files)
                 {
-                    Validator.AddMarkdownFile(Path.Combine(RootDirectory, Name), CleanSource(Source));
+                    Validator.AddMarkdownFile(Path.Combine(RootDirectory, Name), SourceHelper.CleanSource(Source));
                 }
                 foreach (var entity in entities)
                 {
                     Validator.AddEntity(Path.Combine(RootDirectory, entity));
                 }
 
-                var report = fully
-                    ? Validator.ValidateFully()
-                    : Validator.Validate();
+                var report = Validator.Validate(fully);
 
                 if (fully)
                     Assert.True(report.IsComplete);
@@ -55,14 +53,5 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
             => GetReport(name, source, entities, true);
         public static ValidationReport GetReport(string name, string source, bool fully)
             => GetReport(name, source, Array.Empty<string>(), fully);
-
-        private static string CleanSource(string source)
-        {
-            if (source.IndexOf("\r\n", StringComparison.Ordinal) != -1)
-            {
-                return source.Replace("\r\n", "\n", StringComparison.Ordinal);
-            }
-            else return source;
-        }
     }
 }

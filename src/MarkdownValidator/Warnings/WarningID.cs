@@ -18,6 +18,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         //
         Suggestion = -1000000,
 
+        EmptyContext,
         SameLabelAndTargetReference,
         HugeMarkdownFile,
         UrlHostnameIsIP,

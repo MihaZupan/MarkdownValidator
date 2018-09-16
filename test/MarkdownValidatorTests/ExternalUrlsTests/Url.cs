@@ -48,7 +48,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("http://gugl/.../")]
         public void DocumentationReserved(string value)
         {
-            SingleFileTest.AssertWarningsNotPresent(value,
+            SingleFileTest.AssertNotPresent(value,
                 WarningID.InvalidUrlFormat,
                 WarningID.UrlHostnameIsIP,
                 WarningID.UnresolvedReference);

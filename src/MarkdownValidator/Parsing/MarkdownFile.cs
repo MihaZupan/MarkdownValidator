@@ -8,9 +8,11 @@
 using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
+using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
+    [DebuggerDisplay("{RelativePath}")]
     internal class MarkdownFile
     {
         public readonly string FullPath;

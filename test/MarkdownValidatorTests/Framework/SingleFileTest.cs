@@ -7,23 +7,26 @@
 */
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Warnings;
+using System.Linq;
 using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.Framework
 {
     static class SingleFileTest
     {
+        public const string DefaultFileName = "DefaultTestFile.md";
+
         public static void AssertWarnings(
             string source,
             params (WarningID ID, int Line, int Start, int End, string Value)[] warnings)
         {
-            var report = ValidationReportProvider.GetReport("Test0.md", source);
-            WarningComparer.AssertMatch(report.Warnings, warnings);
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source);
+            WarningComparer.AssertMatch(report.Warnings, warnings.ToList(), DefaultFileName);
         }
 
         public static void AssertNoWarnings(string source, bool fully = true)
         {
-            var report = ValidationReportProvider.GetReport("Test0.md", source, fully);
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
             Assert.Empty(report.Warnings);
         }
 
@@ -32,19 +35,19 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public static void AssertContainsWarning(string source, WarningID id, bool fully = true)
         {
-            var report = ValidationReportProvider.GetReport("Test0.md", source, fully);
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
             WarningComparer.AssertContains(report.Warnings, id);
         }
 
-        public static void AssertWarningNotPresent(string source, WarningID id, bool fully = true)
+        public static void AssertNotPresent(string source, WarningID id, bool fully = true)
         {
-            var report = ValidationReportProvider.GetReport("Test0.md", source, fully);
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
             WarningComparer.AssertNotContains(report.Warnings, id);
         }
 
-        public static void AssertWarningsNotPresent(string source, params WarningID[] ids)
+        public static void AssertNotPresent(string source, params WarningID[] ids)
         {
-            var report = ValidationReportProvider.GetReport("Test0.md", source);
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source);
             foreach (var id in ids)
                 WarningComparer.AssertNotContains(report.Warnings, id);
         }

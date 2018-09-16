@@ -5,8 +5,10 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Warnings;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.Framework
@@ -14,20 +16,80 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
     static class WarningComparer
     {
         public static void AssertMatch(
+            Warning actual,
+            (WarningID ID, int Line, int Start, int End, string Value) expected,
+            string fileName)
+            => AssertMatch(actual, fileName, expected.ID, expected.Line, expected.Start, expected.End, expected.Value);
+
+        public static void AssertMatch(
+           Warning actual,
+           string fileName, WarningID id, int line, int start, int end, string value)
+        {
+            Assert.Equal(fileName, actual.Location.RelativeFilePath);
+            Assert.Equal(id, actual.ID);
+            Assert.Equal(line, actual.Location.Line + 1);
+            Assert.Equal(start, actual.Location.Span.Start);
+            Assert.Equal(end, actual.Location.Span.End);
+            Assert.Equal(value, actual.Value);
+        }
+
+        public static void AssertMatch(
             List<Warning> reportWarnings,
-            IList<(WarningID ID, int Line, int Start, int End, string Value)> expected)
+            List<(WarningID ID, int Line, int Start, int End, string Value)> expected, string fileName)
         {
             Assert.Equal(expected.Count, reportWarnings.Count);
-            for (int i = 0; i < reportWarnings.Count; i++)
-            {
-                var (ID, Line, Start, End, Value) = expected[i];
-                var actual = reportWarnings[i];
 
-                Assert.Equal(ID, actual.ID);
-                Assert.Equal(Line, actual.Location.Line + 1);
-                Assert.Equal(Start, actual.Location.Span.Start);
-                Assert.Equal(End, actual.Location.Span.End);
-                Assert.Equal(Value, actual.Value);
+            reportWarnings.Sort();
+
+            var sortedExpected = expected
+                .Select(w => (new WarningLocation(fileName, fileName, w.Line, new SourceSpan(w.Start, w.End)), w.ID, w.Value))
+                .OrderBy(w => w.Item1)
+                .ThenBy(w => w.ID)
+                .ThenBy(w => w.Value);
+
+            int i = 0;
+            foreach (var expectedWarning in sortedExpected)
+            {
+                var actualWarning = reportWarnings[i++];
+                AssertMatch(
+                    actualWarning,
+                    expectedWarning.Item1.RelativeFilePath,
+                    expectedWarning.ID,
+                    expectedWarning.Item1.Line,
+                    expectedWarning.Item1.Span.Start,
+                    expectedWarning.Item1.Span.End,
+                    expectedWarning.Value);
+            }
+        }
+
+        public static void AssertMatch(
+            List<Warning> reportWarnings,
+            params (string FileName, WarningID ID, int Line, int Start, int End, string Value)[] expected)
+        {
+            Assert.Equal(expected.Length, reportWarnings.Count);
+
+            var reportWarningsByFileName = reportWarnings
+                .GroupBy(w => w.Location.RelativeFilePath)
+                .Select(g => g.ToList())
+                .ToDictionary(g => g.First().Location.RelativeFilePath);
+
+            var expectedWarningsByFileName = expected
+                .GroupBy(w => w.FileName)
+                .Select(g => g.ToList())
+                .ToList();
+
+            Assert.Equal(expectedWarningsByFileName.Count, reportWarningsByFileName.Count);
+
+            foreach (var expectedWarnings in expectedWarningsByFileName)
+            {
+                string fileName = expectedWarnings.First().FileName;
+
+                Assert.True(reportWarningsByFileName.TryGetValue(fileName, out List<Warning> warnings));
+
+                AssertMatch(
+                    warnings,
+                    expectedWarnings.Select(w => (w.ID, w.Line, w.Start, w.End, w.Value)).ToList(),
+                    expectedWarnings.First().FileName);
             }
         }
 

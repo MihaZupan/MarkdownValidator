@@ -22,12 +22,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <param name="rootWorkingDirectory">The root directory for all files and directories referenced in your markdown files. See <see cref="RootWorkingDirectory"/></param>
         public Config(string rootWorkingDirectory)
         {
-            if (rootWorkingDirectory is null)
-                throw new ArgumentNullException(nameof(rootWorkingDirectory));
-            if (rootWorkingDirectory == string.Empty)
-                throw new ArgumentException(nameof(rootWorkingDirectory) + " must not be empty");
-
-            RootWorkingDirectory = Path.GetFullPath(rootWorkingDirectory).TrimEnd('\\', '/');
+            RootWorkingDirectory = rootWorkingDirectory;
         }
 
         /// <summary>
@@ -35,8 +30,23 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>It must be a parent to all files and directories added to the context</para>
         /// <para>It can be the root of the file system, if you want, but it must not be a subdirectory of any added files/directories</para>
         /// <para>Note that paths you provide don't have to actually exist on disk</para>
+        /// <para>Setting it to an empty string is the same as <see cref="Environment.CurrentDirectory"/></para>
         /// </summary>
-        public string RootWorkingDirectory;
+        public string RootWorkingDirectory
+        {
+            get => _rootWorkingDirectory;
+            set
+            {
+                if (value is null)
+                    throw new ArgumentNullException(nameof(RootWorkingDirectory));
+
+                _rootWorkingDirectory = value.Length == 0
+                    ? Environment.CurrentDirectory
+                    : Path.GetFullPath(value).TrimEnd('\\', '/');
+            }
+        }
+        private string _rootWorkingDirectory;
+
         internal bool TryGetRelativePath(string fullPath, out string relativePath)
         {
             if (fullPath.StartsWith(RootWorkingDirectory, StringComparison.OrdinalIgnoreCase))
@@ -103,14 +113,37 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 .Build();
         }
 
-        public ParsingConfig Parsing = new ParsingConfig();
-        public WebIOConfig WebIO = new WebIOConfig();
-
-        internal void Initialize()
+        public ParsingConfig Parsing
         {
-            ParsingController = new ParsingController(this);
-            WebIOController = new WebIOController(this);
-            UrlProcessor = new UrlProcessor(this);
+            get => _parsing;
+            set => _parsing = value ?? throw new NullReferenceException(nameof(Parsing));
+        }
+        private ParsingConfig _parsing = new ParsingConfig();
+        public WebIOConfig WebIO
+        {
+            get => _webIO;
+            set => _webIO = value ?? throw new NullReferenceException(nameof(WebIO));
+        }
+        private WebIOConfig _webIO = new WebIOConfig();
+
+        private bool IsInitialized = false;
+        internal void Initialize(bool force = false)
+        {
+            // Locking on 'this' is done intentionall
+            // otherwise multiple Markdown Validators calling Initialize
+            // on the same Config instance could corrupt it
+            // (using force = true may introduce undefined behaviour for Validators
+            // if the Config instance is shared - sharing a Config instance is safe
+            // as long as configuration is not updated after calling Initialize)
+            lock (this)
+            {
+                if (IsInitialized && !force) return;
+                IsInitialized = true;
+
+                ParsingController = new ParsingController(this);
+                WebIOController = new WebIOController(this);
+                UrlProcessor = new UrlProcessor(this);
+            }
         }
         internal ParsingController ParsingController;
         internal WebIOController WebIOController;

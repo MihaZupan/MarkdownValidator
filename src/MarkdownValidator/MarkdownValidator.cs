@@ -18,7 +18,7 @@ namespace MihaZupan.MarkdownValidator
     /// </summary>
     public class MarkdownValidator
     {
-        private readonly Config Configuration;
+        public readonly Config Configuration;
         private readonly ValidationContext Context;
 
         /// <summary>
@@ -42,11 +42,6 @@ namespace MihaZupan.MarkdownValidator
             EnsureValidPath(filePath, out string fullPath, out string relativePath);
             return Context.AddMarkdownFile(fullPath, relativePath, markdownSource);
         }
-        public bool RemoveMarkdownFile(string filePath)
-        {
-            EnsureValidPath(filePath, out string relativePath);
-            return Context.RemoveEntityFromIndex(relativePath, true);
-        }
 
         public bool AddEntity(string path)
         {
@@ -56,14 +51,16 @@ namespace MihaZupan.MarkdownValidator
         public bool RemoveEntity(string path)
         {
             EnsureValidPath(path, out string relativePath);
-            return Context.RemoveEntityFromIndex(relativePath, false);
+            return Context.RemoveEntityFromIndex(relativePath);
         }
 
         /// <summary>
         /// This method will return very quickly, but does not guarantee a complete report if any async operations are still in progress internally
+        /// <para>Setting <paramref name="fully"/> to true is the same as calling <see cref="ValidateFully"/></para>
         /// </summary>
+        /// <param name="fully">Setting this to true is the same as calling <see cref="ValidateFully"/></param>
         /// <returns></returns>
-        public ValidationReport Validate() => Context.Validate(false);
+        public ValidationReport Validate(bool fully = false) => Context.Validate(fully);
         /// <summary>
         /// This method may block if any async operations are still in progress internally
         /// </summary>

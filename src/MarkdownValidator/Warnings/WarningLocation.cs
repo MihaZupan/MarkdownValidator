@@ -8,9 +8,11 @@
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Parsing;
 using System;
+using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
+    [DebuggerDisplay("{Line}, {Span.Start}-{Span.End} {RelativeFilePath}")]
     public sealed class WarningLocation : IEquatable<WarningLocation>, IComparable<WarningLocation>
     {
         public readonly string FullFilePath;
@@ -43,9 +45,9 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public WarningLocation(string fullPath, string relativePath, int line, SourceSpan span)
             : this(fullPath, relativePath)
         {
+            RefersToEntireFile = Line == line && Span.Equals(span);
             Line = line;
             Span = span;
-            RefersToEntireFile = false;
         }
         /// <summary>
         /// The warning applies to the entire file
