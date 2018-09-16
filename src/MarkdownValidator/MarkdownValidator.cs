@@ -25,7 +25,7 @@ namespace MihaZupan.MarkdownValidator
         /// Constructs a new validation context with the specified <see cref="Config"/>
         /// </summary>
         /// <param name="configuration">The configuration to use when constructing, parsing and validating the context</param>
-        public MarkdownValidator(Config configuration, IPipelineProvider pipelineProvider = null)
+        public MarkdownValidator(Config configuration)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Context = new ValidationContext(Configuration);

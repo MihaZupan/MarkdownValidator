@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 
@@ -36,6 +37,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal ParsingResultGlobalDiff Update(string source)
         {
             var previous = ParsingResult;
+            ParsingResult = new ParsingResult(previous);
             Parse(source);
             return new ParsingResultGlobalDiff(previous, ParsingResult);
         }
@@ -55,14 +57,16 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         private void Parse()
         {
-            Configuration.ParsingController.Parse(ParsingResult.SyntaxTree, this);
+            var controller = Configuration.ParsingController;
+            controller.Parse(ParsingResult.SyntaxTree, this);
             foreach (var markdownObject in ParsingResult.SyntaxTree.Descendants())
             {
-                Configuration.ParsingController.Parse(markdownObject, this);
+                controller.Parse(markdownObject, this);
             }
 
-            Configuration.ParsingController.Finalize(this);
+            controller.Finalize(this);
             ParsingResult.Finalize(ParsingContext);
+            StringBuilderCache.Local(); // Clear the StringBuilder buffer
         }
     }
 }

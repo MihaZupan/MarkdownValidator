@@ -50,6 +50,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             return other.Line == Line &&
                 other.SourceSpan.Equals(SourceSpan) &&
                 other.IsImage == IsImage &&
+                other.CanBeUrl == CanBeUrl &&
                 other.GlobalReference.OrdinalEquals(GlobalReference) &&
                 other.RawReference.OrdinalEquals(RawReference);
         }

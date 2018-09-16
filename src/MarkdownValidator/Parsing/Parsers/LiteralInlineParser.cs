@@ -156,6 +156,10 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 }
                 else
                 {
+                    #warning ToDo
+                    // Report more info about contained types to further analysis
+                    // of what are actual references and what is just weird formatting
+
                     // Inline emphasis, inline code, inline links ...
                     canBeUrl = false;
                     nameBuilder.Append(source, inline.Span.Start, inline.Span.Length);

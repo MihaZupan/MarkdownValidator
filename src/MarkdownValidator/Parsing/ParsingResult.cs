@@ -61,10 +61,28 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 }
             }
 
+            Span<int> headingLines = stackalloc int[HeadingDefinitions.Count];
+            for (int i = 0; i < HeadingDefinitions.Count; i++)
+                headingLines[i] = HeadingDefinitions[i].Line;
+
             context.SetWarningSource(WarningSource.LinkReferenceProcessor);
 
             foreach (var referenceList in References.Values)
             {
+                // Ignore references that are located on heading lines
+                if (headingLines.Length > 0)
+                {
+                    for (int i = referenceList.Count - 1; i >= 0; i--)
+                    {
+                        if (headingLines.BinarySearch(referenceList[i].Line) >= 0)
+                        {
+                            referenceList.RemoveAt(i);
+                        }
+                    }
+                    if (referenceList.Count == 0)
+                        continue;
+                }
+
                 var reference = referenceList.First();
                 if (definedReferences.TryGetValue(
                     reference.RawReference,

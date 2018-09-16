@@ -86,14 +86,16 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
 
         /// <summary>
-        /// A custom <see cref="Markdig.MarkdownPipeline"/> provider
+        /// A custom <see cref="MarkdownPipelineBuilder"/> provider
+        /// <para>Each call to this method MUST return a NEW instance of <see cref="MarkdownPipelineBuilder"/></para>
+        /// <para>Calls to this method may happen concurrently from multiple threads</para>	
         /// </summary>
-        public IPipelineProvider PipelineProvider = null;
+        public Func<MarkdownPipelineBuilder> MarkdigPipeline = null;
         internal MarkdownPipeline GetNewPipeline()
         {
-            var builder = PipelineProvider?.GetNewPipeline() ?? new MarkdownPipelineBuilder();
+            var builder = MarkdigPipeline?.Invoke() ?? new MarkdownPipelineBuilder();
 
-            // Add default extensions
+            // Add 'default' extensions
             return builder
                 .UsePreciseSourceLocation()
                 .UseAutoLinks()

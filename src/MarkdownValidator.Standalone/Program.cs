@@ -6,7 +6,6 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
-using MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.Csharp.Telegram;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
@@ -28,7 +27,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
         {
             string location = args.Length == 0 ? "" : args[0];
 
-            location = "Wiki";
+            //location = "Wiki";
             //location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
             //location = Path.Combine(Environment.CurrentDirectory, "../../../../../");
             //location = "test";
@@ -39,12 +38,15 @@ namespace MihaZupan.MarkdownValidator.Standalone
             else
                 location = Path.GetFullPath(location);
 
+            if (Environment.UserInteractive)
+                Console.Title = "Markdown Validator - " + location;
+
             var config = new Config(location);
             config.Parsing.Warnings_HugeFile_LineCount = 1000;
-            config.Parsing.CodeBlocks.AddParser(new TelegramBotCodeBlockParser());
 
             Validator = new MarkdownValidator(config);
             FSWatcher = new FileSystemWatcher(location);
+            FSWatcher.IncludeSubdirectories = true;
 
             FSWatcher.Renamed += (s, e) =>
             {
@@ -95,7 +97,6 @@ namespace MihaZupan.MarkdownValidator.Standalone
                     Update();
                 }
             };
-            FSWatcher.EnableRaisingEvents = true;
 
             WriteLineWithColor("Indexing files ...", ConsoleColor.Green);
 
@@ -133,15 +134,12 @@ namespace MihaZupan.MarkdownValidator.Standalone
                         sources.Add((file, source));
                     }
                 });
-                Stopwatch stopwatch = Stopwatch.StartNew();
                 Parallel.ForEach(sources, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 },
                     fileSource =>
                 {
                     Validator.AddMarkdownFile(fileSource.File, fileSource.Source);
                     Interlocked.Increment(ref totalParsed);
                 });
-                stopwatch.Stop();
-                Console.Title = "Elapsed: " + stopwatch.ElapsedMilliseconds + " ms";
             });
 
             int lastDone = -1;
@@ -167,6 +165,8 @@ namespace MihaZupan.MarkdownValidator.Standalone
                 Thread.Sleep(100);
             }
             Update();
+
+            FSWatcher.EnableRaisingEvents = true;
 
             while (true) Console.ReadKey(true);
         }
