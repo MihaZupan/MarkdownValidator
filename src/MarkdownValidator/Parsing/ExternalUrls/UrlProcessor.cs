@@ -37,7 +37,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 return;
             }
 
-            if (HostnameHelper.IsDocumentationHostname(url.Host))
+            if (url.IsAbsoluteUri && HostnameHelper.IsDocumentationHostname(url.Host))
                 return;
 
             if (!Uri.TryCreate(urlString, UriKind.Absolute, out url))

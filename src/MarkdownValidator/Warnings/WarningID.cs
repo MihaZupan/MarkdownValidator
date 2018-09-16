@@ -35,6 +35,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         EmptyReference,
         EmptyLinkContent,
         HeadingEndsWithWhitespace,
+        ReferencePartHasExcessWhitespace,
 
         //
         // Errors

@@ -53,12 +53,18 @@ namespace MihaZupan.MarkdownValidator.Warnings
         }
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
             if (obj is Warning other)
             {
                 return other.Equals(this);
             }
             return false;
         }
+        public static bool operator ==(Warning a, Warning b)
+        {
+            if (a is null) return b is null;
+            return a.Equals(b);
+        }
+        public static bool operator !=(Warning a, Warning b)
+            => !(a == b);
     }
 }

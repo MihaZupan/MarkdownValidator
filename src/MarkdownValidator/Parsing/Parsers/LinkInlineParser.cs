@@ -23,6 +23,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             var link = context.Object as LinkInline;
             context.SetWarningSource(WarningSource.InternalParser);
 
+            bool canBeUrl = !(link.Parent is EmphasisInline);
+
             if (!link.UrlSpan.Value.IsEmpty &&
                 (link.UrlSpan.Value.Start < link.Span.Start || link.UrlSpan.Value.End > link.Span.End))
             {
@@ -39,20 +41,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     span = link.FirstChild.Span;
                 }
 
-                if (context.TryGetRelativePath(label, out string relative))
-                {
-                    context.ParsingResult.AddReference(
-                        new Reference(
-                            label,
-                            relative,
-                            link.Span,
-                            link.Line,
-                            link.IsImage));
-                }
-                else
-                {
-                    context.ReportPathOutOfContext(label, link.Line, span);
-                }
+                context.TryAddReference(label, link.LabelSpan.Value, link.Line, link.IsImage, canBeUrl);
             }
             else
             {
@@ -65,20 +54,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 }
                 else
                 {
-                    if (context.TryGetRelativePath(link.Url, out string relative))
-                    {
-                        context.ParsingResult.AddReference(
-                            new Reference(
-                                link.Url,
-                                relative,
-                                link.Span,
-                                link.Line,
-                                link.IsImage));
-                    }
-                    else
-                    {
-                        context.ReportPathOutOfContext(link.Url, link.Line, link.UrlSpan.Value);
-                    }
+                    context.TryAddReference(link.Url, link.Span, link.Line, link.IsImage, canBeUrl, link.UrlSpan);
                 }
 
                 if (link.FirstChild == null)

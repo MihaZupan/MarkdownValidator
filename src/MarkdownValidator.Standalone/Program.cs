@@ -7,11 +7,15 @@
 */
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.Csharp.Telegram;
+using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MihaZupan.MarkdownValidator.Standalone
 {
@@ -24,10 +28,11 @@ namespace MihaZupan.MarkdownValidator.Standalone
         {
             string location = args.Length == 0 ? "" : args[0];
 
-            //location = "Wiki";
-            location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
+            location = "Wiki";
+            //location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
             //location = Path.Combine(Environment.CurrentDirectory, "../../../../../");
             //location = "test";
+            //location = @"C:\Users\Mihu\Downloads\docs-master\docs-master";
 
             if (location == "")
                 location = Environment.CurrentDirectory;
@@ -92,11 +97,14 @@ namespace MihaZupan.MarkdownValidator.Standalone
             };
             FSWatcher.EnableRaisingEvents = true;
 
+            WriteLineWithColor("Indexing files ...", ConsoleColor.Green);
+
+            List<string> files = new List<string>();
             Stack<string> directories = new Stack<string>();
             directories.Push(location);
             while (directories.Count > 0)
             {
-                var directory = directories.Pop();
+                string directory = directories.Pop();
                 foreach (var dir in Directory.GetDirectories(directory))
                 {
                     directories.Push(dir);
@@ -106,13 +114,57 @@ namespace MihaZupan.MarkdownValidator.Standalone
                 {
                     if (IsMarkdownFile(file))
                     {
-                        Validator.AddMarkdownFile(file, GetSource(file));
+                        files.Add(file);
+                    }
+                    else Validator.AddEntity(file);
+                }
+            }
+
+            List<(string File, string Source)> sources = new List<(string, string)>();
+            int totalParsed = 0;
+            var task = Task.Run(() =>
+            {
+                Parallel.ForEach(files, new ParallelOptions() { MaxDegreeOfParallelism = 4 },
+                    file =>
+                {
+                    string source = GetSource(file);
+                    lock (sources)
+                    {
+                        sources.Add((file, source));
+                    }
+                });
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                Parallel.ForEach(sources, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 },
+                    fileSource =>
+                {
+                    Validator.AddMarkdownFile(fileSource.File, fileSource.Source);
+                    Interlocked.Increment(ref totalParsed);
+                });
+                stopwatch.Stop();
+                Console.Title = "Elapsed: " + stopwatch.ElapsedMilliseconds + " ms";
+            });
+
+            int lastDone = -1;
+            while (!task.IsCompleted)
+            {
+                int total = totalParsed;
+                if (lastDone != total)
+                {
+                    lastDone = total;
+                    string status;
+                    if (total == 0)
+                    {
+                        status = "Reading files from disk";
                     }
                     else
                     {
-                        Validator.AddEntity(file);
+                        status = string.Format("Parsed {0} out of {1} files. {2}% done",
+                            total, files.Count, (int)((float)total / files.Count * 100));
                     }
+                    Console.Clear();
+                    WriteLineWithColor(status, ConsoleColor.Green);
                 }
+                Thread.Sleep(100);
             }
             Update();
 
@@ -127,11 +179,20 @@ namespace MihaZupan.MarkdownValidator.Standalone
                 UpdateTimer.Change(50, Timeout.Infinite);
             }
         }
+
+        static ValidationReport PreviousReport = null;
         static void UpdateCallback(object state)
         {
             lock (Validator)
             {
                 var report = Validator.Validate();
+                if (PreviousReport != null)
+                {
+                    if (report == PreviousReport)
+                        return;
+                }
+                PreviousReport = report;
+
                 Console.Clear();
 
                 if (report.Warnings.Count == 0)
@@ -140,21 +201,60 @@ namespace MihaZupan.MarkdownValidator.Standalone
                     return;
                 }
 
+                int maxMessageLength = 100;
                 int maxNameLength = Math.Max(8, report.Warnings.Max(w => w.Location.RelativeFilePath.Length));
+                maxNameLength = Math.Min(maxNameLength, 45);
 
                 WriteLineWithColor("Severity\tDocument" + new string(' ', maxNameLength - 8) + "\tLine\tMessage", ConsoleColor.Green);
 
-                foreach (var warning in report.Warnings.OrderBy(w => w.Location).ThenBy(w => w.ID))
+                StringBuilder reportBuilder = new StringBuilder();
+                int count = 0;
+                IEnumerable<Warning> warnings;
+                if (report.Warnings.Count > 1000)
                 {
-                    Console.WriteLine("{0}\t{1}\t{2}\t{3}",
+                    warnings = report.Warnings;
+                }
+                else
+                {
+                    warnings = report.Warnings.OrderBy(w => w.Location).ThenBy(w => w.ID);
+                }
+                foreach (var warning in warnings)
+                {
+                    if (count++ == 50)
+                        break;
+
+                    string fileName = warning.Location.RelativeFilePath;
+                    if (fileName.Length > maxNameLength)
+                    {
+                        fileName = fileName.Substring(0, maxNameLength - 3) + "...";
+                    }
+                    else fileName = fileName.PadRight(maxNameLength, ' ');
+
+                    string message = warning.Message;
+                    if (message.Length > maxMessageLength)
+                        message = message.Substring(0, maxMessageLength - 3) + "...";
+
+                    reportBuilder.AppendFormat("{0}\t{1}\t{2}\t{3}\n",
                         warning.IsError ? "Error\t" : (warning.IsSuggestion ? "Suggestion" : "Warning\t"),
-                        warning.Location.RelativeFilePath.PadRight(maxNameLength, ' '),
+                        fileName,
                         warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.Line + 1).ToString(),
-                        warning.Message);
+                        message);
+                }
+                Console.Write(reportBuilder.ToString());
+
+                if (count < report.Warnings.Count)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Showing the first 50 out of {0} warnings", report.Warnings.Count);
                 }
 
                 if (!report.IsComplete)
-                    UpdateTimer.Change(report.SuggestedWait, Timeout.Infinite);
+                {
+                    UpdateTimer.Change(Math.Min(100, report.SuggestedWait), Timeout.Infinite);
+
+                    Console.WriteLine();
+                    Console.WriteLine("Some changes are still pending ...");
+                }
             }
         }
 

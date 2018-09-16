@@ -50,14 +50,54 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public bool TryGetRelativeHtmlPath(string reference, out string relativePath)
             => Configuration.TryGetRelativePath(SourceFile.HtmlPath, reference, out relativePath);
 
-        public void ReportPathOutOfContext(string path, int line, SourceSpan span)
+        public bool TryAddReference(string reference, SourceSpan span, int line, bool isImage = false, bool canBeUrl = true, SourceSpan? errorSpan = null)
+        {
+            if (TryGetRelativePath(reference, out string relativePath))
+            {
+                ParsingResult.AddReference(
+                    new Reference(
+                        reference,
+                        relativePath,
+                        span,
+                        line,
+                        isImage,
+                        canBeUrl));
+                return true;
+            }
+            else
+            {
+                ReportPathOutOfContext(reference, line, errorSpan ?? span);
+                return false;
+            }
+        }
+        public bool TryAddLocalReferenceDefinition(LinkReferenceDefinition referenceDefinition)
+        {
+            if (TryGetRelativePath(referenceDefinition.Label, out string relativePath))
+            {
+                ParsingResult.LocalReferenceDefinitions.Add(
+                    new ReferenceDefinition(
+                        referenceDefinition.Label,
+                        relativePath,
+                        referenceDefinition.Span,
+                        referenceDefinition.Line,
+                        SourceFile));
+                return true;
+            }
+            else
+            {
+                ReportPathOutOfContext(referenceDefinition.Label, referenceDefinition.Line, referenceDefinition.LabelSpan);
+                return false;
+            }
+        }
+        private void ReportPathOutOfContext(string path, int line, SourceSpan span)
         {
             ReportWarning(
                 WarningID.PathNotInContext,
                 line,
                 span,
                 path,
-                $"Path `{path}` is not in the validator's working directory");
+                "Path `{0}` is not in the validator's working directory",
+                path);
         }
         
         public void RegisterAsyncOperation(AsyncProgress progress)
@@ -67,40 +107,32 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <summary>
         /// Report a general warning about the file
         /// </summary>
-        /// <param name="id">ID of the warning.</param>
-        /// <param name="messageFormat">Message or message format string</param>
-        /// <param name="messageArgs">Optional arguments for messageFormat</param>
         public void ReportGeneralWarning(WarningID id, string value, string messageFormat, params string[] messageArgs)
             => ReportWarning(id, new WarningLocation(SourceFile), value, string.Format(messageFormat, messageArgs));
 
         /// <summary>
         /// Report a warning that applies to the entire parsed object
         /// </summary>
-        /// <param name="id">ID of the warning.</param>
-        /// <param name="messageFormat">Message or message format string</param>
-        /// <param name="messageArgs">Optional arguments for messageFormat</param>
         public void ReportWarning(WarningID id, string value, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, Object.Line, Object.Span, value, string.Format(messageFormat, messageArgs));
+            => ReportWarning(id, Object.Line, Object.Span, value, messageFormat, messageArgs);
 
         /// <summary>
         /// Report a warning that applies to the entire reference
         /// </summary>
-        /// <param name="id">ID of the warning.</param>
-        /// <param name="reference">Reference that the warning is about</param>
-        /// <param name="messageFormat">Message or message format string</param>
-        /// <param name="messageArgs">Optional arguments for messageFormat</param>
         internal void ReportWarning(WarningID id, Reference reference, string messageFormat, params string[] messageArgs)
             => ReportWarning(id, new WarningLocation(SourceFile, reference), reference.RawReference, string.Format(messageFormat, messageArgs));
 
         /// <summary>
         /// Report a warning about a specific span of source
         /// </summary>
-        /// <param name="id">ID of the warning.</param>
-        /// <param name="line">The starting line of the warning span</param>
-        /// <param name="span">Span of the source that the warning points at</param>
-        /// <param name="message">The message for the warning</param>
-        public void ReportWarning(WarningID id, int line, SourceSpan span, string value, string message)
-            => ReportWarning(id, new WarningLocation(SourceFile, line, span), value, message);
+        public void ReportWarning(WarningID id, int line, int start, int end, string value, string messageFormat, params string[] messageArgs)
+            => ReportWarning(id, line, new SourceSpan(start, end), value, messageFormat, messageArgs);
+
+        /// <summary>
+        /// Report a warning about a specific span of source
+        /// </summary>
+        public void ReportWarning(WarningID id, int line, SourceSpan span, string value, string messageFormat, params string[] messageArgs)
+            => ReportWarning(id, new WarningLocation(SourceFile, line, span), value, string.Format(messageFormat, messageArgs));
 
         private void ReportWarning(WarningID id, WarningLocation location, string value, string message)
             => SourceFile.ParsingResult.ParserWarnings.Add(

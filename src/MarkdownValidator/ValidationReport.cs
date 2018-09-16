@@ -6,11 +6,12 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Warnings;
+using System;
 using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator
 {
-    public class ValidationReport
+    public class ValidationReport : IEquatable<ValidationReport>
     {
         /// <summary>
         /// Indicates whether async operations (such as network IO) are still happening internally in the context
@@ -47,9 +48,43 @@ namespace MihaZupan.MarkdownValidator
                     WarningSource.Validator));
         }
 
-        internal (List<Warning> removed, List<Warning> added) Diff(ValidationReport previousReport)
+        public (List<Warning> removed, List<Warning> added) Diff(ValidationReport previousReport)
         {
             return DiffHelper.Diff(previousReport.Warnings, Warnings);
         }
+
+        public static readonly ValidationReport Empty = new ValidationReport(true, 0);
+
+        public override int GetHashCode() => base.GetHashCode();
+        public override bool Equals(object obj)
+        {
+            if (obj is ValidationReport other)
+                return Equals(other);
+            return false;
+        }
+        public bool Equals(ValidationReport other)
+        {
+            if (other is null)
+                return false;
+
+            if (IsComplete != other.IsComplete ||
+                SuggestedWait != other.SuggestedWait ||
+                Warnings.Count != other.Warnings.Count)
+                return false;
+
+            for (int i = 0; i < Warnings.Count; i++)
+            {
+                if (!Warnings[i].Equals(other.Warnings[i]))
+                    return false;
+            }
+            return true;
+        }
+        public static bool operator ==(ValidationReport a, ValidationReport b)
+        {
+            if (a is null) return b is null;
+            return a.Equals(b);
+        }
+        public static bool operator !=(ValidationReport a, ValidationReport b)
+            => !(a == b);
     }
 }

@@ -174,9 +174,9 @@ namespace MihaZupan.MarkdownValidator
             Unlock();
             return false;
         }
-        public bool AddMarkdownFile(string fullPath, string path, string source)
+        public bool AddMarkdownFile(string fullPath, string relativePath, string source)
         {
-            MarkdownFile markdownFile = new MarkdownFile(fullPath, path, source, Configuration);
+            MarkdownFile markdownFile = new MarkdownFile(fullPath, relativePath, source, Configuration);
             Lock();
             if (!IndexedMarkdownFiles.ContainsKey(markdownFile.RelativePath))
             {

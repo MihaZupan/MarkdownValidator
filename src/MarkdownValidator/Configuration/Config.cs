@@ -56,6 +56,9 @@ namespace MihaZupan.MarkdownValidator.Configuration
         {
             string relative;
 
+            if (reference.StartsWith('~'))
+                reference = reference.Substring(1);
+
             if (reference.Contains(':'))
             {
                 relativePath = reference;

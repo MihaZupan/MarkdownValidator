@@ -6,9 +6,11 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using System;
+using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator
 {
+    [DebuggerDisplay("{Value}")]
     internal sealed class ReferenceInt : IEquatable<ReferenceInt>, IComparable<ReferenceInt>
     {
         public int Value;
@@ -48,15 +50,9 @@ namespace MihaZupan.MarkdownValidator
             => !(a == b);
 
         public static ReferenceInt operator ++(ReferenceInt value)
-        {
-            value.Value++;
-            return value;
-        }
+            => new ReferenceInt(value.Value++);
         public static ReferenceInt operator --(ReferenceInt value)
-        {
-            value.Value--;
-            return value;
-        }
+            => new ReferenceInt(value.Value--);
 
         public static implicit operator int(ReferenceInt value)
             => value.Value;

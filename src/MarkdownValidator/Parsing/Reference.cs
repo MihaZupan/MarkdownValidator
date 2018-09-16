@@ -17,14 +17,16 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public readonly SourceSpan SourceSpan;
         public readonly int Line;
         public readonly bool IsImage;
+        public readonly bool CanBeUrl;
 
-        public Reference(string reference, string globalReference, SourceSpan span, int line, bool isImage = false)
+        public Reference(string reference, string globalReference, SourceSpan span, int line, bool isImage = false, bool canBeUrl = true)
         {
             RawReference = reference;
             GlobalReference = globalReference;
             SourceSpan = span;
             Line = line;
             IsImage = isImage;
+            CanBeUrl = canBeUrl;
         }
 
         public override int GetHashCode()
@@ -36,7 +38,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
         }
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
             if (obj is Reference other)
             {
                 return Equals(other);
@@ -52,5 +53,12 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 other.GlobalReference.OrdinalEquals(GlobalReference) &&
                 other.RawReference.OrdinalEquals(RawReference);
         }
+        public static bool operator ==(Reference a, Reference b)
+        {
+            if (a is null) return b is null;
+            return a.Equals(b);
+        }
+        public static bool operator !=(Reference a, Reference b)
+            => !(a == b);
     }
 }

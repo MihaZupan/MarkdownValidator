@@ -72,7 +72,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 {
                     first.Used = true;
                 }
-                else if (reference.RawReference.Contains(':'))
+                else if (reference.CanBeUrl && reference.RawReference.Contains(':'))
                 {
                     context.ProcessLinkReference(reference);
                 }

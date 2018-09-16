@@ -68,7 +68,6 @@ namespace MihaZupan.MarkdownValidator.Warnings
         }
         public override bool Equals(object obj)
         {
-            if (obj is null) return false;
             if (obj is SourceSpan other)
             {
                 return Equals(other);
@@ -83,6 +82,13 @@ namespace MihaZupan.MarkdownValidator.Warnings
                 other.FullFilePath.OrdinalEquals(FullFilePath) &&
                 other.RelativeFilePath.Length == RelativeFilePath.Length;
         }
+        public static bool operator ==(WarningLocation a, WarningLocation b)
+        {
+            if (a is null) return b is null;
+            return a.Equals(b);
+        }
+        public static bool operator !=(WarningLocation a, WarningLocation b)
+            => !(a == b);
 
         public int CompareTo(WarningLocation other)
         {
