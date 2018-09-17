@@ -37,6 +37,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         EmptyLinkContent,
         HeadingEndsWithWhitespace,
         ReferencePartHasExcessWhitespace,
+        InvalidListNumberOrder,
 
         //
         // Errors

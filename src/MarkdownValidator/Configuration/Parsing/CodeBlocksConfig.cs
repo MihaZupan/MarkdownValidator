@@ -13,6 +13,9 @@ namespace MihaZupan.MarkdownValidator.Configuration
 {
     public class CodeBlocksConfig
     {
+        /// <summary>
+        /// Defaults to true
+        /// </summary>
         public bool ParseUndefinedLanguages = true;
         public Predicate<string> LanguageWhiteList = language => true;
         public Predicate<string> LanguageBlackList = language => false;
@@ -59,5 +62,19 @@ namespace MihaZupan.MarkdownValidator.Configuration
             "pascal",
             "matlab",
         };
+
+        /// <summary>
+        /// This will be merged into <see cref="CommonLanguages"/> as soon as the <see cref="Config"/> instance is
+        /// used in a <see cref="MarkdownValidator"/>
+        /// <para>It is to be used exclusively for config importing before any parsing takes place</para>
+        /// Defaults to an empty array
+        /// </summary>
+        public string[] MoreCommonLanguages = Array.Empty<string>();
+
+        internal void Initialize()
+        {
+            foreach (var langauge in MoreCommonLanguages)
+                CommonLanguages.Add(langauge);
+        }
     }
 }

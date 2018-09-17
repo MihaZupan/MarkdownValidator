@@ -37,6 +37,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             new HeadingBlockParser().Initialize(registration);
             new FootnoteParser().Initialize(registration);
             new CodeBlockParser().Initialize(registration);
+            new ListBlockParser().Initialize(registration);
 
             foreach (var parser in Configuration.Parsing.Parsers)
             {

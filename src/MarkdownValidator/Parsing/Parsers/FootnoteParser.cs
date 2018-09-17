@@ -7,7 +7,6 @@
 */
 using Markdig.Extensions.Footnotes;
 using MihaZupan.MarkdownValidator.Warnings;
-using System;
 using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Parsing.Parsers
@@ -25,10 +24,10 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         {
             var footnoteGroup = context.Object as FootnoteGroup;
 
-            var (Defined, Accessed) = GetUsedOrders(context);
+            var state = GetUsedOrders(context);
             foreach (Footnote footnote in footnoteGroup)
             {
-                Accessed.Add(footnote.Order);
+                state.Accessed.Add(footnote.Order);
             }
         }
 
@@ -36,8 +35,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         {
             var linkDefinition = context.Object as FootnoteLinkReferenceDefinition;
 
-            var (Defined, Accessed) = GetUsedOrders(context);
-            Defined.Add((
+            var state = GetUsedOrders(context);
+            state.Defined.Add((
                 linkDefinition.Footnote.Order,
                 new Reference(
                     linkDefinition.Label,
@@ -50,10 +49,10 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         {
             context.SetWarningSource(WarningSource.InternalParserFinalize);
 
-            var (Defined, Accessed) = GetUsedOrders(context);
-            foreach (var (Order, Location) in Defined)
+            var state = GetUsedOrders(context);
+            foreach (var (Order, Location) in state.Defined)
             {
-                if (!Accessed.ContainsAny(a => a == Order))
+                if (!state.Accessed.ContainsAny(a => a == Order))
                 {
                     context.ReportWarning(
                         WarningID.UnusedDefinedFootnote,
@@ -64,19 +63,13 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             }
         }
 
-        private static readonly Type StorageKey = typeof(FootnoteParser);
-        private static (List<(int Order, Reference Location)> Defined, List<int> Accessed) GetUsedOrders(ParsingContext context)
+        private class FootnoteParserState
         {
-            if (context.ParserStorage.TryGetValue(StorageKey, out object obj))
-            {
-                return ((List<(int, Reference)>, List<int>))obj;
-            }
-            else
-            {
-                var indexes = (new List<(int, Reference)>(), new List<int>());
-                context.ParserStorage.Add(StorageKey, indexes);
-                return indexes;
-            }
+            public readonly List<(int Order, Reference Location)> Defined = new List<(int Order, Reference Location)>();
+            public readonly List<int> Accessed = new List<int>();
         }
+
+        private static FootnoteParserState GetUsedOrders(ParsingContext context)
+            => context.GetParserState<FootnoteParser, FootnoteParserState>(() => new FootnoteParserState());
     }
 }

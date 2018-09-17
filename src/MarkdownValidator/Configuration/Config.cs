@@ -140,6 +140,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 if (IsInitialized && !force) return;
                 IsInitialized = true;
 
+                Parsing.Initialize();
+
                 ParsingController = new ParsingController(this);
                 WebIOController = new WebIOController(this);
                 UrlProcessor = new UrlProcessor(this);

@@ -10,7 +10,6 @@ using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
-using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
@@ -19,7 +18,15 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public Config Configuration => SourceFile.Configuration;
         public string RelativePath => SourceFile.RelativePath;
 
-        public Dictionary<Type, object> ParserStorage => ParsingResult.ParserStorage;
+        public ObjectType GetParserState<ParserType, ObjectType>(Func<ObjectType> init)
+        {
+            if (!ParsingResult.ParserStorage.TryGetValue(typeof(ParserType), out object state))
+            {
+                state = init();
+                ParsingResult.ParserStorage.Add(typeof(ParserType), state);
+            }
+            return (ObjectType)state;
+        }
 
         // Only available to internal parsers
         internal readonly MarkdownFile SourceFile;

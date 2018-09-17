@@ -215,19 +215,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             return true;
         }
 
-        private static readonly Type StorageKey = typeof(LiteralInlineParser);
         private static ReferenceInt GetLastIndex(ParsingContext context)
-        {
-            if (context.ParserStorage.TryGetValue(StorageKey, out object obj))
-            {
-                return (ReferenceInt)obj;
-            }
-            else
-            {
-                var index = new ReferenceInt(-1);
-                context.ParserStorage.Add(StorageKey, index);
-                return index;
-            }
-        }
+            => context.GetParserState<LinkInlineParser, ReferenceInt>(() => new ReferenceInt(-1));
     }
 }
