@@ -13,6 +13,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal class LinkInlineParser : IParser
     {
+        public string Identifier => nameof(LinkInlineParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(LinkInline), ParseLinkInline);
@@ -48,7 +50,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (link.Url.Length == 0)
                 {
                     context.ReportWarning(
-                        WarningID.EmptyReference,
+                        WarningIDs.EmptyReference,
                         string.Empty,
                         "Empty reference");
                 }
@@ -60,7 +62,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (link.FirstChild == null)
                 {
                     context.ReportWarning(
-                        WarningID.EmptyLinkContent,
+                        WarningIDs.EmptyLinkContent,
                         string.Empty,
                         "Empty link content");
                 }

@@ -23,7 +23,7 @@ Test[^1]
 [^2]: Test 2
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.UnusedDefinedFootnote, 5, 22, 25, "^2"));
+                (WarningIDs.UnusedDefinedFootnote, 5, 22, 25, "^2"));
         }
     }
 }

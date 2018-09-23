@@ -14,6 +14,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal class HeadingBlockParser : IParser
     {
+        public string Identifier => nameof(HeadingBlockParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(HeadingBlock), ParseHeadingBlock);
@@ -24,26 +26,45 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             var heading = context.Object as HeadingBlock;
             context.SetWarningSource(WarningSource.InternalParser);
 
+            if (heading.HeaderChar == 0) return;
             var rawText = context.Source.Substring(heading.Span);
             if (heading.Inline.Span.IsEmpty)
             {
                 context.ReportWarning(
-                    WarningID.EmptyHeading,
+                    WarningIDs.EmptyHeading,
                     rawText,
                     "Empty heading");
                 return;
             }
-            string headerText = rawText.Substring(heading.Inline.Span.Start - heading.Span.Start);
+            int offset = rawText.IndexOf('#', StringComparison.Ordinal);
+            for (int i = offset + 1; i < rawText.Length; i++)
+            {
+                if (rawText[i] != '#')
+                {
+                    offset = i + 1;
+                    break;
+                }
+            }
+            string headerText = rawText.Substring(offset);
 
             var headerUrl = '#' + LinkHelper.UrilizeAsGfm(headerText);
 
             if (headerUrl.EndsWith('-'))
             {
                 context.ReportWarning(
-                    WarningID.HeadingEndsWithWhitespace,
+                    WarningIDs.HeadingEndsWithWhitespace,
                     rawText,
                     "Heading `{0}` ends with a whitespace",
                     rawText);
+            }
+
+            if (headerUrl.Length == 1 || !headerUrl.ContainsAny(c => c != '#' && c != '-'))
+            {
+                context.ReportWarning(
+                    WarningIDs.EffectivelyEmptyHeading,
+                    rawText,
+                    "Heading is effectively empty");
+                return;
             }
 
             context.TryGetRelativePath(headerUrl, out string relative);
@@ -52,7 +73,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 out ReferenceDefinition definition))
             {
                 context.ReportWarning(
-                    WarningID.DuplicateHeadingDefinition,
+                    WarningIDs.DuplicateHeadingDefinition,
                     rawText,
                     "Duplicate heading definition `{0}` - already defined on line {1}",
                     headerText,

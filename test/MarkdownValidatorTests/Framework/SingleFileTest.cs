@@ -7,6 +7,7 @@
 */
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Warnings;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -21,13 +22,14 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
             params (WarningID ID, int Line, int Start, int End, string Value)[] warnings)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source);
-            WarningComparer.AssertMatch(report.Warnings, warnings.ToList(), DefaultFileName);
+            Assert.True(report.WarningsByFile.TryGetValue(DefaultFileName, out List<Warning> reportWarnings));
+            WarningComparer.AssertMatch(reportWarnings, warnings.ToList(), DefaultFileName);
         }
 
         public static void AssertNoWarnings(string source, bool fully = true)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
-            Assert.Empty(report.Warnings);
+            Assert.Empty(report.WarningsByFile);
         }
 
         public static void AssertGlobalWarning(string source, WarningID id, string value = "")
@@ -36,20 +38,20 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         public static void AssertContainsWarning(string source, WarningID id, bool fully = true)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
-            WarningComparer.AssertContains(report.Warnings, id);
+            WarningComparer.AssertContains(report.WarningsByFile, id);
         }
 
         public static void AssertNotPresent(string source, WarningID id, bool fully = true)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
-            WarningComparer.AssertNotContains(report.Warnings, id);
+            WarningComparer.AssertNotContains(report.WarningsByFile, id);
         }
 
         public static void AssertNotPresent(string source, params WarningID[] ids)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source);
             foreach (var id in ids)
-                WarningComparer.AssertNotContains(report.Warnings, id);
+                WarningComparer.AssertNotContains(report.WarningsByFile, id);
         }
     }
 }

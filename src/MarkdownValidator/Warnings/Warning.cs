@@ -28,8 +28,8 @@ namespace MihaZupan.MarkdownValidator.Warnings
             Source = source;
             Value = value;
             Message = message;
-            IsError = id >= WarningID.Error;
-            IsSuggestion = id < WarningID.Warning;
+            IsError = id.IsError;
+            IsSuggestion = id.IsSuggestion;
         }
 
         public bool Equals(Warning other)
@@ -48,7 +48,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
             {
                 int hash = Location.GetHashCode();
                 hash = (hash * 397) ^ Message.Length;
-                hash ^= (int)ID;
+                hash ^= ID.GetHashCode();
                 hash ^= (int)Source;
                 return hash;
             }

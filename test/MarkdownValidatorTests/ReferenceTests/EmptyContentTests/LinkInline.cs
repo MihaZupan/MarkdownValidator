@@ -25,7 +25,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyContentTests
         {
             string source = @"[](.)";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyLinkContent, 1, 0, 4, string.Empty));
+                (WarningIDs.EmptyLinkContent, 1, 0, 4, string.Empty));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyContentTests
         {
             string source = @"text[](.)text";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyLinkContent, 1, 4, 8, string.Empty));
+                (WarningIDs.EmptyLinkContent, 1, 4, 8, string.Empty));
         }
 
         [Fact]
@@ -44,8 +44,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyContentTests
 text[](.)text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyLinkContent, 2, 1, 5, string.Empty),
-                (WarningID.EmptyLinkContent, 3, 11, 15, string.Empty));
+                (WarningIDs.EmptyLinkContent, 2, 1, 5, string.Empty),
+                (WarningIDs.EmptyLinkContent, 3, 11, 15, string.Empty));
         }
     }
 }

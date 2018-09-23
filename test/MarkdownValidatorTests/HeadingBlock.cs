@@ -18,7 +18,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = @"#";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyHeading, 1, 0, 0, source));
+                (WarningIDs.EmptyHeading, 1, 0, 0, source));
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = "###";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyHeading, 1, 0, 2, source));
+                (WarningIDs.EmptyHeading, 1, 0, 2, source));
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = "  ###";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyHeading, 1, 2, 4, source.TrimStart()));
+                (WarningIDs.EmptyHeading, 1, 2, 4, source.TrimStart()));
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = "###  ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyHeading, 1, 0, 4, source));
+                (WarningIDs.EmptyHeading, 1, 0, 4, source));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = @"# text ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.HeadingEndsWithWhitespace, 1, 0, 6, source));
+                (WarningIDs.HeadingEndsWithWhitespace, 1, 0, 6, source));
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = @"### text ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.HeadingEndsWithWhitespace, 1, 0, 8, source));
+                (WarningIDs.HeadingEndsWithWhitespace, 1, 0, 8, source));
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         {
             string source = @"  ### text ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.HeadingEndsWithWhitespace, 1, 2, 10, source.TrimStart()));
+                (WarningIDs.HeadingEndsWithWhitespace, 1, 2, 10, source.TrimStart()));
         }
 
         [Fact]
@@ -78,9 +78,9 @@ namespace MihaZupan.MarkdownValidator.Tests
    ##  stuff  
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.HeadingEndsWithWhitespace, 2, 3, 11, "### text "),
-                (WarningID.HeadingEndsWithWhitespace, 3, 13, 20, "# text2 "),
-                (WarningID.HeadingEndsWithWhitespace, 4, 25, 35, "##  stuff  "));
+                (WarningIDs.HeadingEndsWithWhitespace, 2, 3, 11, "### text "),
+                (WarningIDs.HeadingEndsWithWhitespace, 3, 13, 20, "# text2 "),
+                (WarningIDs.HeadingEndsWithWhitespace, 4, 25, 35, "##  stuff  "));
         }
     }
 }

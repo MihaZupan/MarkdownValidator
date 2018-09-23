@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Extensions.Footnotes;
+using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Warnings;
 using System.Collections.Generic;
 
@@ -13,15 +14,18 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal class FootnoteParser : IParser
     {
+        public string Identifier => nameof(FootnoteParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(FootnoteGroup), ParseFootnoteGroup);
+            context.Register(typeof(FootnoteLink), ParseFootnoteLink);
             context.Register(typeof(FootnoteLinkReferenceDefinition), ParseFootnoteLinkReferenceDefinition);
             context.RegisterFinalizer(Finalize);
         }
 
         private void ParseFootnoteGroup(ParsingContext context)
-        {
+        {            
             var footnoteGroup = context.Object as FootnoteGroup;
 
             var state = GetUsedOrders(context);
@@ -29,6 +33,43 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             {
                 state.Accessed.Add(footnote.Order);
             }
+        }
+
+        private void ParseFootnoteLink(ParsingContext context)
+        {
+            var link = context.Object as FootnoteLink;
+
+            if (link.IsBackLink)
+                return;
+
+            var footnote = link.Footnote;
+
+            var paragraph = footnote[0] as ParagraphBlock;
+
+            if (paragraph != null)
+            {
+                if (paragraph.Span.IsEmpty)
+                {
+                    context.ReportWarning(
+                        WarningIDs.EmptyFootnoteDefinition,
+                        link.Line,
+                        link.Span,
+                        string.Empty,
+                        "Footnote definition for `{0}` is empty",
+                        footnote.Order.ToString());
+                    return;
+                }
+                else
+                {
+                    // Might contain other links
+                }
+            }
+            else // Might not be a paragraph
+            {
+
+            }
+
+            #warning ToDo
         }
 
         private void ParseFootnoteLinkReferenceDefinition(ParsingContext context)
@@ -52,10 +93,10 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             var state = GetUsedOrders(context);
             foreach (var (Order, Location) in state.Defined)
             {
-                if (!state.Accessed.ContainsAny(a => a == Order))
+                if (state.Accessed.BinarySearch(Order) < 0)
                 {
                     context.ReportWarning(
-                        WarningID.UnusedDefinedFootnote,
+                        WarningIDs.UnusedDefinedFootnote,
                         Location,
                         "Footnote `{0}` is not being used",
                         Location.RawReference);

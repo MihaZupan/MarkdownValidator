@@ -9,6 +9,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
 {
     public interface IParser
     {
+        string Identifier { get; }
         void Initialize(ParserRegistrationContext context);
     }
 }

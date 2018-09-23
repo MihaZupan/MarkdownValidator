@@ -29,7 +29,7 @@ Test[^1]
         {
             string source = @"Test[^1]";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.UnresolvedFootnoteReference, 1, 4, 7, "^1"));
+                (WarningIDs.UnresolvedFootnoteReference, 1, 4, 7, "^1"));
         }
     }
 }

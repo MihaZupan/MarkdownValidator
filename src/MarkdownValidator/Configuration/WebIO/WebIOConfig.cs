@@ -14,16 +14,16 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <summary>
         /// Defaults to 16
         /// </summary>
-        public int MaximumConcurrency
+        public int MaximumRequestConcurrency
         {
-            get => _maximumConcurrency;
+            get => _maximumRequestConcurrency;
             set
             {
-                if (value < 1) throw new ArgumentOutOfRangeException(nameof(MaximumConcurrency), value, "Must be a positive integer");
-                _maximumConcurrency = Math.Min(1024, value);
+                if (value < 1) throw new ArgumentOutOfRangeException(nameof(MaximumRequestConcurrency), value, "Must be a positive integer");
+                _maximumRequestConcurrency = Math.Min(1024, value);
             }
         }
-        private int _maximumConcurrency = 16;
+        private int _maximumRequestConcurrency = 16;
 
         /// <summary>
         /// Setting this to a non-positive value will make the parser stop trying after the first redirect

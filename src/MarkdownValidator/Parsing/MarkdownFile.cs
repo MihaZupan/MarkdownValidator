@@ -39,14 +39,12 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal ParsingResultGlobalDiff Update(string source)
         {
             var previous = ParsingResult;
-            ParsingResult = new ParsingResult(previous);
             Parse(source);
             return new ParsingResultGlobalDiff(previous, ParsingResult);
         }
         internal ParsingResultGlobalDiff Update()
         {
             var previous = ParsingResult;
-            ParsingResult = new ParsingResult(previous);
             Parse();
             return new ParsingResultGlobalDiff(previous, ParsingResult);
         }

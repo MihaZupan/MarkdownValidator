@@ -17,7 +17,9 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// Defaults to true
         /// </summary>
         public bool ParseUndefinedLanguages = true;
+        [NonSerialized]
         public Predicate<string> LanguageWhiteList = language => true;
+        [NonSerialized]
         public Predicate<string> LanguageBlackList = language => false;
 
         internal List<ICodeBlockParser> Parsers = new List<ICodeBlockParser>();
@@ -25,21 +27,21 @@ namespace MihaZupan.MarkdownValidator.Configuration
         {
             Parsers.Add(parser);
         }
+        public HashSet<string> DisabledParsers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Parser lists for these languages will be pre-prepared to improve performance
-        /// <para>Any language added here will be matched with <see cref="StringComparer.OrdinalIgnoreCase"/></para>
+        /// <para>Any language added here will be matched using <see cref="StringComparer.OrdinalIgnoreCase"/></para>
         /// </summary>
         /// <remarks>
         /// If you think there is a relevant language missing from this list, please open an issue/PR on GitHub
         /// </remarks>
-        public static readonly HashSet<string> CommonLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        internal static readonly string[] CommonLanguages = new string[]
         {
             "text",
             "json", "diff", "csv", "xml", "yaml",
 
             "css",
-            "http",
             "sql",
 
             "shell", "sh", "bash",
@@ -63,18 +65,15 @@ namespace MihaZupan.MarkdownValidator.Configuration
             "matlab",
         };
 
-        /// <summary>
-        /// This will be merged into <see cref="CommonLanguages"/> as soon as the <see cref="Config"/> instance is
-        /// used in a <see cref="MarkdownValidator"/>
-        /// <para>It is to be used exclusively for config importing before any parsing takes place</para>
-        /// Defaults to an empty array
-        /// </summary>
-        public string[] MoreCommonLanguages = Array.Empty<string>();
-
         internal void Initialize()
         {
-            foreach (var langauge in MoreCommonLanguages)
-                CommonLanguages.Add(langauge);
+            List<ICodeBlockParser> allowedParsers = new List<ICodeBlockParser>();
+            foreach (var parser in Parsers)
+            {
+                if (!DisabledParsers.Contains(parser.Identifier))
+                    allowedParsers.Add(parser);
+            }
+            Parsers = allowedParsers;
         }
     }
 }

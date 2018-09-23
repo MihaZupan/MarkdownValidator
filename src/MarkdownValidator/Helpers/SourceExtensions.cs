@@ -12,7 +12,7 @@ using System;
 
 namespace MihaZupan.MarkdownValidator
 {
-    internal static class SourceExtensions
+    public static class SourceExtensions
     {
         public static SourceSpan ToSpan(this StringSlice stringSlice)
             => new SourceSpan(stringSlice.Start, stringSlice.End);
@@ -41,5 +41,14 @@ namespace MihaZupan.MarkdownValidator
             index -= literal.Content.Start;
             return true;
         }
+
+        public static StringLine Last(this StringLineGroup lines)
+            => lines.Lines[lines.Count - 1];
+
+        public static char First(this StringSlice source)
+            => source[0];
+
+        public static char Last(this StringSlice source)
+            => source[source.Length - 1];
     }
 }

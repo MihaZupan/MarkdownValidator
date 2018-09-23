@@ -10,6 +10,7 @@ using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace MihaZupan.MarkdownValidator
@@ -101,9 +102,14 @@ namespace MihaZupan.MarkdownValidator
                     file.RelativePath,
                     (null, new LinkedList<MarkdownFile>()));
             }
-            ContextReferenceableEntities.Add(
-                file.HtmlPath,
-                (null, new LinkedList<MarkdownFile>()));
+
+            // We have to do this check in case markdown files don't actually end with .md, but share the name
+            if (!ContextReferenceableEntities.ContainsKey(file.HtmlPath))
+            {
+                ContextReferenceableEntities.Add(
+                    file.HtmlPath,
+                    (null, new LinkedList<MarkdownFile>()));
+            }
 
             foreach (var definedReference in file.ParsingResult.HeadingDefinitions)
             {
@@ -149,7 +155,12 @@ namespace MihaZupan.MarkdownValidator
             }
             foreach (var referencedEntity in diff.RemovedReferences)
             {
-                ContextReferenceableEntities[referencedEntity].Files.Remove(file);
+                // Do an exists check here - would be the same if we excluded removed references
+                // that existed in UnprocessedReferences when creating the ParsingResultGlobalDiff
+                if (ContextReferenceableEntities.TryGetValue(referencedEntity, out var references))
+                {
+                    references.Files.Remove(file);
+                }
             }
 
             AddAsyncOperations(file);
@@ -239,14 +250,15 @@ namespace MihaZupan.MarkdownValidator
             Unlock();
         }
 
-        public ValidationReport Validate(bool getFullReport)
+        public ValidationReport Validate(bool getFullReport, CancellationToken cancellationToken = default)
         {
             Lock();
 
             if (IndexedMarkdownFiles.Count == 0)
             {
-                var emptyReport = ValidationReport.Empty.AddWarning(
-                    WarningID.EmptyContext,
+                var emptyReport = new ValidationReport(Configuration, true);
+                emptyReport.AddWarning(
+                    WarningIDs.EmptyContext,
                     new WarningLocation(string.Empty, string.Empty),
                     string.Empty,
                     "You should consider writing some Markdown");
@@ -259,11 +271,7 @@ namespace MihaZupan.MarkdownValidator
             List<MarkdownFile> filesToReparse = new List<MarkdownFile>();
             foreach (var asyncOperations in AsyncOperations.Values)
             {
-                if (asyncOperations.Count == 0)
-                    continue;
-
                 bool reparse = false;
-
                 var node = asyncOperations.First;
                 MarkdownFile file = node.Value.File;
 
@@ -274,7 +282,10 @@ namespace MihaZupan.MarkdownValidator
                     suggestedWait = Math.Max(suggestedWait, progress.SuggestedWait);
 
                     if (!progress.Finished && getFullReport)
-                        progress.MRE.WaitOne();
+                    {
+                        if (cancellationToken == default) progress.MRE.WaitOne();
+                        else WaitHandle.WaitAny(new[] { progress.MRE, cancellationToken.WaitHandle });
+                    }
 
                     if (progress.Finished)
                     {
@@ -294,7 +305,7 @@ namespace MihaZupan.MarkdownValidator
                     AsyncOperations.Remove(file);
             }
 
-            ValidationReport report = new ValidationReport(AsyncOperations.Count == 0, suggestedWait);
+            ValidationReport report = new ValidationReport(Configuration, AsyncOperations.Count == 0, suggestedWait);
 
             // Refresh references
             List<MarkdownFile> finishedFiles = new List<MarkdownFile>();
@@ -319,7 +330,7 @@ namespace MihaZupan.MarkdownValidator
                         foreach (var referencePoint in file.ParsingResult.References[reference])
                         {
                             report.AddWarning(
-                                WarningID.UnresolvedFootnoteReference,
+                                WarningIDs.UnresolvedFootnoteReference,
                                 new WarningLocation(file, referencePoint),
                                 referencePoint.RawReference,
                                 "Unresolved footnote reference `{0}`",
@@ -331,7 +342,7 @@ namespace MihaZupan.MarkdownValidator
                         foreach (var referencePoint in file.ParsingResult.References[reference])
                         {
                             report.AddWarning(
-                                WarningID.UnresolvedReference,
+                                WarningIDs.UnresolvedReference,
                                 new WarningLocation(file, referencePoint),
                                 referencePoint.RawReference,
                                 "Unresolved reference `{0}`",
@@ -344,7 +355,7 @@ namespace MihaZupan.MarkdownValidator
             // Get all parsing warnings
             foreach (var markdownFile in UnfinishedMarkdownFiles)
             {
-                report.Warnings.AddRange(markdownFile.ParsingResult.ParserWarnings);
+                report.AddWarnings(markdownFile.ParsingResult.ParserWarnings);
             }
 
             Unlock();

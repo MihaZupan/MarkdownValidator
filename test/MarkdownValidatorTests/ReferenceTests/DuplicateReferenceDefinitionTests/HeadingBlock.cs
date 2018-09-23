@@ -38,7 +38,7 @@ namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
 # title
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateHeadingDefinition, 3, 9, 15, "# title"));
+                (WarningIDs.DuplicateHeadingDefinition, 3, 9, 15, "# title"));
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
 ## title
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateHeadingDefinition, 3, 9, 16, "## title"));
+                (WarningIDs.DuplicateHeadingDefinition, 3, 9, 16, "## title"));
         }
 
         [Fact]
@@ -63,8 +63,8 @@ namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
 ##### test 2
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.DuplicateHeadingDefinition, 4, 19, 27, "### title"),
-                (WarningID.DuplicateHeadingDefinition, 6, 40, 51, "##### test 2"));
+                (WarningIDs.DuplicateHeadingDefinition, 4, 19, 27, "### title"),
+                (WarningIDs.DuplicateHeadingDefinition, 6, 40, 51, "##### test 2"));
         }
     }
 }

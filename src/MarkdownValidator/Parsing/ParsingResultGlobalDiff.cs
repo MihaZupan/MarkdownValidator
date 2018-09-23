@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using System;
 using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Parsing
@@ -23,7 +24,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
             List<string> newReferences;
             (RemovedReferences, newReferences) =
-                DiffHelper.Diff(previous.References.Keys, current.References.Keys);
+                DiffHelper.Diff(previous.References.Keys, current.References.Keys, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

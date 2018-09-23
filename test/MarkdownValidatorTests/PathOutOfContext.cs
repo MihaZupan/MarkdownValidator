@@ -19,7 +19,7 @@ namespace MihaZupan.MarkdownValidator.Tests
             // UnresolvedReference maps to the entire reference
             string source = @"[text](foo/bar)";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.UnresolvedReference, 1, 0, 14, "foo/bar"));
+                (WarningIDs.UnresolvedReference, 1, 0, 14, "foo/bar"));
         }
 
         [Fact]
@@ -28,7 +28,7 @@ namespace MihaZupan.MarkdownValidator.Tests
             // PathNotInContext maps to the actual reference path 
             string source = @"[text](../foo.bar)";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.PathNotInContext, 1, 7, 16, "../foo.bar"));
+                (WarningIDs.PathNotInContext, 1, 7, 16, "../foo.bar"));
         }
 
         [Fact]
@@ -40,8 +40,8 @@ namespace MihaZupan.MarkdownValidator.Tests
 [stuff](../bar.foo)
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.PathNotInContext, 2, 8, 17, "../foo.bar"),
-                (WarningID.PathNotInContext, 3, 28, 37, "../bar.foo"));
+                (WarningIDs.PathNotInContext, 2, 8, 17, "../foo.bar"),
+                (WarningIDs.PathNotInContext, 3, 28, 37, "../bar.foo"));
         }
     }
 }

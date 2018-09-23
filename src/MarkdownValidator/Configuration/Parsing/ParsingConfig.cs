@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Parsing;
+using System;
 using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Configuration
@@ -20,19 +21,24 @@ namespace MihaZupan.MarkdownValidator.Configuration
             Parsers.Add(parser);
         }
 
+        public HashSet<string> DisabledParsers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>
         /// If you wish to disable this warning, set this to a huge value
         /// <para>Defaults to 1500</para>
         /// </summary>
         public int Warnings_HugeFile_LineCount = 1500;
 
-        /// <summary>
-        /// Defaults to true
-        /// </summary>
-        public bool Warnings_InvalidListNumberOrder_Enabled = true;
-
         internal void Initialize()
         {
+            List<IParser> allowedParsers = new List<IParser>();
+            foreach (var parser in Parsers)
+            {
+                if (!DisabledParsers.Contains(parser.Identifier))
+                    allowedParsers.Add(parser);
+            }
+            Parsers = allowedParsers;
+
             CodeBlocks.Initialize();
         }
     }

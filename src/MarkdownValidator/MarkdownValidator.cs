@@ -7,6 +7,7 @@
 */
 using MihaZupan.MarkdownValidator.Configuration;
 using System;
+using System.Threading;
 
 namespace MihaZupan.MarkdownValidator
 {
@@ -16,7 +17,7 @@ namespace MihaZupan.MarkdownValidator
     /// <para>All method calls on an instance of this class are thread-safe</para>
     /// <para>It is up to you to make sure you call all adds/updates before calling Validate</para>
     /// </summary>
-    public class MarkdownValidator
+    public class MarkdownContextValidator
     {
         public readonly Config Configuration;
         private readonly ValidationContext Context;
@@ -25,7 +26,7 @@ namespace MihaZupan.MarkdownValidator
         /// Constructs a new validation context with the specified <see cref="Config"/>
         /// </summary>
         /// <param name="configuration">The configuration to use when constructing, parsing and validating the context</param>
-        public MarkdownValidator(Config configuration)
+        public MarkdownContextValidator(Config configuration)
         {
             Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             Context = new ValidationContext(Configuration);
@@ -60,12 +61,16 @@ namespace MihaZupan.MarkdownValidator
         /// </summary>
         /// <param name="fully">Setting this to true is the same as calling <see cref="ValidateFully"/></param>
         /// <returns></returns>
-        public ValidationReport Validate(bool fully = false) => Context.Validate(fully);
+        public ValidationReport Validate(bool fully = false)
+            => Context.Validate(fully);
         /// <summary>
         /// This method may block if any async operations are still in progress internally
+        /// <para>If the <paramref name="cancellationToken"/> isn't signaled,
+        /// the <see cref="ValidationReport"/> is guaranteed to be complete</para>
         /// </summary>
         /// <returns></returns>
-        public ValidationReport ValidateFully() => Context.Validate(true);
+        public ValidationReport ValidateFully(CancellationToken cancellationToken = default)
+            => Context.Validate(true, cancellationToken);
 
         public void Clear() => Context.Clear();
 

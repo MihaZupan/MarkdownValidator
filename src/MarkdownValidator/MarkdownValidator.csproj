@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Reference Include="Markdig">
-      <HintPath>..\..\..\markdig\src\Markdig\bin\Debug\netstandard2.0\Markdig.dll</HintPath>
+      <HintPath>..\..\..\markdig\src\Markdig\bin\Release\netstandard2.0\Markdig.dll</HintPath>
     </Reference>
   </ItemGroup>
 

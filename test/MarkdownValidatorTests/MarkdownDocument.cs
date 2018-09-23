@@ -27,34 +27,34 @@ namespace MihaZupan.MarkdownValidator.Tests
         public void HugeFile()
         {
             string source = "Text" + new string('\n', HugeLineCount);
-            SingleFileTest.AssertGlobalWarning(source, WarningID.HugeMarkdownFile, $"{HugeLineCount} >= {HugeLineCount}");
+            SingleFileTest.AssertGlobalWarning(source, WarningIDs.HugeMarkdownFile, $"{HugeLineCount} >= {HugeLineCount}");
 
             source = "Text" + new string('\n', HugeLineCount * 2);
-            SingleFileTest.AssertGlobalWarning(source, WarningID.HugeMarkdownFile, $"{HugeLineCount * 2} >= {HugeLineCount}");
+            SingleFileTest.AssertGlobalWarning(source, WarningIDs.HugeMarkdownFile, $"{HugeLineCount * 2} >= {HugeLineCount}");
         }
 
         [Fact]
         public void EmptyFile()
         {
-            SingleFileTest.AssertGlobalWarning(string.Empty, WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(string.Empty, WarningIDs.EmptyMarkdownFile);
         }
 
         [Fact]
         public void EmptyFile_WhitespaceOnly()
         {
-            SingleFileTest.AssertGlobalWarning(new string(' ', 5), WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(new string(' ', 5), WarningIDs.EmptyMarkdownFile);
         }
 
         [Fact]
         public void EmptyFile_NewLinesOnly()
         {
-            SingleFileTest.AssertGlobalWarning(new string('\n', 5), WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(new string('\n', 5), WarningIDs.EmptyMarkdownFile);
         }
 
         [Fact]
         public void EmptyFile_WhiteSpaceAndNewLines()
         {
-            SingleFileTest.AssertGlobalWarning(" \n \n \n ", WarningID.EmptyMarkdownFile);
+            SingleFileTest.AssertGlobalWarning(" \n \n \n ", WarningIDs.EmptyMarkdownFile);
         }
     }
 }

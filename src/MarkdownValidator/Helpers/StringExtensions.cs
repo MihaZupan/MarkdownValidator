@@ -9,10 +9,13 @@ using System;
 
 namespace MihaZupan.MarkdownValidator
 {
-    internal static class StringExtensions
+    public static class StringExtensions
     {
         public static bool OrdinalEquals(this string source, string value)
             => source.Equals(value, StringComparison.Ordinal);
+
+        public static bool OrdinalContains(this string source, char value)
+            => Contains(source, value, out _);
 
         public static bool Contains(this string source, char value, out int index, StringComparison comparison = StringComparison.Ordinal)
         {

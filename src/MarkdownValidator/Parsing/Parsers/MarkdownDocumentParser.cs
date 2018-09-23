@@ -12,6 +12,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal sealed class MarkdownDocumentParser : IParser
     {
+        public string Identifier => nameof(MarkdownDocumentParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(MarkdownDocument), ParseDocument);
@@ -25,14 +27,14 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             if (document.Count == 0)
             {
                 context.ReportGeneralWarning(
-                    WarningID.EmptyMarkdownFile,
+                    WarningIDs.EmptyMarkdownFile,
                     string.Empty,
                     "Empty markdown file");
             }
             else if (document.LineCount >= context.Configuration.Parsing.Warnings_HugeFile_LineCount)
             {
                 context.ReportGeneralWarning(
-                    WarningID.HugeMarkdownFile,
+                    WarningIDs.HugeMarkdownFile,
                     $"{document.LineCount} >= {context.Configuration.Parsing.Warnings_HugeFile_LineCount}",
                     "Markdown file is huge! Consider moving some content into other files.");
             }

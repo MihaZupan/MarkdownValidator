@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
     {
         private readonly ParsingController ParsingController;
         public readonly Config Configuration;
+        internal string ParserIdentifier;
 
         internal ParserRegistrationContext(ParsingController parsingController, Config configuration)
         {
@@ -22,9 +23,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
         }
 
         public void Register(Type type, Action<ParsingContext> action)
-            => ParsingController.Register(type, action);
+            => ParsingController.Register(type, ParserIdentifier, action);
 
         public void RegisterFinalizer(Action<ParsingContext> action)
-            => ParsingController.RegisterFinalizer(action);
+            => ParsingController.RegisterFinalizer(ParserIdentifier, action);
     }
 }

@@ -5,53 +5,55 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using System;
+
 namespace MihaZupan.MarkdownValidator.Warnings
 {
     /// <summary>
-    /// All <see cref="WarningID"/>s with values higher than <see cref="Error"/> (1M) are considered errors
-    /// <para>All <see cref="WarningID"/>s with values lower than <see cref="Warning"/> (0) are considered suggestions</para>
+    /// All <see cref="WarningID"/>s with values higher than <see cref="WarningIDs.ErrorID"/> are considered errors
+    /// <para>All <see cref="WarningID"/>s with negative values are considered suggestions</para>
     /// </summary>
-    public enum WarningID
+    public class WarningID : IEquatable<WarningID>, IComparable<WarningID>
     {
-        //
-        // Suggestions
-        //
-        Suggestion = -1000000,
+        public readonly int ID;
+        public readonly string Identifier;
+        public readonly bool IsError;
+        public readonly bool IsSuggestion;
 
-        EmptyContext,
-        SameLabelAndTargetReference,
-        HugeMarkdownFile,
-        UrlHostnameIsIP,
+        public WarningID(int id, string identifier)
+        {
+            ID = id;
+            Identifier = identifier;
+            IsError = id > WarningIDs.ErrorID;
+            IsSuggestion = id < 0;
+        }
 
-        //
-        // Warnings
-        //
-        Warning = 0,
+        public override int GetHashCode()
+            => ID.GetHashCode();
+        public override bool Equals(object obj)
+        {
+            if (obj is WarningID other)
+            {
+                return Equals(other);
+            }
+            return false;
+        }
+        public bool Equals(WarningID other)
+        {
+            if (other is null)
+                return false;
+            return ID == other.ID;
+        }
 
-        EmptyMarkdownFile,
-        UnusedDefinedReference,
-        UnusedDefinedFootnote,
-        EmptyCodeBlock,
-        EmptyHeading,
-        EmptyReference,
-        EmptyLinkContent,
-        HeadingEndsWithWhitespace,
-        ReferencePartHasExcessWhitespace,
-        InvalidListNumberOrder,
+        public static bool operator ==(WarningID a, WarningID b)
+        {
+            if (a is null) return b is null;
+            return a.Equals(b);
+        }
+        public static bool operator !=(WarningID a, WarningID b)
+            => !(a == b);
 
-        //
-        // Errors
-        //
-        Error = 1000000,
-
-        PathNotInContext,
-        UnresolvedReference,
-        UnresolvedFootnoteReference,
-        DuplicateReferenceDefinition,
-        DuplicateHeadingDefinition,
-        InvalidEmailFormat, // Unused
-        InvalidUrlFormat,
-        ReferenceContainsLineBreak,
-        InvalidReferenceNesting,
+        public int CompareTo(WarningID other)
+            => ID.CompareTo(other.ID);
     }
 }

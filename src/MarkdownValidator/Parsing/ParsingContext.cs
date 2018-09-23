@@ -35,6 +35,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public MarkdownObject Object { get; private set; }
         public StringSlice Source { get; private set; }
         public WarningSource WarningSource { get; private set; }
+        public string ParserIdentifier { get; private set; }
 
         internal ParsingContext(MarkdownFile sourceFile)
         {
@@ -50,6 +51,11 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal void SetWarningSource(WarningSource warningSource)
         {
             WarningSource = warningSource;
+        }
+        internal void SetWarningSource(WarningSource warningSource, string parserIdentifier)
+        {
+            WarningSource = warningSource;
+            ParserIdentifier = parserIdentifier;
         }
 
         public bool TryGetRelativePath(string reference, out string relativePath)
@@ -77,29 +83,26 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 return false;
             }
         }
-        public bool TryAddLocalReferenceDefinition(LinkReferenceDefinition referenceDefinition)
+        public void AddLocalReferenceDefinition(LinkReferenceDefinition referenceDefinition)
         {
-            if (TryGetRelativePath(referenceDefinition.Label, out string relativePath))
-            {
-                ParsingResult.LocalReferenceDefinitions.Add(
-                    new ReferenceDefinition(
-                        referenceDefinition.Label,
-                        relativePath,
-                        referenceDefinition.Span,
-                        referenceDefinition.Line,
-                        SourceFile));
-                return true;
-            }
-            else
-            {
-                ReportPathOutOfContext(referenceDefinition.Label, referenceDefinition.Line, referenceDefinition.LabelSpan);
-                return false;
-            }
+            ParsingResult.LocalReferenceDefinitions.Add(
+                new ReferenceDefinition(
+                    referenceDefinition.Label,
+                    referenceDefinition.Label,
+                    referenceDefinition.Span,
+                    referenceDefinition.Line,
+                    SourceFile));
+
+            TryAddReference(
+                referenceDefinition.Url,
+                referenceDefinition.Span,
+                referenceDefinition.Line,
+                errorSpan: referenceDefinition.UrlSpan);
         }
         private void ReportPathOutOfContext(string path, int line, SourceSpan span)
         {
             ReportWarning(
-                WarningID.PathNotInContext,
+                WarningIDs.PathNotInContext,
                 line,
                 span,
                 path,

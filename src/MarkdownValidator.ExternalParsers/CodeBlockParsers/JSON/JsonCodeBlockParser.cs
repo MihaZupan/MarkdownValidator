@@ -5,17 +5,20 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using Markdig.Helpers;
+using MihaZupan.MarkdownValidator.Parsing;
 using System;
 
-namespace MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.Csharp
+namespace MihaZupan.MarkdownValidator.ExternalParsers.CodeBlockParsers.JSON
 {
-    public abstract class CSharpCodeBlockParser : ICodeBlockParser
+    public abstract class JsonCodeBlockParser : ICodeBlockParser
     {
-        public bool SupportsUndefinedLanguages => false;
-        public bool SupportsLanguage(string info)
-            => info.IsAny(StringComparison.OrdinalIgnoreCase, "csharp", "c#", "cs");
+        public abstract string Identifier { get; }
 
-        public abstract void ParseCodeBlock(StringSlice codeBlock, ParsingContext context);
+        public bool SupportsUndefinedLanguages => false;
+
+        public bool SupportsLanguage(string info)
+            => info.Equals("json", StringComparison.OrdinalIgnoreCase);
+
+        public abstract void ParseCodeBlock(CodeBlockInfo codeBlock, ParsingContext context);
     }
 }

@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,68 +13,56 @@ namespace MihaZupan.MarkdownValidator
 {
     internal static class DiffHelper
     {
-        public static (List<T> removed, List<T> added) Diff<T>(List<T> previous, List<T> current)
+        public static (List<T> removed, List<T> added) Diff<T>(ICollection<T> previous, ICollection<T> current, IEqualityComparer<T> comparer = null)
+            => Diff(previous, current, previous.Count, comparer);
+
+        /// <param name="previousCount">Has to be AT LEAST the size of previous - can be more</param>
+        public static (List<T> removed, List<T> added) Diff<T>(IEnumerable<T> previous, IEnumerable<T> current, int previousCount, IEqualityComparer<T> comparer = null)
         {
+            comparer = comparer ?? EqualityComparer<T>.Default;
+
             List<T> removed = new List<T>();
             List<T> added = new List<T>();
 
-            if (previous.Count < 20)
+            Span<bool> toDelete = stackalloc bool[previousCount];
+
+            if (previousCount < 20)
             {
                 foreach (var element in current)
                 {
-                    int index = previous.IndexOf(element);
+                    int index = previous.FindIndex(element, comparer);
                     if (index != -1)
                     {
-                        previous.RemoveAt(index);
+                        toDelete[index] = true;
                     }
                     else
                     {
                         added.Add(element);
                     }
-                }
-                foreach (var previousWarning in previous)
-                {
-                    removed.Add(previousWarning);
                 }
             }
             else
             {
-                HashSet<T> previousElements = previous.ToHashSet();
+                int count = 0;
+                Dictionary<T, int> previousElements = previous.ToDictionary(e => e, _ => count++, comparer);
                 foreach (var element in current)
                 {
-                    if (previousElements.Contains(element))
+                    if (previousElements.TryGetValue(element, out int index))
                     {
-                        previousElements.Remove(element);
+                        toDelete[index] = true;
                     }
                     else
                     {
                         added.Add(element);
                     }
                 }
-                foreach (var previousWarning in previousElements)
-                {
-                    removed.Add(previousWarning);
-                }
             }
 
-            return (removed, added);
-        }
-        public static (List<T> removed, List<T> added) Diff<T>(ICollection<T> previous, ICollection<T> current)
-        {
-            List<T> removed = new List<T>();
-            List<T> added = new List<T>();
-
-            HashSet<T> previousElements = previous.ToHashSet();
-            foreach (var element in current)
+            int deletedIndex = 0;
+            foreach (var element in previous)
             {
-                if (previousElements.Contains(element))
-                {
-                    previousElements.Remove(element);
-                }
-                else
-                {
-                    added.Add(element);
-                }
+                if (!toDelete[deletedIndex++])
+                    removed.Add(element);
             }
 
             return (removed, added);

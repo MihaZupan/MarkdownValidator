@@ -5,12 +5,12 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using Markdig.Helpers;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
     public interface ICodeBlockParser
     {
+        string Identifier { get; }
         bool SupportsUndefinedLanguages { get; }
         /// <summary>
         /// Returns true when the parser supports the language.
@@ -19,6 +19,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <param name="info">The language info specified at the start of the code block</param>
         /// <returns></returns>
         bool SupportsLanguage(string info);
-        void ParseCodeBlock(StringSlice codeBlock, ParsingContext context);
+        void ParseCodeBlock(CodeBlockInfo codeBlock, ParsingContext context);
     }
 }

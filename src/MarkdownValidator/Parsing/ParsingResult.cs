@@ -53,7 +53,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 if (!definedReferences.TryAdd(definition.RawReference, definition))
                 {
                     context.ReportWarning(
-                        WarningID.DuplicateReferenceDefinition,
+                        WarningIDs.DuplicateReferenceDefinition,
                         definition,
                         "Duplicate reference definition `{0}` - already defined on line {1}",
                         definition.RawReference,
@@ -107,7 +107,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 if (!definition.Used)
                 {
                     context.ReportWarning(
-                        WarningID.UnusedDefinedReference,
+                        WarningIDs.UnusedDefinedReference,
                         definition,
                         "Unused defined reference `{0}`",
                         definition.RawReference);

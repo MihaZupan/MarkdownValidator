@@ -10,6 +10,7 @@ using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using MihaZupan.MarkdownValidator.WebIO;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace MihaZupan.MarkdownValidator.Configuration
@@ -32,20 +33,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Note that paths you provide don't have to actually exist on disk</para>
         /// <para>Setting it to an empty string is the same as <see cref="Environment.CurrentDirectory"/></para>
         /// </summary>
-        public string RootWorkingDirectory
-        {
-            get => _rootWorkingDirectory;
-            set
-            {
-                if (value is null)
-                    throw new ArgumentNullException(nameof(RootWorkingDirectory));
-
-                _rootWorkingDirectory = value.Length == 0
-                    ? Environment.CurrentDirectory
-                    : Path.GetFullPath(value).TrimEnd('\\', '/');
-            }
-        }
-        private string _rootWorkingDirectory;
+        [NonSerialized]
+        public string RootWorkingDirectory;
 
         internal bool TryGetRelativePath(string fullPath, out string relativePath)
         {
@@ -100,6 +89,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Each call to this method MUST return a NEW instance of <see cref="MarkdownPipelineBuilder"/></para>
         /// <para>Calls to this method may happen concurrently from multiple threads</para>	
         /// </summary>
+        [NonSerialized]
         public Func<MarkdownPipelineBuilder> MarkdigPipeline = null;
         internal MarkdownPipeline GetNewPipeline()
         {
@@ -126,26 +116,34 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
         private WebIOConfig _webIO = new WebIOConfig();
 
-        private bool IsInitialized = false;
-        internal void Initialize(bool force = false)
+        public HashSet<string> ExtensionAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        public HashSet<string> DisabledWarnings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        public HashSet<int> DisabledWarningIDs = new HashSet<int>();
+
+        public bool DisableExternalParsers;
+
+        internal void Initialize()
         {
-            // Locking on 'this' is done intentionall
-            // otherwise multiple Markdown Validators calling Initialize
-            // on the same Config instance could corrupt it
-            // (using force = true may introduce undefined behaviour for Validators
-            // if the Config instance is shared - sharing a Config instance is safe
-            // as long as configuration is not updated after calling Initialize)
-            lock (this)
+            if (RootWorkingDirectory is null)
+                throw new ArgumentNullException(nameof(RootWorkingDirectory));
+
+            RootWorkingDirectory = RootWorkingDirectory.Length == 0
+                ? Environment.CurrentDirectory
+                : Path.GetFullPath(RootWorkingDirectory).TrimEnd('\\', '/');
+
+            if (!DisableExternalParsers)
             {
-                if (IsInitialized && !force) return;
-                IsInitialized = true;
-
-                Parsing.Initialize();
-
-                ParsingController = new ParsingController(this);
-                WebIOController = new WebIOController(this);
-                UrlProcessor = new UrlProcessor(this);
+                ExtensionAssemblies.Add("MarkdownValidator.ExternalParsers.dll");
+                foreach (var assembly in ExtensionAssemblies)
+                    ExtensionLoader.Load(this, assembly, out _);
             }
+
+            Parsing.Initialize();
+
+            ParsingController = new ParsingController(this);
+            WebIOController = new WebIOController(this);
+            UrlProcessor = new UrlProcessor(this);
         }
         internal ParsingController ParsingController;
         internal WebIOController WebIOController;

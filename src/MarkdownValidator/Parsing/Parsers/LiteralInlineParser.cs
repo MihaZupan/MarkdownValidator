@@ -15,6 +15,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal class LiteralInlineParser : IParser
     {
+        public string Identifier => nameof(LiteralInlineParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(LiteralInline), ParseLiteralInline);
@@ -75,7 +77,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (inline.NextSibling is null)
                 {
                     context.ReportWarning(
-                        WarningID.InvalidReferenceNesting,
+                        WarningIDs.InvalidReferenceNesting,
                         inline.Line, start, lastIndex,
                         string.Empty,
                         "Invalid [] nesting");
@@ -85,6 +87,9 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     inline = newLine.NextSibling;
                     lineBreaks = true;
+
+                    if (inline.NextSibling is null)
+                        return;
                 }
                 inline = inline.NextSibling.NextSibling;
 
@@ -102,7 +107,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     if (target.Equals(name, StringComparison.OrdinalIgnoreCase))
                     {
                         context.ReportWarning(
-                            WarningID.SameLabelAndTargetReference,
+                            WarningIDs.SameLabelAndTargetReference,
                             inline.Line, entireSpan,
                             string.Empty,
                             "You can use `[{0}]` instead of `[{0}][{1}]`",
@@ -116,7 +121,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             if (lineBreaks)
             {
                 context.ReportWarning(
-                    WarningID.ReferenceContainsLineBreak,
+                    WarningIDs.ReferenceContainsLineBreak,
                     inline.Line,
                     start, lastIndex,
                     string.Empty,
@@ -180,7 +185,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (part.Length != 0)
                 {
                     context.ReportWarning(
-                        WarningID.ReferencePartHasExcessWhitespace,
+                        WarningIDs.ReferenceHasExcessWhitespace,
                         line, partSpan,
                         part,
                         "Leading space in {0} `{1}`",
@@ -194,7 +199,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (part.Length != 0)
                 {
                     context.ReportWarning(
-                        WarningID.ReferencePartHasExcessWhitespace,
+                        WarningIDs.ReferenceHasExcessWhitespace,
                         line, partSpan,
                         part,
                         "Trailing space in {0} `{1}`",
@@ -205,7 +210,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             if (part.Length == 0)
             {
                 context.ReportWarning(
-                    isReference ? WarningID.EmptyReference : WarningID.EmptyLinkContent,
+                    isReference ? WarningIDs.EmptyReference : WarningIDs.EmptyLinkContent,
                     line, partSpan,
                     string.Empty,
                     "Empty {0}",

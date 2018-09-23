@@ -30,7 +30,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 !Uri.TryCreate(urlString, UriKind.RelativeOrAbsolute, out Uri url))
             {
                 context.ReportWarning(
-                    WarningID.InvalidUrlFormat,
+                    WarningIDs.InvalidUrlFormat,
                     reference,
                     "`{0}` is not a valid url",
                     urlString);
@@ -43,7 +43,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
             if (!Uri.TryCreate(urlString, UriKind.Absolute, out url))
             {
                 context.ReportWarning(
-                    WarningID.InvalidUrlFormat,
+                    WarningIDs.InvalidUrlFormat,
                     reference,
                     "`{0}` is not a valid url",
                     urlString);
@@ -54,21 +54,36 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 url.HostNameType == UriHostNameType.IPv6)
             {
                 context.ReportWarning(
-                    WarningID.UrlHostnameIsIP,
+                    WarningIDs.UrlHostnameIsIP,
                     reference,
                     "Use a hostname instead of an IP address");
             }
 
             // ToDo: Extensible scheme parsing support
-            if (url.Scheme.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            if (url.Scheme.StartsWith(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
             {
                 ProcessHttpUrl(context, reference, url);
+            }
+            else if (url.Scheme.StartsWith(Uri.UriSchemeMailto, StringComparison.OrdinalIgnoreCase))
+            {
+                ProcessMailtoUrl(context, reference, url);
             }
         }
 
         private void ProcessHttpUrl(ParsingContext context, Reference reference, Uri url)
         {
             #warning ToDo
+        }
+        private void ProcessMailtoUrl(ParsingContext context, Reference reference, Uri url)
+        {
+            if (!url.AbsolutePath.OrdinalContains('@'))
+            {
+                context.ReportWarning(
+                    WarningIDs.InvalidEmailFormat,
+                    reference,
+                    "Email doesn't contain @");
+                return;
+            }
         }
     }
 }

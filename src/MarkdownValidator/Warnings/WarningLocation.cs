@@ -45,7 +45,8 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public WarningLocation(string fullPath, string relativePath, int line, SourceSpan span)
             : this(fullPath, relativePath)
         {
-            RefersToEntireFile = Line == line && Span.Equals(span);
+            RefersToEntireFile = line < 0;
+
             Line = line;
             Span = span;
         }
@@ -111,6 +112,12 @@ namespace MihaZupan.MarkdownValidator.Warnings
                     {
                         // Sort by position in the file
                         compare = Span.Start.CompareTo(other.Span.Start);
+
+                        if (compare == 0)
+                        {
+                            // Sort by length
+                            compare = Span.Length.CompareTo(other.Span.Length);
+                        }
                     }
                 }
             }

@@ -16,11 +16,11 @@ namespace MihaZupan.MarkdownValidator.Parsing
 {
     internal sealed class ParsingController
     {
-        private readonly Dictionary<Type, List<Action<ParsingContext>>> Parsers =
-            new Dictionary<Type, List<Action<ParsingContext>>>();
+        private readonly Dictionary<Type, List<(string ParserIdentifier, Action<ParsingContext> ParsingAction)>> Parsers =
+            new Dictionary<Type, List<(string ParserIdentifier, Action<ParsingContext> ParsingAction)>>();
 
-        private readonly List<Action<ParsingContext>> RegisteredFinalizers =
-            new List<Action<ParsingContext>>();
+        private readonly List<(string ParserIdentifier, Action<ParsingContext> Finalizer)> RegisteredFinalizers =
+            new List<(string ParserIdentifier, Action<ParsingContext> Finalizer)>();
 
         internal readonly Config Configuration;
 
@@ -29,46 +29,54 @@ namespace MihaZupan.MarkdownValidator.Parsing
             Configuration = configuration;
             var registration = new ParserRegistrationContext(this, configuration);
 
-            // Internal parsers
-            new MarkdownDocumentParser().Initialize(registration);
-            new LiteralInlineParser().Initialize(registration);
-            new LinkInlineParser().Initialize(registration);
-            new LinkReferenceDefinitionParser().Initialize(registration);
-            new HeadingBlockParser().Initialize(registration);
-            new FootnoteParser().Initialize(registration);
-            new CodeBlockParser().Initialize(registration);
-            new ListBlockParser().Initialize(registration);
+            var internalParsers = new IParser[]
+            {
+                new MarkdownDocumentParser(),
+                new LiteralInlineParser(),
+                new LinkInlineParser(),
+                new LinkReferenceDefinitionParser(),
+                new HeadingBlockParser(),
+                new FootnoteParser(),
+                new CodeBlockParser(),
+            };
 
+            foreach (var parser in internalParsers)
+            {
+                registration.ParserIdentifier = parser.Identifier;
+                parser.Initialize(registration);
+            }
             foreach (var parser in Configuration.Parsing.Parsers)
             {
+                registration.ParserIdentifier = parser.Identifier;
                 parser.Initialize(registration);
             }
         }
 
-        public void Register(Type type, Action<ParsingContext> action)
+        public void Register(Type type, string identifier, Action<ParsingContext> action)
         {
-            if (Parsers.TryGetValue(type, out List<Action<ParsingContext>> actions))
+            var entry = (identifier, action);
+            if (Parsers.TryGetValue(type, out var actions))
             {
-                actions.Add(action);
+                actions.Add(entry);
             }
             else
             {
-                Parsers.Add(type, new List<Action<ParsingContext>>() { action });
+                Parsers.Add(type, new List<(string, Action<ParsingContext>)>() { entry });
             }
         }
-        public void RegisterFinalizer(Action<ParsingContext> action)
-            => RegisteredFinalizers.Add(action);
+        public void RegisterFinalizer(string identifier, Action<ParsingContext> action)
+            => RegisteredFinalizers.Add((identifier, action));
 
         public void Parse(MarkdownObject objectToParse, MarkdownFile sourceFile)
         {
-            if (Parsers.TryGetValue(objectToParse.GetType(), out List<Action<ParsingContext>> parsers))
+            if (Parsers.TryGetValue(objectToParse.GetType(), out var parsers))
             {
                 ParsingContext context = sourceFile.ParsingContext;
                 context.Update(objectToParse);
-                foreach (var parserAction in parsers)
+                foreach (var (identifier, action) in parsers)
                 {
-                    context.SetWarningSource(WarningSource.ExternalParser);
-                    parserAction(context);
+                    context.SetWarningSource(WarningSource.ExternalParser, identifier);
+                    action(context);
                 }
             }
         }
@@ -76,9 +84,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             ParsingContext context = sourceFile.ParsingContext;
             context.Update(null);
-            foreach (var finalizer in RegisteredFinalizers)
+            foreach (var (identifier, finalizer) in RegisteredFinalizers)
             {
-                context.SetWarningSource(WarningSource.ExternalParserFinalize);
+                context.SetWarningSource(WarningSource.ExternalParserFinalize, identifier);
                 finalizer(context);
             }
         }

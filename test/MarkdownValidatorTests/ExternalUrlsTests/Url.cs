@@ -24,7 +24,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("[foo](://test.com)")]
         public void InvalidFormat(string value)
         {
-            SingleFileTest.AssertContainsWarning(value, WarningID.InvalidUrlFormat, false);
+            SingleFileTest.AssertContainsWarning(value, WarningIDs.InvalidUrlFormat, false);
         }
 
         [Theory]
@@ -34,7 +34,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("[foo](http://[::]/)")]
         public void IPHostname(string value)
         {
-            SingleFileTest.AssertContainsWarning(value, WarningID.UrlHostnameIsIP, false);
+            SingleFileTest.AssertContainsWarning(value, WarningIDs.UrlHostnameIsIP, false);
         }
 
         [Theory]
@@ -49,9 +49,9 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         public void DocumentationReserved(string value)
         {
             SingleFileTest.AssertNotPresent(value,
-                WarningID.InvalidUrlFormat,
-                WarningID.UrlHostnameIsIP,
-                WarningID.UnresolvedReference);
+                WarningIDs.InvalidUrlFormat,
+                WarningIDs.UrlHostnameIsIP,
+                WarningIDs.UnresolvedReference);
         }
     }
 }

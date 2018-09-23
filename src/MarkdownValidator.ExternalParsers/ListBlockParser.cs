@@ -6,16 +6,17 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
-using MihaZupan.MarkdownValidator.Warnings;
+using MihaZupan.MarkdownValidator.Parsing;
 
-namespace MihaZupan.MarkdownValidator.Parsing.Parsers
+namespace MihaZupan.MarkdownValidator.ExternalParsers
 {
-    internal class ListBlockParser : IParser
+    public class ListBlockParser : IParser
     {
+        public string Identifier => nameof(ListBlockParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
-            if (context.Configuration.Parsing.Warnings_InvalidListNumberOrder_Enabled)
-                context.Register(typeof(ListBlock), ParseListBlock);
+            context.Register(typeof(ListBlock), ParseListBlock);
         }
 
         private void ParseListBlock(ParsingContext context)
@@ -31,7 +32,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (listItem.Order != ++expected)
                 {
                     context.ReportWarning(
-                       WarningID.InvalidListNumberOrder,
+                       ExternalWarningIDs.InvalidListNumberOrder,
                        listItem.Line,
                        listItem.Span,
                        $"{expected}-{listItem.Order}",

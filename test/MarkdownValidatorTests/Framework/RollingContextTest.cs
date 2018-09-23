@@ -9,6 +9,7 @@ using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MihaZupan.MarkdownValidator.Tests.Framework
@@ -16,7 +17,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
     class RollingContextTest
     {
         public const string DefaultFileName = "DefaultTestFile.md";
-        private readonly MarkdownValidator Validator;
+        private readonly MarkdownContextValidator Validator;
         public bool ValidateFully { get; private set; } = true;
 
         public RollingContextTest(string workingDirectory = "")
@@ -25,7 +26,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         public RollingContextTest(Config configuration)
         {
             configuration = configuration ?? new Config(string.Empty);
-            Validator = new MarkdownValidator(configuration);
+            Validator = new MarkdownContextValidator(configuration);
         }
 
         public RollingContextTest SetValidateFully(bool fully)
@@ -70,7 +71,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         public RollingContextTest Assert(params (string FileName, WarningID ID, int Line, int Start, int End, string Value)[] warnings)
         {
             var report = Validator.Validate(ValidateFully);
-            WarningComparer.AssertMatch(report.Warnings, warnings);
+            WarningComparer.AssertMatch(report.WarningsByFile, warnings);
             return this;
         }
 
@@ -78,21 +79,33 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         {
             var report = Validator.Validate(ValidateFully);
             foreach (var id in ids)
-                WarningComparer.AssertContains(report.Warnings, id);
+                WarningComparer.AssertContains(report.WarningsByFile, id);
             return this;
         }
 
         public RollingContextTest AssertContains(WarningID id, int line, int start, int end, string value, string fileName = null)
         {
+            bool matches(Warning warning)
+            {
+                return warning.ID == id &&
+                    warning.Location.Line == line - 1 &&
+                    warning.Location.Span == new SourceSpan(start, end) &&
+                    warning.Value == value &&
+                    (fileName == null || warning.Location.RelativeFilePath.OrdinalEquals(fileName));
+            }
+
             var report = Validator.Validate(ValidateFully);
-            Xunit.Assert.Contains(
-                report.Warnings,
-                w =>
-                    w.ID == id &&
-                    w.Location.Line == line - 1 &&
-                    w.Location.Span == new SourceSpan(start, end) &&
-                    w.Value == value &&
-                    (fileName == null || w.Location.RelativeFilePath == fileName));
+
+            if (fileName != null)
+            {
+                Xunit.Assert.True(report.WarningsByFile.TryGetValue(fileName, out List<Warning> warnings));
+                Xunit.Assert.Contains(warnings, w => matches(w));
+            }
+            else
+            {
+                Xunit.Assert.True(report.WarningsByFile.ContainsAny(f => f.Value.ContainsAny(w => matches(w))));
+            }
+
             return this;
         }
 
@@ -100,28 +113,29 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         {
             var report = Validator.Validate(ValidateFully);
             foreach (var id in ids)
-                WarningComparer.AssertNotContains(report.Warnings, id);
+                WarningComparer.AssertNotContains(report.WarningsByFile, id);
             return this;
         }
 
         public RollingContextTest AssertNoWarnings()
         {
-            Xunit.Assert.Empty(Validator.Validate(ValidateFully).Warnings);
+            Xunit.Assert.Empty(Validator.Validate(ValidateFully).WarningsByFile);
             return this;
         }
 
         public RollingContextTest AssertSingle(Predicate<Warning> warningPredicate)
         {
             var report = Validator.Validate(ValidateFully);
-            Xunit.Assert.Single(report.Warnings);
-            Xunit.Assert.True(warningPredicate(report.Warnings.Single()));
+            Xunit.Assert.Single(report.WarningsByFile);
+            Xunit.Assert.Single(report.WarningsByFile.Single().Value);
+            Xunit.Assert.True(warningPredicate(report.WarningsByFile.Single().Value.Single()));
             return this;
         }
 
         public RollingContextTest AssertContains(Predicate<Warning> warningPredicate)
         {
             var report = Validator.Validate(ValidateFully);
-            Xunit.Assert.Contains(report.Warnings, warningPredicate);
+            Xunit.Assert.True(report.WarningsByFile.ContainsAny(f => f.Value.ContainsAny(warningPredicate)));
             return this;
         }
     }

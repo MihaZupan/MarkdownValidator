@@ -25,7 +25,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
         {
             string source = @"[text]()";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 1, 0, 7, string.Empty));
+                (WarningIDs.EmptyReference, 1, 0, 7, string.Empty));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
         {
             string source = @"text[text]()text";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 1, 4, 11, string.Empty));
+                (WarningIDs.EmptyReference, 1, 4, 11, string.Empty));
         }
 
         [Fact]
@@ -44,8 +44,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
 text[text]()text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningID.EmptyReference, 2, 1, 8, string.Empty),
-                (WarningID.EmptyReference, 3, 14, 21, string.Empty));
+                (WarningIDs.EmptyReference, 2, 1, 8, string.Empty),
+                (WarningIDs.EmptyReference, 3, 14, 21, string.Empty));
         }
     }
 }

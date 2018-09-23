@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator
 {
-    internal static class LinqHelper
+    public static class LinqHelper
     {
         public static bool ContainsAny<T>(this IEnumerable<T> enumerable, Predicate<T> condition)
         {
@@ -33,6 +33,19 @@ namespace MihaZupan.MarkdownValidator
             }
             first = default;
             return false;
+        }
+        public static int FindIndex<T>(this IEnumerable<T> enumerable, T value, IEqualityComparer<T> comparer = null)
+        {
+            comparer = comparer ?? EqualityComparer<T>.Default;
+
+            int count = 0;
+            foreach (var element in enumerable)
+            {
+                if (comparer.Equals(element, value))
+                    return count;
+                count++;
+            }
+            return -1;
         }
     }
 }

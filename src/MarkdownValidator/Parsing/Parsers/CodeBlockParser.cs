@@ -16,6 +16,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal class CodeBlockParser : IParser
     {
+        public string Identifier => nameof(CodeBlockParser);
+
         private bool ParseUndefinedLanguages;
         private Predicate<string> LanguageWhiteListTest;
         private Predicate<string> LanguageBlackListTest;
@@ -72,11 +74,13 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             if (codeBlock.Lines.Count == 0)
             {
-                context.ReportWarning(WarningID.EmptyCodeBlock, string.Empty, "Code block is empty");
+                context.ReportWarning(WarningIDs.EmptyCodeBlock, string.Empty, "Code block is empty");
                 return;
             }
 
             StringSlice slice = context.Source.Reposition(codeBlock.Span);
+            var codeBlockInfo = new CodeBlockInfo(codeBlock, slice);
+
             List<ICodeBlockParser> parsers = null;
 
             if (codeBlock.Info is null)
@@ -94,8 +98,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     {
                         if (parser.SupportsLanguage(codeBlock.Info))
                         {
-                            context.SetWarningSource(WarningSource.ExternalCodeBlockParser);
-                            parser.ParseCodeBlock(slice, context);
+                            context.SetWarningSource(WarningSource.ExternalCodeBlockParser, parser.Identifier);
+                            parser.ParseCodeBlock(codeBlockInfo, context);
                         }
                     }
                 }
@@ -107,8 +111,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             foreach (var parser in parsers)
             {
-                context.SetWarningSource(WarningSource.ExternalCodeBlockParser);
-                parser.ParseCodeBlock(slice, context);
+                context.SetWarningSource(WarningSource.ExternalCodeBlockParser, parser.Identifier);
+                parser.ParseCodeBlock(codeBlockInfo, context);
             }
         }
     }

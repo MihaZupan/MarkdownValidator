@@ -6,10 +6,9 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
-using MihaZupan.MarkdownValidator.Warnings;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,10 +20,14 @@ namespace MihaZupan.MarkdownValidator.Standalone
     class Program
     {
         static FileSystemWatcher FSWatcher;
-        static MarkdownValidator Validator;
+        static MarkdownContextValidator Validator;
+
+        public const string ConfigurationFileName = ".markdown-validator.json";
+        public const string DefaultConfigurationFileName = ".markdown-validator-default.json";
 
         static void Main(string[] args)
         {
+            File.WriteAllText(DefaultConfigurationFileName, JsonConvert.SerializeObject(new Config(string.Empty), Formatting.Indented));
             string location = args.Length == 0 ? "" : args[0];
 
             //location = "Wiki";
@@ -41,10 +44,33 @@ namespace MihaZupan.MarkdownValidator.Standalone
             if (Environment.UserInteractive)
                 Console.Title = "Markdown Validator - " + location;
 
-            var config = new Config(location);
-            config.Parsing.Warnings_HugeFile_LineCount = 1000;
+            Config configuration = null;
+            string path = ConfigurationFileName;
+            if (File.Exists(path))
+            {
+                configuration = TryLoadConfiguration(path);
+            }
+            if (configuration != null)
+            {
+                path = Path.Combine(Path.GetDirectoryName(Environment.CurrentDirectory), ConfigurationFileName);
+                if (File.Exists(path))
+                {
+                    configuration = TryLoadConfiguration(path);
+                }
+            }
+            if (configuration != null)
+            {
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ConfigurationFileName);
+                if (File.Exists(path))
+                {
+                    configuration = TryLoadConfiguration(path);
+                }
+            }
 
-            Validator = new MarkdownValidator(config);
+            if (configuration == null) configuration = new Config(location);
+            else configuration.RootWorkingDirectory = location;
+
+            Validator = new MarkdownContextValidator(configuration);
             FSWatcher = new FileSystemWatcher(location);
             FSWatcher.IncludeSubdirectories = true;
 
@@ -157,6 +183,18 @@ namespace MihaZupan.MarkdownValidator.Standalone
 
             while (true) Console.ReadKey(true);
         }
+        private static Config TryLoadConfiguration(string path)
+        {
+            string json = File.ReadAllText(path);
+            try
+            {
+                return JsonConvert.DeserializeObject<Config>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         private static Timer UpdateTimer = new Timer(UpdateCallback);
         static void Update()
@@ -173,66 +211,60 @@ namespace MihaZupan.MarkdownValidator.Standalone
             lock (Validator)
             {
                 var report = Validator.Validate();
-                if (PreviousReport != null)
-                {
-                    if (report == PreviousReport)
-                        return;
-                }
+                if (report == PreviousReport)
+                    return;
                 PreviousReport = report;
 
                 Console.Clear();
 
-                if (report.Warnings.Count == 0)
+                if (report.WarningsByFile.Count == 0)
                 {
                     WriteLineWithColor("All is good", ConsoleColor.Green);
                     return;
                 }
 
                 int maxMessageLength = 100;
-                int maxNameLength = Math.Max(8, report.Warnings.Max(w => w.Location.RelativeFilePath.Length));
+                int maxNameLength = Math.Max(8, report.WarningsByFile.Max(w => w.Key.Length));
                 maxNameLength = Math.Min(maxNameLength, 45);
 
                 WriteLineWithColor("Severity\tDocument" + new string(' ', maxNameLength - 8) + "\tLine\tMessage", ConsoleColor.Green);
 
                 StringBuilder reportBuilder = new StringBuilder();
+                int totalWarnings = report.WarningCount;
                 int count = 0;
-                IEnumerable<Warning> warnings;
-                if (report.Warnings.Count > 1000)
-                {
-                    warnings = report.Warnings;
-                }
-                else
-                {
-                    warnings = report.Warnings.OrderBy(w => w.Location).ThenBy(w => w.ID);
-                }
-                foreach (var warning in warnings)
+                foreach (var fileWarnings in report.WarningsByFile)
                 {
                     if (count++ == 50)
                         break;
+                    count += fileWarnings.Value.Count - 1;
 
-                    string fileName = warning.Location.RelativeFilePath;
+                    string fileName = fileWarnings.Value.First().Location.RelativeFilePath;
                     if (fileName.Length > maxNameLength)
                     {
                         fileName = fileName.Substring(0, maxNameLength - 3) + "...";
                     }
                     else fileName = fileName.PadRight(maxNameLength, ' ');
 
-                    string message = warning.Message;
-                    if (message.Length > maxMessageLength)
-                        message = message.Substring(0, maxMessageLength - 3) + "...";
+                    foreach (var warning in fileWarnings.Value)
+                    {
 
-                    reportBuilder.AppendFormat("{0}\t{1}\t{2}\t{3}\n",
-                        warning.IsError ? "Error\t" : (warning.IsSuggestion ? "Suggestion" : "Warning\t"),
-                        fileName,
-                        warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.Line + 1).ToString(),
-                        message);
+                        string message = warning.Message;
+                        if (message.Length > maxMessageLength)
+                            message = message.Substring(0, maxMessageLength - 3) + "...";
+
+                        reportBuilder.AppendFormat("{0}\t{1}\t{2}\t{3}\n",
+                            warning.IsError ? "Error\t" : (warning.IsSuggestion ? "Suggestion" : "Warning\t"),
+                            fileName,
+                            warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.Line + 1).ToString(),
+                            message);
+                    }
                 }
                 Console.Write(reportBuilder.ToString());
 
-                if (count < report.Warnings.Count)
+                if (count < totalWarnings)
                 {
                     Console.WriteLine();
-                    Console.WriteLine("Showing the first 50 out of {0} warnings", report.Warnings.Count);
+                    Console.WriteLine("Showing the first {0} out of {1} warnings", count, totalWarnings);
                 }
 
                 if (!report.IsComplete)

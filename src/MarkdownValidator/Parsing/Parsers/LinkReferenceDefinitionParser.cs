@@ -12,6 +12,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
     internal class LinkReferenceDefinitionParser : IParser
     {
+        public string Identifier => nameof(LinkReferenceDefinitionParser);
+
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(LinkReferenceDefinition), ParseLinkReferenceDefinition);
@@ -22,14 +24,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             var referenceDefinition = context.Object as LinkReferenceDefinition;
             context.SetWarningSource(WarningSource.InternalParser);
 
-            if (context.TryAddLocalReferenceDefinition(referenceDefinition))
-            {
-                context.TryAddReference(
-                    referenceDefinition.Url,
-                    referenceDefinition.Span,
-                    referenceDefinition.Line,
-                    errorSpan: referenceDefinition.UrlSpan);
-            }
+            context.AddLocalReferenceDefinition(referenceDefinition);
         }
     }
 }

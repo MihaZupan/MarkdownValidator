@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <ApplicationIcon />
+    <StartupObject />
+    <RootNamespace>MihaZupan.MarkdownValidator.ExternalParsers</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarkdownValidator\MarkdownValidator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CodeBlockParsers\CSharp\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Markdig">
+      <HintPath>..\..\..\markdig\src\Markdig\bin\Release\netstandard2.0\Markdig.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -63,28 +63,23 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         }
 
         public static void AssertMatch(
-            List<Warning> reportWarnings,
+            Dictionary<string, List<Warning>> reportWarningsByFile,
             params (string FileName, WarningID ID, int Line, int Start, int End, string Value)[] expected)
         {
-            Assert.Equal(expected.Length, reportWarnings.Count);
-
-            var reportWarningsByFileName = reportWarnings
-                .GroupBy(w => w.Location.RelativeFilePath)
-                .Select(g => g.ToList())
-                .ToDictionary(g => g.First().Location.RelativeFilePath);
+            Assert.Equal(expected.Length, reportWarningsByFile.Sum(f => f.Value.Count));
 
             var expectedWarningsByFileName = expected
                 .GroupBy(w => w.FileName)
                 .Select(g => g.ToList())
                 .ToList();
 
-            Assert.Equal(expectedWarningsByFileName.Count, reportWarningsByFileName.Count);
+            Assert.Equal(expectedWarningsByFileName.Count, reportWarningsByFile.Count);
 
             foreach (var expectedWarnings in expectedWarningsByFileName)
             {
                 string fileName = expectedWarnings.First().FileName;
 
-                Assert.True(reportWarningsByFileName.TryGetValue(fileName, out List<Warning> warnings));
+                Assert.True(reportWarningsByFile.TryGetValue(fileName, out List<Warning> warnings));
 
                 AssertMatch(
                     warnings,
@@ -93,32 +88,18 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
             }
         }
 
-        public static void AssertContains(List<Warning> reportWarnings, WarningID id)
+        public static void AssertContains(Dictionary<string, List<Warning>> reportWarnings, WarningID id)
         {
-            bool contains = false;
-            foreach (var warning in reportWarnings)
-            {
-                if (warning.ID == id)
-                {
-                    contains = true;
-                    break;
-                }
-            }
+            bool contains = Contains(reportWarnings, id);
             Assert.True(contains, $"The report does not contain a(n) {id} warning");
         }
 
-        public static void AssertNotContains(List<Warning> reportWarnings, WarningID id)
+        public static void AssertNotContains(Dictionary<string, List<Warning>> reportWarnings, WarningID id)
         {
-            bool contains = false;
-            foreach (var warning in reportWarnings)
-            {
-                if (warning.ID == id)
-                {
-                    contains = true;
-                    break;
-                }
-            }
+            bool contains = Contains(reportWarnings, id);
             Assert.False(contains, $"The report does contain a(n) {id} warning");
         }
+        private static bool Contains(Dictionary<string, List<Warning>> reportWarnings, WarningID id)
+            => reportWarnings.ContainsAny(f => f.Value.ContainsAny(w => w.ID == id));
     }
 }
