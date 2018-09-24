@@ -4,7 +4,7 @@
   "description": "Extensible Markdown validator and analyzer",
   "author": "Miha Zupan",
   "license": "BSD-2-Clause",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "MihaZupan",
   "engines": {
     "vscode": "^1.25.0"

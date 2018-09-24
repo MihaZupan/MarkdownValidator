@@ -277,8 +277,17 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             return DiagnosticSeverity.Warning;
         }
         private static Range ToRange(WarningLocation location)
-            => new Range(
-                new Position(location.StartLine, location.StartLineColumn),
-                new Position(location.EndLine, location.EndLineColumn));
+        {
+            if (!location.RefersToEntireFile)
+            {
+                return new Range(
+                    new Position(location.StartLine, location.StartLineColumn),
+                    new Position(location.EndLine, location.EndLineColumn));
+            }
+            else
+            {
+                return new Range(new Position(0, 0), new Position(0, 0));
+            }
+        }
     }
 }
