@@ -17,16 +17,16 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyContentTests
         public void Double()
         {
             string source = @"[][.]";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyLinkContent, 1, 0, 1, string.Empty));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyLinkContent, 0, 1, string.Empty);
         }
 
         [Fact]
         public void InText()
         {
             string source = @"text[][.]text";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyLinkContent, 1, 4, 5, string.Empty));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyLinkContent, 4, 5, string.Empty);
         }
 
         [Fact]
@@ -37,8 +37,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyContentTests
 text[][.]text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyLinkContent, 2, 1, 2, string.Empty),
-                (WarningIDs.EmptyLinkContent, 3, 11, 12, string.Empty));
+                (WarningIDs.EmptyLinkContent, 1, 2, string.Empty),
+                (WarningIDs.EmptyLinkContent, 11, 12, string.Empty));
         }
     }
 }

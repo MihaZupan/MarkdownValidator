@@ -39,8 +39,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnusedReferenceTests
         public void UnusedLinkReference_Single()
         {
             string source = @"[foo]: .";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnusedDefinedReference, 1, 0, 7, "foo"));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.UnusedDefinedReference, 0, 7, "foo");
         }
 
         [Fact]
@@ -55,8 +55,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnusedReferenceTests
 
 [stuff]: .
 ";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnusedDefinedReference, 8, 33, 42, "stuff"));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.UnusedDefinedReference, 33, 42, "stuff");
         }
 
         [Fact]
@@ -70,8 +70,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnusedReferenceTests
 [stuff]: .
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnusedDefinedReference, 4, 8, 15, "foo"),
-                (WarningIDs.UnusedDefinedReference, 6, 26, 35, "stuff"));
+                (WarningIDs.UnusedDefinedReference, 8, 15, "foo"),
+                (WarningIDs.UnusedDefinedReference, 26, 35, "stuff"));
         }
     }
 }

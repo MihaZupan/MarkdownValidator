@@ -254,18 +254,6 @@ namespace MihaZupan.MarkdownValidator
         {
             Lock();
 
-            if (IndexedMarkdownFiles.Count == 0)
-            {
-                var emptyReport = new ValidationReport(Configuration, true);
-                emptyReport.AddWarning(
-                    WarningIDs.EmptyContext,
-                    new WarningLocation(string.Empty, string.Empty),
-                    string.Empty,
-                    "You should consider writing some Markdown");
-                Unlock();
-                return emptyReport;
-            }
-
             // Check async operations and reparse updated files
             int suggestedWait = -1;
             List<MarkdownFile> filesToReparse = new List<MarkdownFile>();

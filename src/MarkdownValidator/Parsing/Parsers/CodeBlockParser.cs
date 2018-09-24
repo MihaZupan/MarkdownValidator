@@ -78,8 +78,25 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 return;
             }
 
+            if (codeBlock.IsOpen)
+            {
+                context.ReportWarning(
+                    WarningIDs.UnclosedCodeBlock,
+                    codeBlock.Span.Start,
+                    context.Source.Text.Length - 1,
+                    string.Empty,
+                    "Code block is never closed");
+                return;
+            }
+
             StringSlice slice = context.Source.Reposition(codeBlock.Span);
             var codeBlockInfo = new CodeBlockInfo(codeBlock, slice);
+
+            if (codeBlockInfo.Content.IsEffectivelyEmpty())
+            {
+                context.ReportWarning(WarningIDs.EffectivelyEmptyCodeBlock, string.Empty, "Code block is effectively empty");
+                return;
+            }
 
             List<ICodeBlockParser> parsers = null;
 

@@ -1,0 +1,18 @@
+language: csharp
+dist: trusty
+sudo: false
+mono: none
+dotnet: 2.1.0
+branches:
+  except:
+  - master
+script: >
+  cd src &&
+  dotnet build MarkdownValidator -c Release &&
+  dotnet build MarkdownValidator.ExternalParsers -c Release &&
+  dotnet build MarkdownValidator.MarkdownLanguageServer -c Release &&
+  dotnet build MarkdownValidator.Standalone -c Release &&  
+  cd ../test/MarkdownValidatorTests &&
+  dotnet xunit -configuration Release -nobuild -stoponfail -verbose
+notifications:
+  email: false

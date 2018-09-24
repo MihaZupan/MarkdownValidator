@@ -5,31 +5,48 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using MihaZupan.MarkdownValidator.ExternalParsers;
 using MihaZupan.MarkdownValidator.Tests.Framework;
-using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
-namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnresolvedReferenceTests
+namespace MihaZupan.MarkdownValidator.Tests.WarningTests
 {
-    public class Footnote
+    public class ValidJSON
     {
         [Fact]
-        public void NoWarning()
+        public void Valid_Empty()
         {
             string source = @"
-Test[^1]
-
-[^1]: Some text
+```json
+{}
+```
 ";
             SingleFileTest.AssertNoWarnings(source);
         }
 
         [Fact]
-        public void MissingFootnoteDefinition()
+        public void Valid()
         {
-            string source = @"Test[^1]";
+            string source = @"
+```json
+{
+    ""test"": 123
+}
+```
+";
+            SingleFileTest.AssertNoWarnings(source);
+        }
+
+        [Fact]
+        public void Invalid()
+        {
+            string source = @"
+```json
+1-3
+```
+";
             SingleFileTest.AssertWarning(source,
-                WarningIDs.UnresolvedFootnoteReference, 4, 7, "^1");
+                ExternalWarningIDs.InvalidJsonInJsonCodeBlock, 9, 11, "1-3");
         }
     }
 }

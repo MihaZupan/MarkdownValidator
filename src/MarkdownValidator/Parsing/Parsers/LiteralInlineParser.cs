@@ -64,7 +64,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             // Update the processed index to avoid parsing the same literals multiple times
             lastIndex.Value = inline.Span.End;
 
-            if (!TryCleanPart(context, ref name, nameSpan, inline.Line, start, firstForm) && firstForm)
+            if (!TryCleanPart(context, ref name, nameSpan, start, firstForm) && firstForm)
                 return;
 
             if (firstForm)
@@ -78,7 +78,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     context.ReportWarning(
                         WarningIDs.InvalidReferenceNesting,
-                        inline.Line, start, lastIndex,
+                        start, lastIndex,
                         string.Empty,
                         "Invalid [] nesting");
                     return;
@@ -102,13 +102,13 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 // Update the processed index to avoid parsing the same literals multiple times
                 lastIndex.Value = inline.Span.End;
 
-                if (TryCleanPart(context, ref target, targetSpan, inline.Line, targetStart, true))
+                if (TryCleanPart(context, ref target, targetSpan, targetStart, true))
                 {
                     if (target.Equals(name, StringComparison.OrdinalIgnoreCase))
                     {
                         context.ReportWarning(
                             WarningIDs.SameLabelAndTargetReference,
-                            inline.Line, entireSpan,
+                            entireSpan,
                             string.Empty,
                             "You can use `[{0}]` instead of `[{0}][{1}]`",
                             name,
@@ -122,7 +122,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             {
                 context.ReportWarning(
                     WarningIDs.ReferenceContainsLineBreak,
-                    inline.Line,
                     start, lastIndex,
                     string.Empty,
                     "Ugly :'( Remove those damn line breaks from references!");
@@ -177,7 +176,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             part = null;
             return false;
         }
-        private static bool TryCleanPart(ParsingContext context, ref string part, SourceSpan partSpan, int line, int start, bool isReference)
+        private static bool TryCleanPart(ParsingContext context, ref string part, SourceSpan partSpan, int start, bool isReference)
         {
             if (part.StartsWith(' '))
             {
@@ -186,7 +185,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     context.ReportWarning(
                         WarningIDs.ReferenceHasExcessWhitespace,
-                        line, partSpan,
+                        partSpan,
                         part,
                         "Leading space in {0} `{1}`",
                         isReference ? "reference" : "link content",
@@ -200,7 +199,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     context.ReportWarning(
                         WarningIDs.ReferenceHasExcessWhitespace,
-                        line, partSpan,
+                        partSpan,
                         part,
                         "Trailing space in {0} `{1}`",
                         isReference ? "reference" : "link content",
@@ -211,7 +210,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             {
                 context.ReportWarning(
                     isReference ? WarningIDs.EmptyReference : WarningIDs.EmptyLinkContent,
-                    line, partSpan,
+                    partSpan,
                     string.Empty,
                     "Empty {0}",
                     isReference ? "reference" : "link content");

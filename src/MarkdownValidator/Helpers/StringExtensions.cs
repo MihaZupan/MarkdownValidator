@@ -23,6 +23,16 @@ namespace MihaZupan.MarkdownValidator
             return index != -1;
         }
 
+        public static bool OrdinalContainsAny(this string source, params char[] values)
+        {
+            foreach (var value in values)
+            {
+                if (source.OrdinalContains(value))
+                    return true;
+            }
+            return false;
+        }
+
         public static bool ContainsAny(this string source, StringComparison stringComparison, params string[] values)
         {
             foreach (var value in values)
@@ -31,6 +41,18 @@ namespace MihaZupan.MarkdownValidator
                     return true;
             }
             return false;
+        }
+
+        public static bool IsEffectivelyEmpty(this string source)
+        {
+            if (source.Length == 0) return true;
+            for (int i = 0; i < source.Length; i++)
+            {
+                char c = source[i];
+                if (c != ' ' && c != '\n' && c != '\r')
+                    return false;
+            }
+            return true;
         }
 
         public static bool IsAny(this string source, StringComparison stringComparison, params string[] values)
@@ -55,6 +77,9 @@ namespace MihaZupan.MarkdownValidator
 
         public static bool OrdinalContains(this string source, string value)
             => source.Contains(value, StringComparison.Ordinal);
+
+        public static bool OrdinalContains(this string source, string value, int startIndex, int count)
+            => source.IndexOf(value, startIndex, count, StringComparison.Ordinal) != -1;
 
         public static bool Contains(this string source, char value, int offset = 0)
             => source.IndexOf(value, offset) != -1;

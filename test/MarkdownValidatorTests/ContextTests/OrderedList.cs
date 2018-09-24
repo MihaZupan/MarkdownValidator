@@ -31,8 +31,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
 3. Foo
 ")
                 .Assert(
-                    (ExternalWarningIDs.InvalidListNumberOrder, 5, 26, 32, "3-2"),
-                    (ExternalWarningIDs.InvalidListNumberOrder, 8, 54, 59, "4-5"))
+                    (ExternalWarningIDs.InvalidListNumberOrder, 26, 32, "3-2"),
+                    (ExternalWarningIDs.InvalidListNumberOrder, 54, 59, "4-5"))
                 .Update(@"
 1. Test
 	1. Foo
@@ -42,11 +42,11 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
 4. Bar
 18. Foo
 ")
-                .Assert(ExternalWarningIDs.InvalidListNumberOrder, 8, 53, 59, "5-18")
+                .Assert(ExternalWarningIDs.InvalidListNumberOrder, 53, 59, "5-18")
                 .Clear()
                 .AssertNotPresent(ExternalWarningIDs.InvalidListNumberOrder)
                 .Update("2. Foo")
-                .Assert(ExternalWarningIDs.InvalidListNumberOrder, 1, 0, 5, "1-2")
+                .Assert(ExternalWarningIDs.InvalidListNumberOrder, 0, 5, "1-2")
                 .Update("1. Bar")
                 .AssertNoWarnings();
         }

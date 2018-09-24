@@ -79,7 +79,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             }
             else
             {
-                ReportPathOutOfContext(reference, line, errorSpan ?? span);
+                ReportPathOutOfContext(reference, errorSpan ?? span);
                 return false;
             }
         }
@@ -99,11 +99,10 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 referenceDefinition.Line,
                 errorSpan: referenceDefinition.UrlSpan);
         }
-        private void ReportPathOutOfContext(string path, int line, SourceSpan span)
+        private void ReportPathOutOfContext(string path, SourceSpan span)
         {
             ReportWarning(
                 WarningIDs.PathNotInContext,
-                line,
                 span,
                 path,
                 "Path `{0}` is not in the validator's working directory",
@@ -124,7 +123,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// Report a warning that applies to the entire parsed object
         /// </summary>
         public void ReportWarning(WarningID id, string value, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, Object.Line, Object.Span, value, messageFormat, messageArgs);
+            => ReportWarning(id, Object.Span, value, messageFormat, messageArgs);
 
         /// <summary>
         /// Report a warning that applies to the entire reference
@@ -135,14 +134,14 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <summary>
         /// Report a warning about a specific span of source
         /// </summary>
-        public void ReportWarning(WarningID id, int line, int start, int end, string value, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, line, new SourceSpan(start, end), value, messageFormat, messageArgs);
+        public void ReportWarning(WarningID id, int start, int end, string value, string messageFormat, params string[] messageArgs)
+            => ReportWarning(id, new SourceSpan(start, end), value, messageFormat, messageArgs);
 
         /// <summary>
         /// Report a warning about a specific span of source
         /// </summary>
-        public void ReportWarning(WarningID id, int line, SourceSpan span, string value, string messageFormat, params string[] messageArgs)
-            => ReportWarning(id, new WarningLocation(SourceFile, line, span), value, string.Format(messageFormat, messageArgs));
+        public void ReportWarning(WarningID id, SourceSpan span, string value, string messageFormat, params string[] messageArgs)
+            => ReportWarning(id, new WarningLocation(SourceFile, span), value, string.Format(messageFormat, messageArgs));
 
         private void ReportWarning(WarningID id, WarningLocation location, string value, string message)
             => SourceFile.ParsingResult.ParserWarnings.Add(
@@ -151,7 +150,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     location,
                     value,
                     message,
-                    WarningSource));
+                    WarningSource,
+                    ParserIdentifier));
         #endregion
 
         internal void ProcessLinkReference(Reference reference)

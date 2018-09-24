@@ -62,13 +62,13 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         }
 
 
-        public RollingContextTest Assert(WarningID id, int line, int start, int end, string value, string fileName = DefaultFileName)
-            => Assert((fileName, id, line, start, end, value));
+        public RollingContextTest Assert(WarningID id, int start, int end, string value, string fileName = DefaultFileName)
+            => Assert((fileName, id, start, end, value));
 
-        public RollingContextTest Assert(params (WarningID ID, int Line, int Start, int End, string Value)[] warnings)
-            => Assert(warnings.Select(w => (DefaultFileName, w.ID, w.Line, w.Start, w.End, w.Value)).ToArray());
+        public RollingContextTest Assert(params (WarningID ID, int Start, int End, string Value)[] warnings)
+            => Assert(warnings.Select(w => (DefaultFileName, w.ID, w.Start, w.End, w.Value)).ToArray());
 
-        public RollingContextTest Assert(params (string FileName, WarningID ID, int Line, int Start, int End, string Value)[] warnings)
+        public RollingContextTest Assert(params (string FileName, WarningID ID, int Start, int End, string Value)[] warnings)
         {
             var report = Validator.Validate(ValidateFully);
             WarningComparer.AssertMatch(report.WarningsByFile, warnings);
@@ -83,12 +83,11 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
             return this;
         }
 
-        public RollingContextTest AssertContains(WarningID id, int line, int start, int end, string value, string fileName = null)
+        public RollingContextTest AssertContains(WarningID id, int start, int end, string value, string fileName = null)
         {
             bool matches(Warning warning)
             {
                 return warning.ID == id &&
-                    warning.Location.Line == line - 1 &&
                     warning.Location.Span == new SourceSpan(start, end) &&
                     warning.Value == value &&
                     (fileName == null || warning.Location.RelativeFilePath.OrdinalEquals(fileName));

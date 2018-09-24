@@ -246,13 +246,11 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
                         for (int i = 0; i < fileDiagnostics.Length; i++)
                         {
                             var warning = warnings[i];
-                            int line = Math.Max(warning.Location.Line, 0);
+                            int line = Math.Max(warning.Location.StartLine, 0);
                             fileDiagnostics[i] = new Diagnostic()
                             {
                                 Code = new DiagnosticCode(warning.ID.Identifier),
-                                Range = new Range(
-                                    new Position(line, 0),
-                                    new Position(line, 0)),
+                                Range = ToRange(warning.Location),
                                 Message = warning.Message,
                                 Severity = ToDiagnosticSeverity(warning),
                                 //Source = "MarkdownValidator"
@@ -278,5 +276,9 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             if (warning.IsError) return DiagnosticSeverity.Error;
             return DiagnosticSeverity.Warning;
         }
+        private static Range ToRange(WarningLocation location)
+            => new Range(
+                new Position(location.StartLine, location.StartLineColumn),
+                new Position(location.EndLine, location.EndLineColumn));
     }
 }

@@ -42,6 +42,9 @@ namespace MihaZupan.MarkdownValidator
             return true;
         }
 
+        public static bool OrdinalContains(this StringSlice source, string value)
+            => source.Text.IndexOf(value, source.Start, source.Length, StringComparison.Ordinal) != -1;
+
         public static StringLine Last(this StringLineGroup lines)
             => lines.Lines[lines.Count - 1];
 

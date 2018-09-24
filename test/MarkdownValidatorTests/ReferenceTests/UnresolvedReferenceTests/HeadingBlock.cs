@@ -40,7 +40,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnresolvedReferenceTe
         {
             string source = @"[stuff](#text)";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnresolvedReference, 1, 0, 13, "#text"));
+                (WarningIDs.UnresolvedReference, 0, 13, "#text"));
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnresolvedReferenceTe
 [stuff]: #text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnresolvedReference, 4, 15, 28, "#text"));
+                (WarningIDs.UnresolvedReference, 15, 28, "#text"));
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnresolvedReferenceTe
 [stuff](##text)
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnresolvedReference, 3, 9, 23, "##text"));
+                (WarningIDs.UnresolvedReference, 9, 23, "##text"));
         }
     }
 }

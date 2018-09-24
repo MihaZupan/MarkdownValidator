@@ -19,10 +19,14 @@
     <ProjectReference Include="..\..\src\MarkdownValidator.ExternalParsers\MarkdownValidator.ExternalParsers.csproj" />
     <ProjectReference Include="..\..\src\MarkdownValidator\MarkdownValidator.csproj" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.4.0-beta.1.build3958" />
+  </ItemGroup>
+  
   <ItemGroup>
     <Reference Include="Markdig">
-      <HintPath>..\..\..\markdig\src\Markdig\bin\Debug\netstandard2.0\Markdig.dll</HintPath>
+      <HintPath>..\..\..\markdig\src\Markdig\bin\Release\netstandard2.0\Markdig.dll</HintPath>
     </Reference>
   </ItemGroup>
 

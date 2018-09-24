@@ -50,7 +50,8 @@ namespace MihaZupan.MarkdownValidator
                     location,
                     value,
                     string.Format(messageFormat, messageArgs),
-                    WarningSource.Validator));
+                    WarningSource.Validator,
+                    nameof(ValidationContext)));
             return this;
         }
 

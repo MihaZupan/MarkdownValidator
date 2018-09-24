@@ -17,17 +17,16 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
     {
         public static void AssertMatch(
             Warning actual,
-            (WarningID ID, int Line, int Start, int End, string Value) expected,
+            (WarningID ID, int Start, int End, string Value) expected,
             string fileName)
-            => AssertMatch(actual, fileName, expected.ID, expected.Line, expected.Start, expected.End, expected.Value);
+            => AssertMatch(actual, fileName, expected.ID, expected.Start, expected.End, expected.Value);
 
         public static void AssertMatch(
            Warning actual,
-           string fileName, WarningID id, int line, int start, int end, string value)
+           string fileName, WarningID id, int start, int end, string value)
         {
             Assert.Equal(fileName, actual.Location.RelativeFilePath);
             Assert.Equal(id, actual.ID);
-            Assert.Equal(line, actual.Location.Line + 1);
             Assert.Equal(start, actual.Location.Span.Start);
             Assert.Equal(end, actual.Location.Span.End);
             Assert.Equal(value, actual.Value);
@@ -35,14 +34,14 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public static void AssertMatch(
             List<Warning> reportWarnings,
-            List<(WarningID ID, int Line, int Start, int End, string Value)> expected, string fileName)
+            List<(WarningID ID, int Start, int End, string Value)> expected, string fileName)
         {
             Assert.Equal(expected.Count, reportWarnings.Count);
 
             reportWarnings.Sort();
 
             var sortedExpected = expected
-                .Select(w => (new WarningLocation(fileName, fileName, w.Line, new SourceSpan(w.Start, w.End)), w.ID, w.Value))
+                .Select(w => (new WarningLocation(fileName, fileName, new SourceSpan(w.Start, w.End)), w.ID, w.Value))
                 .OrderBy(w => w.Item1)
                 .ThenBy(w => w.ID)
                 .ThenBy(w => w.Value);
@@ -55,7 +54,6 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                     actualWarning,
                     expectedWarning.Item1.RelativeFilePath,
                     expectedWarning.ID,
-                    expectedWarning.Item1.Line,
                     expectedWarning.Item1.Span.Start,
                     expectedWarning.Item1.Span.End,
                     expectedWarning.Value);
@@ -64,7 +62,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public static void AssertMatch(
             Dictionary<string, List<Warning>> reportWarningsByFile,
-            params (string FileName, WarningID ID, int Line, int Start, int End, string Value)[] expected)
+            params (string FileName, WarningID ID, int Start, int End, string Value)[] expected)
         {
             Assert.Equal(expected.Length, reportWarningsByFile.Sum(f => f.Value.Count));
 
@@ -83,7 +81,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
                 AssertMatch(
                     warnings,
-                    expectedWarnings.Select(w => (w.ID, w.Line, w.Start, w.End, w.Value)).ToList(),
+                    expectedWarnings.Select(w => (w.ID, w.Start, w.End, w.Value)).ToList(),
                     expectedWarnings.First().FileName);
             }
         }

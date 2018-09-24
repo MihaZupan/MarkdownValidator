@@ -33,7 +33,6 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
                 {
                     context.ReportWarning(
                        ExternalWarningIDs.InvalidListNumberOrder,
-                       listItem.Line,
                        listItem.Span,
                        $"{expected}-{listItem.Order}",
                        "Invalid list number order - expected {0}, not {1}",

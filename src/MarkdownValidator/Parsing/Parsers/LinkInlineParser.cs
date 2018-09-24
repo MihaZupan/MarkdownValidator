@@ -8,6 +8,7 @@
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using MihaZupan.MarkdownValidator.Warnings;
+using System;
 
 namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
@@ -36,6 +37,20 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     label = link.Label;
                     span = link.LabelSpan.Value;
+
+                    if (!span.IsEmpty && link.FirstChild is LiteralInline literal)
+                    {
+                        string content = literal.Content.ToString();
+                        if (content.Equals(label, StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.ReportWarning(
+                                WarningIDs.SameLabelAndTargetReference,
+                                string.Empty,
+                                "You can use `[{0}]` instead of `[{0}][{1}]`",
+                                content,
+                                label);
+                        }
+                    }
                 }
                 else
                 {
@@ -47,26 +62,39 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             }
             else
             {
-                if (link.Url.Length == 0)
-                {
-                    context.ReportWarning(
-                        WarningIDs.EmptyReference,
-                        string.Empty,
-                        "Empty reference");
-                }
+                if (link.Url.IsEffectivelyEmpty()) ReportEmptyReference(context);
                 else
                 {
                     context.TryAddReference(link.Url, link.Span, link.Line, link.IsImage, canBeUrl, link.UrlSpan);
+
+                    if (context.Source.OrdinalContains("( ") || context.Source.OrdinalContains(" )"))
+                        ReportExcessSpace(context);
                 }
 
-                if (link.FirstChild == null)
-                {
-                    context.ReportWarning(
-                        WarningIDs.EmptyLinkContent,
-                        string.Empty,
-                        "Empty link content");
-                }
+                if (link.FirstChild == null) ReportEmptyLinkContent(context);
             }
+        }
+
+        private static void ReportExcessSpace(ParsingContext context)
+        {
+            context.ReportWarning(
+                WarningIDs.ReferenceHasExcessWhitespace,
+                string.Empty,
+                "Excess space in reference");
+        }
+        private static void ReportEmptyReference(ParsingContext context)
+        {
+            context.ReportWarning(
+                WarningIDs.EmptyReference,
+                string.Empty,
+                "Empty reference");
+        }
+        private static void ReportEmptyLinkContent(ParsingContext context)
+        {
+            context.ReportWarning(
+                WarningIDs.EmptyLinkContent,
+                string.Empty,
+                "Empty link content");
         }
     }
 }

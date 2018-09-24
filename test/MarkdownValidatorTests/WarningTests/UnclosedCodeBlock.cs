@@ -9,21 +9,22 @@ using MihaZupan.MarkdownValidator.Tests.Framework;
 using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
-namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.UnusedReferenceTests
+namespace MihaZupan.MarkdownValidator.Tests.WarningTests
 {
-    public class Footnote
+    public class UnclosedCodeBlock
     {
         [Fact]
-        public void UnusedFootnote()
+        public void Test()
         {
             string source = @"
-Test[^1]
 
-[^1]: Test
-[^2]: Test 2
+```
+
+
+
 ";
             SingleFileTest.AssertWarning(source,
-                WarningIDs.UnusedDefinedFootnote, 22, 25, "^2");
+                WarningIDs.UnclosedCodeBlock, 2, 8, string.Empty);
         }
     }
 }

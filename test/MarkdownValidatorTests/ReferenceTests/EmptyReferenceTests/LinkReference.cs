@@ -17,8 +17,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
         public void Solo()
         {
             string source = @"[]: .";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyReference, 1, 0, 1, string.Empty));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyReference, 0, 1, string.Empty);
         }
 
         [Fact]
@@ -30,8 +30,8 @@ text
 []: .
 text
 ";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyReference, 4, 7, 8, string.Empty));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyReference, 7, 8, string.Empty);
         }
 
         [Fact]
@@ -45,8 +45,8 @@ text
 text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyReference, 2, 1, 2, string.Empty),
-                (WarningIDs.EmptyReference, 5, 13, 14, string.Empty));
+                (WarningIDs.EmptyReference, 1, 2, string.Empty),
+                (WarningIDs.EmptyReference, 13, 14, string.Empty));
         }
     }
 }

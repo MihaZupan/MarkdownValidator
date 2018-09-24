@@ -10,18 +10,19 @@ using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
-    [DebuggerDisplay("{ID}, {Location.Line}, {Location.Span.Start}-{Location.Span.End}, {Value}")]
+    [DebuggerDisplay("{ID.Identifier}, {Location.StartLine}-{Location.EndLine}, {Location.Span.Start}-{Location.Span.End}, {Value}")]
     public sealed class Warning : IEquatable<Warning>, IComparable<Warning>
     {
         public readonly WarningLocation Location;
         public readonly WarningID ID;
         public readonly WarningSource Source;
+        public readonly string ParserIdentifier;
         public readonly string Value;
         public readonly string Message;
         public readonly bool IsError;
         public readonly bool IsSuggestion;
 
-        internal Warning(WarningID id, WarningLocation location, string value, string message, WarningSource source)
+        internal Warning(WarningID id, WarningLocation location, string value, string message, WarningSource source, string parserIdentifier)
         {
             Location = location;
             ID = id;
@@ -30,6 +31,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
             Message = message;
             IsError = id.IsError;
             IsSuggestion = id.IsSuggestion;
+            ParserIdentifier = parserIdentifier;
         }
 
         public bool Equals(Warning other)

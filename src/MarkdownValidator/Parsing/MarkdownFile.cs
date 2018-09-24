@@ -51,7 +51,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         private void Parse(string source)
         {
-            ParsingResult = new ParsingResult(source, Configuration.GetNewPipeline());
+            ParsingResult = new ParsingResult(source, Configuration);
             Parse();
         }
 

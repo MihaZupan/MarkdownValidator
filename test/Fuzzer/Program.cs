@@ -8,6 +8,7 @@
 using MihaZupan.MarkdownValidator;
 using MihaZupan.MarkdownValidator.Configuration;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace MihaZupan.Fuzzer
@@ -62,6 +63,7 @@ namespace MihaZupan.Fuzzer
                                 }
                             }
                             catch (ArgumentException ae) when (ae.Message.EndsWith("is not a child path of the root working directory of the context", StringComparison.Ordinal)) { }
+                            catch (PathTooLongException) { }
                         }
                     });
                 }

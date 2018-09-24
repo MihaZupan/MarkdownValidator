@@ -7,6 +7,7 @@
 */
 using Markdig;
 using Markdig.Syntax;
+using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
@@ -19,26 +20,26 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public string Source;
         public MarkdownDocument SyntaxTree;
 
+        public readonly List<int> LineStartIndexes;
         public Dictionary<Type, object> ParserStorage = new Dictionary<Type, object>();
-
-        public List<Warning> ParserWarnings { get; private set; } = new List<Warning>();
-        public List<ReferenceDefinition> HeadingDefinitions = new List<ReferenceDefinition>();
+        public readonly List<Warning> ParserWarnings = new List<Warning>();
+        public readonly List<ReferenceDefinition> HeadingDefinitions = new List<ReferenceDefinition>();
         public List<ReferenceDefinition> LocalReferenceDefinitions = new List<ReferenceDefinition>();
-
         public readonly Dictionary<string, List<Reference>> References = new Dictionary<string, List<Reference>>(StringComparer.OrdinalIgnoreCase);
-        public LinkedList<string> UnprocessedReferences { get; internal set; } = new LinkedList<string>();
-
+        public readonly LinkedList<string> UnprocessedReferences = new LinkedList<string>();
         public readonly LinkedList<AsyncProgress> AsyncOperations = new LinkedList<AsyncProgress>();
 
-        public ParsingResult(string source, MarkdownPipeline pipeline)
+        public ParsingResult(string source, Config configuration)
         {
             Source = source;
-            SyntaxTree = Markdown.Parse(source, pipeline);
+            SyntaxTree = Markdown.Parse(source, configuration.GetNewPipeline());
+            LineStartIndexes = SyntaxTree.LineStartIndexes;
         }
         public ParsingResult(ParsingResult parsingResult)
         {
             Source = parsingResult.Source;
             SyntaxTree = parsingResult.SyntaxTree;
+            LineStartIndexes = parsingResult.LineStartIndexes;
         }
 
         public void Finalize(ParsingContext context)

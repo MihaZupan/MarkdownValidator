@@ -17,16 +17,16 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
         public void Single_Solo()
         {
             string source = @"[]";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyReference, 1, 0, 1, string.Empty));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyReference, 0, 1, string.Empty);
         }
 
         [Fact]
         public void Single_InText()
         {
             string source = @"text[]text";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyReference, 1, 4, 5, string.Empty));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyReference, 4, 5, string.Empty);
         }
 
         [Fact]
@@ -37,8 +37,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ReferenceTests.EmptyReferenceTests
 text[]text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyReference, 2, 1, 2, string.Empty),
-                (WarningIDs.EmptyReference, 3, 8, 9, string.Empty));
+                (WarningIDs.EmptyReference, 1, 2, string.Empty),
+                (WarningIDs.EmptyReference, 8, 9, string.Empty));
         }
 
         [Fact]
@@ -46,8 +46,8 @@ text[]text
         {
             string source = @"[test][]";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnresolvedReference, 1, 0, 5, "test"),
-                (WarningIDs.EmptyReference, 1, 6, 7, string.Empty));
+                (WarningIDs.UnresolvedReference, 0, 5, "test"),
+                (WarningIDs.EmptyReference, 6, 7, string.Empty));
         }
 
         [Fact]
@@ -55,8 +55,8 @@ text[]text
         {
             string source = @"text[test][]text";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnresolvedReference, 1, 4, 9, "test"),
-                (WarningIDs.EmptyReference, 1, 10, 11, string.Empty));
+                (WarningIDs.UnresolvedReference, 4, 9, "test"),
+                (WarningIDs.EmptyReference, 10, 11, string.Empty));
         }
 
         [Fact]
@@ -67,10 +67,10 @@ text[]text
 text[stuff][]text
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.UnresolvedReference, 2, 1, 6, "test"),
-                (WarningIDs.UnresolvedReference, 3, 14, 20, "stuff"),
-                (WarningIDs.EmptyReference, 2, 7, 8, string.Empty),
-                (WarningIDs.EmptyReference, 3, 21, 22, string.Empty));
+                (WarningIDs.UnresolvedReference, 1, 6, "test"),
+                (WarningIDs.UnresolvedReference, 14, 20, "stuff"),
+                (WarningIDs.EmptyReference, 7, 8, string.Empty),
+                (WarningIDs.EmptyReference, 21, 22, string.Empty));
         }
     }
 }

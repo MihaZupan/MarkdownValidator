@@ -16,6 +16,11 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
         //
         public const int WarningID = WarningIDs.ErrorID / 2;
         public static readonly WarningID InvalidListNumberOrder     = new WarningID(WarningID + 1,  nameof(InvalidListNumberOrder));
-        public static readonly WarningID InvalidJsonInJsonCodeBlock = new WarningID(WarningID + 2,  nameof(InvalidListNumberOrder));
+        public static readonly WarningID InvalidJsonInJsonCodeBlock = new WarningID(WarningID + 2,  nameof(InvalidJsonInJsonCodeBlock));
+
+        //
+        // Errors
+        //
+        public const int ErrorID = WarningIDs.ErrorID * 2;
     }
 }

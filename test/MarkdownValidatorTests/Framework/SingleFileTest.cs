@@ -19,12 +19,15 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public static void AssertWarnings(
             string source,
-            params (WarningID ID, int Line, int Start, int End, string Value)[] warnings)
+            params (WarningID ID, int Start, int End, string Value)[] warnings)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source);
             Assert.True(report.WarningsByFile.TryGetValue(DefaultFileName, out List<Warning> reportWarnings));
             WarningComparer.AssertMatch(reportWarnings, warnings.ToList(), DefaultFileName);
         }
+
+        public static void AssertWarning(string source, WarningID id, int start, int end, string value)
+            => AssertWarnings(source, (id, start, end, value));
 
         public static void AssertNoWarnings(string source, bool fully = true)
         {
@@ -33,7 +36,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         }
 
         public static void AssertGlobalWarning(string source, WarningID id, string value = "")
-            => AssertWarnings(source, (id, 0, SourceSpan.Empty.Start, SourceSpan.Empty.End, value));
+            => AssertWarnings(source, (id, SourceSpan.Empty.Start, SourceSpan.Empty.End, value));
 
         public static void AssertContainsWarning(string source, WarningID id, bool fully = true)
         {

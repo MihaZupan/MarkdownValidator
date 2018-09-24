@@ -7,6 +7,7 @@
 */
 using Markdig.Syntax;
 using System;
+using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
@@ -15,9 +16,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public readonly string RawReference;
         public readonly string GlobalReference;
         public readonly SourceSpan SourceSpan;
-        public readonly int Line;
         public readonly bool IsImage;
         public readonly bool CanBeUrl;
+        public readonly int Line;
 
         public Reference(string reference, string globalReference, SourceSpan span, int line, bool isImage = false, bool canBeUrl = true)
         {

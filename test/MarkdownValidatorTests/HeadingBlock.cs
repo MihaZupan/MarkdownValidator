@@ -17,56 +17,72 @@ namespace MihaZupan.MarkdownValidator.Tests
         public void Empty_Single()
         {
             string source = @"#";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyHeading, 1, 0, 0, source));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyHeading, 0, 0, source);
         }
 
         [Fact]
         public void Empty_Multiple()
         {
             string source = "###";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyHeading, 1, 0, 2, source));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyHeading, 0, 2, source);
         }
 
         [Fact]
         public void Empty_Indented()
         {
             string source = "  ###";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyHeading, 1, 2, 4, source.TrimStart()));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyHeading, 2, 4, source.TrimStart());
         }
 
         [Fact]
         public void Empty_Multiple_TrailingWhitespace()
         {
             string source = "###  ";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.EmptyHeading, 1, 0, 4, source));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EmptyHeading, 0, 4, source);
+        }
+
+        [Fact]
+        public void EffectivelyEmpty_Single()
+        {
+            string source = @"# --";
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EffectivelyEmptyHeading, 0, 3, source);
+        }
+
+        [Fact]
+        public void EffectivelyEmpty_Multiple()
+        {
+            string source = @" ### -!";
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.EffectivelyEmptyHeading, 1, 6, "### -!");
         }
 
         [Fact]
         public void EndsInWhitespace_Single()
         {
             string source = @"# text ";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.HeadingEndsWithWhitespace, 1, 0, 6, source));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.HeadingEndsWithWhitespace, 0, 6, source);
         }
 
         [Fact]
         public void EndsInWhitespace_Multiple()
         {
             string source = @"### text ";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.HeadingEndsWithWhitespace, 1, 0, 8, source));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.HeadingEndsWithWhitespace, 0, 8, source);
         }
 
         [Fact]
         public void EndsInWhitespace_Indented()
         {
             string source = @"  ### text ";
-            SingleFileTest.AssertWarnings(source,
-                (WarningIDs.HeadingEndsWithWhitespace, 1, 2, 10, source.TrimStart()));
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.HeadingEndsWithWhitespace, 2, 10, source.TrimStart());
         }
 
         [Fact]
@@ -78,9 +94,9 @@ namespace MihaZupan.MarkdownValidator.Tests
    ##  stuff  
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.HeadingEndsWithWhitespace, 2, 3, 11, "### text "),
-                (WarningIDs.HeadingEndsWithWhitespace, 3, 13, 20, "# text2 "),
-                (WarningIDs.HeadingEndsWithWhitespace, 4, 25, 35, "##  stuff  "));
+                (WarningIDs.HeadingEndsWithWhitespace, 3, 11, "### text "),
+                (WarningIDs.HeadingEndsWithWhitespace, 13, 20, "# text2 "),
+                (WarningIDs.HeadingEndsWithWhitespace, 25, 35, "##  stuff  "));
         }
     }
 }

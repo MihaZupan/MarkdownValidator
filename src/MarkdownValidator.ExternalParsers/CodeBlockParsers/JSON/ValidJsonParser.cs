@@ -32,6 +32,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers.CodeBlockParsers.JSON
             {
                 context.ReportWarning(
                     ExternalWarningIDs.InvalidJsonInJsonCodeBlock,
+                    codeBlock.ContentSpan,
                     codeBlock.Content,
                     "JSON is not valid");
             }

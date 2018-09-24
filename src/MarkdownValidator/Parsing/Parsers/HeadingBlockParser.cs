@@ -49,15 +49,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             var headerUrl = '#' + LinkHelper.UrilizeAsGfm(headerText);
 
-            if (headerUrl.EndsWith('-'))
-            {
-                context.ReportWarning(
-                    WarningIDs.HeadingEndsWithWhitespace,
-                    rawText,
-                    "Heading `{0}` ends with a whitespace",
-                    rawText);
-            }
-
             if (headerUrl.Length == 1 || !headerUrl.ContainsAny(c => c != '#' && c != '-'))
             {
                 context.ReportWarning(
@@ -65,6 +56,15 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     rawText,
                     "Heading is effectively empty");
                 return;
+            }
+
+            if (headerUrl.EndsWith('-'))
+            {
+                context.ReportWarning(
+                    WarningIDs.HeadingEndsWithWhitespace,
+                    rawText,
+                    "Heading `{0}` ends with a whitespace",
+                    rawText);
             }
 
             context.TryGetRelativePath(headerUrl, out string relative);

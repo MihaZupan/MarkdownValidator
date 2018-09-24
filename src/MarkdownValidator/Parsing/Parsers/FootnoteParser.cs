@@ -52,7 +52,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     context.ReportWarning(
                         WarningIDs.EmptyFootnoteDefinition,
-                        link.Line,
                         link.Span,
                         string.Empty,
                         "Footnote definition for `{0}` is empty",

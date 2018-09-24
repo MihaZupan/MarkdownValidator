@@ -48,7 +48,7 @@ namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
 [test]: .
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.DuplicateReferenceDefinition, 5, 19, 27, "test"));
+                (WarningIDs.DuplicateReferenceDefinition, 19, 27, "test"));
         }
 
         [Fact]
@@ -64,8 +64,8 @@ namespace MihaZupan.MarkdownValidator.Tests.DuplicateReferenceDefinitionTests
 [test]: .
 ";
             SingleFileTest.AssertWarnings(source,
-                (WarningIDs.DuplicateReferenceDefinition, 7, 38, 47, "stuff"),
-                (WarningIDs.DuplicateReferenceDefinition, 8, 49, 57, "test"));
+                (WarningIDs.DuplicateReferenceDefinition, 38, 47, "stuff"),
+                (WarningIDs.DuplicateReferenceDefinition, 49, 57, "test"));
         }
     }
 }

@@ -64,26 +64,11 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
             {
                 ProcessHttpUrl(context, reference, url);
             }
-            else if (url.Scheme.StartsWith(Uri.UriSchemeMailto, StringComparison.OrdinalIgnoreCase))
-            {
-                ProcessMailtoUrl(context, reference, url);
-            }
         }
 
         private void ProcessHttpUrl(ParsingContext context, Reference reference, Uri url)
         {
             #warning ToDo
-        }
-        private void ProcessMailtoUrl(ParsingContext context, Reference reference, Uri url)
-        {
-            if (!url.AbsolutePath.OrdinalContains('@'))
-            {
-                context.ReportWarning(
-                    WarningIDs.InvalidEmailFormat,
-                    reference,
-                    "Email doesn't contain @");
-                return;
-            }
         }
     }
 }

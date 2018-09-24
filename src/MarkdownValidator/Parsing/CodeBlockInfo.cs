@@ -15,38 +15,26 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public readonly string Info;
         public readonly string Arguments;
         public readonly StringLineGroup Lines;
-        public readonly StringSlice Slice;
+        public readonly StringSlice CodeBlockSlice;
         public readonly string Source;
+        public readonly SourceSpan ContentSpan;
         public readonly StringSlice ContentSlice;
-
-        public string Content
-        {
-            get
-            {
-                if (_content is null)
-                {
-                    if (ContentSlice.Length <= 0)
-                        _content = string.Empty;
-                    else
-                        _content = ContentSlice.ToString();
-                }
-                return _content;
-            }
-        }
-        private string _content;
+        public readonly string Content;
 
         internal CodeBlockInfo(FencedCodeBlock codeBlock, StringSlice slice)
         {
-            Info = codeBlock.Info;
-            Arguments = codeBlock.Arguments;
-            Lines = codeBlock.Lines;            
-            Slice = slice;
-            Source = Slice.Text;
+            Info = codeBlock.Info ?? string.Empty;
+            Arguments = codeBlock.Arguments ?? string.Empty;
+            Lines = codeBlock.Lines;
+            CodeBlockSlice = slice;
+            Source = CodeBlockSlice.Text;
 
             int contentStart = Lines.Lines[0].Position;
             var lastLine = Lines.Last();
-            int contentEnd = lastLine.Position + lastLine.Slice.Length;
-            ContentSlice = Slice.Reposition(new SourceSpan(contentStart, contentEnd));
+            int contentEnd = lastLine.Position + lastLine.Slice.Length - 1;
+            ContentSpan = new SourceSpan(contentStart, contentEnd);
+            ContentSlice = CodeBlockSlice.Reposition(ContentSpan);
+            Content = ContentSlice.ToString();
         }
     }
 }

@@ -8,31 +8,71 @@
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Parsing;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Warnings
 {
-    [DebuggerDisplay("{Line}, {Span.Start}-{Span.End} {RelativeFilePath}")]
+    [DebuggerDisplay("{StartLine}-{EndLine}, {Span.Start}-{Span.End} {RelativeFilePath}")]
     public sealed class WarningLocation : IEquatable<WarningLocation>, IComparable<WarningLocation>
     {
         public readonly string FullFilePath;
         public readonly string RelativeFilePath;
-        /// <summary>
-        /// Zero-based line index of the warning location in the source file
-        /// </summary>
-        public readonly int Line = -1;
         public readonly SourceSpan Span = SourceSpan.Empty;
         public readonly bool RefersToEntireFile = true;
+        // Keeps us from having to have a Markdig reference on some projects
+        public int Length => Span.Length;
+
+        /// <summary>
+        /// Will be -1 if refering to the entire file. Zero-based
+        /// </summary>
+        public readonly int StartLine = -1;
+        /// <summary>
+        /// Will be -1 if refering to the entire file. Zero-based
+        /// </summary>
+        public readonly int EndLine = -1;
+        /// <summary>
+        /// Will be -1 if refering to the entire file. Zero-based
+        /// </summary>
+        public readonly int StartLineColumn = -1;
+        /// <summary>
+        /// Will be -1 if refering to the entire file. Zero-based
+        /// </summary>
+        public readonly int EndLineColumn = -1;
 
         internal WarningLocation(MarkdownFile file, Reference reference)
-            : this(file.FullPath, file.RelativePath, reference.Line, reference.SourceSpan)
+            : this(file, reference.SourceSpan)
         { }
         /// <summary>
         /// The warning applies to a specific section in a file
         /// </summary>
-        internal WarningLocation(MarkdownFile file, int line, SourceSpan span)
-            : this(file.FullPath, file.RelativePath, line, span)
-        { }
+        internal WarningLocation(MarkdownFile file, SourceSpan span)
+            : this(file.FullPath, file.RelativePath, span)
+        {
+            if (!RefersToEntireFile)
+            {
+                List<int> lineIndexes = file.ParsingResult.LineStartIndexes;
+
+                int index = lineIndexes.BinarySearch(span.Start);
+                if (index < 0) index = ~index - 1;
+
+                StartLine = index;
+                StartLineColumn = span.Start - lineIndexes[index];
+
+                if (++index  == lineIndexes.Count || lineIndexes[index] > span.End)
+                {
+                    EndLine = index - 1;
+                    EndLineColumn = StartLineColumn + span.Length;
+                    return;
+                }
+
+                index = lineIndexes.BinarySearch(index, lineIndexes.Count - index, span.End, Comparer<int>.Default);
+                if (index < 0) index = ~index - 1;
+
+                EndLine = index;
+                EndLineColumn = span.End - lineIndexes[index];
+            }
+        }
         /// <summary>
         /// The warning applies to the entire file
         /// </summary>
@@ -42,12 +82,10 @@ namespace MihaZupan.MarkdownValidator.Warnings
         /// <summary>
         /// The warning applies to a specific section in a file
         /// </summary>
-        public WarningLocation(string fullPath, string relativePath, int line, SourceSpan span)
+        public WarningLocation(string fullPath, string relativePath, SourceSpan span)
             : this(fullPath, relativePath)
         {
-            RefersToEntireFile = line < 0;
-
-            Line = line;
+            RefersToEntireFile = Span.Equals(span);
             Span = span;
         }
         /// <summary>
@@ -64,7 +102,8 @@ namespace MihaZupan.MarkdownValidator.Warnings
             unchecked
             {
                 int hash = Span.GetHashCode();
-                hash = (hash * 397) ^ Line;
+                hash = (hash * 397) ^ StartLine;
+                hash = (hash * 397) ^ EndLineColumn;
                 hash = (hash * 397) ^ FullFilePath.Length;
                 return hash;
             }
@@ -80,7 +119,11 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public bool Equals(WarningLocation other)
         {
             if (other is null) return false;
-            return other.Line == Line &&
+            return 
+                other.StartLine == StartLine &&
+                other.StartLineColumn == StartLineColumn &&
+                other.EndLine == EndLine &&
+                other.EndLineColumn == EndLineColumn &&
                 other.Span.Equals(Span) &&
                 other.FullFilePath.OrdinalEquals(FullFilePath) &&
                 other.RelativeFilePath.Length == RelativeFilePath.Length;
@@ -105,18 +148,36 @@ namespace MihaZupan.MarkdownValidator.Warnings
 
                 if (compare == 0)
                 {
-                    // Sort by line number
-                    compare = Line.CompareTo(other.Line);
+                    // Sort by start line number
+                    compare = StartLine.CompareTo(other.StartLine);
 
                     if (compare == 0)
                     {
-                        // Sort by position in the file
-                        compare = Span.Start.CompareTo(other.Span.Start);
+                        // Sort by start line column
+                        compare = StartLineColumn.CompareTo(other.StartLineColumn);
 
                         if (compare == 0)
                         {
-                            // Sort by length
-                            compare = Span.Length.CompareTo(other.Span.Length);
+                            // Sort by end line number
+                            compare = EndLine.CompareTo(other.EndLine);
+
+                            if (compare == 0)
+                            {
+                                // Sort by end line column
+                                compare = EndLineColumn.CompareTo(other.EndLineColumn);
+
+                                if (compare == 0)
+                                {
+                                    // Sort by position in the file
+                                    compare = Span.Start.CompareTo(other.Span.Start);
+
+                                    if (compare == 0)
+                                    {
+                                        // Sort by length
+                                        compare = Span.Length.CompareTo(other.Span.Length);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -33,7 +33,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
             //location = "Wiki";
             //location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
             //location = Path.Combine(Environment.CurrentDirectory, "../../../../../");
-            //location = "test";
+            location = "test";
             //location = @"C:\Users\Mihu\Downloads\docs-master\docs-master";
 
             if (location == "")
@@ -255,7 +255,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
                         reportBuilder.AppendFormat("{0}\t{1}\t{2}\t{3}\n",
                             warning.IsError ? "Error\t" : (warning.IsSuggestion ? "Suggestion" : "Warning\t"),
                             fileName,
-                            warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.Line + 1).ToString(),
+                            warning.Location.RefersToEntireFile ? "n/a" : (warning.Location.StartLine + 1).ToString(),
                             message);
                     }
                 }
