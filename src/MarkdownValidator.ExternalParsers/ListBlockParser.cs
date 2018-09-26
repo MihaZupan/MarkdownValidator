@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Parsing;
 
 namespace MihaZupan.MarkdownValidator.ExternalParsers
@@ -26,10 +27,13 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
             if (!list.IsOrdered)
                 return;
 
+            if (list.All<ListItemBlock>(i => i.Order == 1))
+                return;
+
             int expected = 0;
             foreach (ListItemBlock listItem in list)
             {
-                if (listItem.Order != ++expected)
+                if (++expected != listItem.Order)
                 {
                     context.ReportWarning(
                        ExternalWarningIDs.InvalidListNumberOrder,

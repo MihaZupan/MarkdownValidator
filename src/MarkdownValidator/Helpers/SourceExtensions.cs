@@ -10,7 +10,7 @@ using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using System;
 
-namespace MihaZupan.MarkdownValidator
+namespace MihaZupan.MarkdownValidator.Helpers
 {
     public static class SourceExtensions
     {

@@ -30,10 +30,10 @@ namespace MihaZupan.MarkdownValidator.Standalone
             File.WriteAllText(DefaultConfigurationFileName, JsonConvert.SerializeObject(new Config(string.Empty), Formatting.Indented));
             string location = args.Length == 0 ? "" : args[0];
 
-            //location = "Wiki";
+            location = "Wiki";
             //location = @"C:\MihaZupan\MarkdownReferenceValidator\test-data\src";
             //location = Path.Combine(Environment.CurrentDirectory, "../../../../../");
-            location = "test";
+            //location = "test";
             //location = @"C:\Users\Mihu\Downloads\docs-master\docs-master";
 
             if (location == "")

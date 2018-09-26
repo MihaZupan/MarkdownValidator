@@ -7,6 +7,7 @@
 */
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
@@ -135,6 +136,13 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         {
             var report = Validator.Validate(ValidateFully);
             Xunit.Assert.True(report.WarningsByFile.ContainsAny(f => f.Value.ContainsAny(warningPredicate)));
+            return this;
+        }
+
+        public RollingContextTest AssertWarningCount(int count)
+        {
+            var report = Validator.Validate(ValidateFully);
+            Xunit.Assert.Equal(count, report.WarningCount);
             return this;
         }
     }

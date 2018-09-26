@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using Newtonsoft.Json;
 using OmniSharp.Extensions.Embedded.MediatR;
@@ -46,7 +47,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         public Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
         {
             string text = request.ContentChanges.Single().Text;
-            string path = request.TextDocument.Uri.LocalPath.TrimStart('/');
+            string path = PathHelper.GetPathFromFileUri(request.TextDocument.Uri);
 
             if (text.Length == 0)
             {
@@ -63,7 +64,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         public Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
         {
             string text = request.TextDocument.Text;
-            string path = request.TextDocument.Uri.LocalPath.TrimStart('/');
+            string path = PathHelper.GetPathFromFileUri(request.TextDocument.Uri);
 
             if (!_validator.UpdateMarkdownFile(path, text))
                 _validator.AddMarkdownFile(path, text);
@@ -77,7 +78,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         public Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken)
         {
             string text = request.Text;
-            string path = request.TextDocument.Uri.LocalPath.TrimStart('/');
+            string path = PathHelper.GetPathFromFileUri(request.TextDocument.Uri);
 
             if (!_validator.UpdateMarkdownFile(path, text))
                 _validator.AddMarkdownFile(path, text);
@@ -93,7 +94,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             {
                 if (change.Type == FileChangeType.Deleted)
                 {
-                    _validator.RemoveEntity(change.Uri.LocalPath.TrimStart('/'));
+                    _validator.RemoveEntity(PathHelper.GetPathFromFileUri(change.Uri));
                     deleted = true;
                     break;
                 }
@@ -263,9 +264,12 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
                         fileDiagnostics = Array.Empty<Diagnostic>();
                     }
 
+                    if (path[0] != '/') // It is already there on linux, has to be added on windows
+                        path = '/' + path;
+
                     _router.Document.PublishDiagnostics(new PublishDiagnosticsParams()
                     {
-                        Uri = new Uri("file:///" + path),
+                        Uri = new Uri("file://" + path),
                         Diagnostics = new Container<Diagnostic>(fileDiagnostics)
                     });
                 }

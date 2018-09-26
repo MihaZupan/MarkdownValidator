@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,8 @@ namespace MihaZupan.MarkdownValidator
         }
 
         internal ValidationReport AddWarning(WarningID id, WarningLocation location, string value, string messageFormat, params string[] messageArgs)
+            => AddWarning(id, location, value, WarningSource.Validator, messageFormat, messageArgs);
+        internal ValidationReport AddWarning(WarningID id, WarningLocation location, string value, WarningSource source, string messageFormat, params string[] messageArgs)
         {
             AddWarning(
                 new Warning(
@@ -50,19 +53,13 @@ namespace MihaZupan.MarkdownValidator
                     location,
                     value,
                     string.Format(messageFormat, messageArgs),
-                    WarningSource.Validator,
+                    source,
                     nameof(ValidationContext)));
             return this;
         }
 
         internal void AddWarning(Warning warning)
         {
-            if (Configuration.DisabledWarningIDs.Contains(warning.ID.ID))
-                return;
-
-            if (Configuration.DisabledWarnings.Contains(warning.ID.Identifier))
-                return;
-
             WarningCount++;
             if (WarningsByFile.TryGetValue(warning.Location.RelativeFilePath, out List<Warning> warnings))
             {

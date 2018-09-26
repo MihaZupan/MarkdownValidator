@@ -77,6 +77,6 @@ namespace MihaZupan.MarkdownValidator
         private void EnsureValidPath(string path, out string relativePath)
             => EnsureValidPath(path, out _, out relativePath);
         private void EnsureValidPath(string path, out string fullPath, out string relativePath)
-            => Configuration.EnsurePathIsValidForContext(path, out fullPath, out relativePath);
+            => Configuration.PathHelper.EnsurePathIsValidForContext(path, out fullPath, out relativePath);
     }
 }

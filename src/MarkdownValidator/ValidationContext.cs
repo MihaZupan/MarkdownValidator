@@ -6,11 +6,11 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace MihaZupan.MarkdownValidator
@@ -76,18 +76,47 @@ namespace MihaZupan.MarkdownValidator
         {
             UpdateInternalContext(file, file.Update());
         }
-        private bool RefreshInternalContext(MarkdownFile file)
+        private bool RefreshInternalContext(MarkdownFile file, ValidationReport report)
         {
             var unprocessedEntities = file.ParsingResult.UnprocessedReferences;
             var node = unprocessedEntities.First;
             while (node != null)
             {
+                bool allReferencesAreGood = true;
+
                 var next = node.Next;
                 if (ContextReferenceableEntities.TryGetValue(node.Value,
-                    out (ReferenceDefinition, LinkedList<MarkdownFile> Files) entity))
+                    out (ReferenceDefinition Definition, LinkedList<MarkdownFile> Files) entity))
                 {
-                    entity.Files.AddLast(file);
-                    unprocessedEntities.Remove(node);
+                    if (entity.Definition is null)
+                    {
+                        // This is a reference to a file/directory that seems to exist in the context
+                        // Check for case equality - OrdinalIgnoreCase matched -> try Ordinal
+                        IndexedEntities.TryGetValue(node.Value, out string originalName);
+                        foreach (var reference in file.ParsingResult.References[node.Value])
+                        {
+                            if (!originalName.OrdinalEquals(reference.GlobalReference))
+                            {
+                                // The referenced file is not an exact case-match for the file on disk
+                                // That is a possible problem when using *nix hosts with case-sensitive file systems
+                                allReferencesAreGood = false;
+                                report.AddWarning(
+                                    WarningIDs.FileReferenceCaseMismatch,
+                                    new WarningLocation(file, reference),
+                                    reference.GlobalReference,
+                                    WarningSource.RefreshInternalContext,
+                                    "`{0}` is not an exact case-match for `{1}`. This could be a problem on *nix hosts.",
+                                    reference.GlobalReference, originalName);
+                            }
+                        }
+                    }
+
+                    if (allReferencesAreGood)
+                    {
+                        // All is well, case-sensitive equality confirmed
+                        entity.Files.AddLast(file);
+                        unprocessedEntities.Remove(node);
+                    }
                 }
                 node = next;
             }
@@ -299,7 +328,7 @@ namespace MihaZupan.MarkdownValidator
             List<MarkdownFile> finishedFiles = new List<MarkdownFile>();
             foreach (var markdownFile in UnfinishedMarkdownFiles)
             {
-                if (RefreshInternalContext(markdownFile))
+                if (RefreshInternalContext(markdownFile, report))
                 {
                     if (markdownFile.ParsingResult.ParserWarnings.Count == 0)
                         finishedFiles.Add(markdownFile);

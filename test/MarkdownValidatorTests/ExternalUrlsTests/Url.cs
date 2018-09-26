@@ -20,8 +20,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Theory]
-        [InlineData("[foo](:)")]
         [InlineData("[foo](://test.com)")]
+        [InlineData("[foo](http://test.com:)")]
         public void InvalidFormat(string value)
         {
             SingleFileTest.AssertContainsWarning(value, WarningIDs.InvalidUrlFormat, false);

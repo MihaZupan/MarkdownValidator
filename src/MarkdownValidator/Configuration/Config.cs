@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using MihaZupan.MarkdownValidator.WebIO;
@@ -35,54 +36,6 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// </summary>
         [NonSerialized]
         public string RootWorkingDirectory;
-
-        internal bool TryGetRelativePath(string fullPath, out string relativePath)
-        {
-            if (fullPath.StartsWith(RootWorkingDirectory, StringComparison.OrdinalIgnoreCase))
-            {
-                if (fullPath.Length == RootWorkingDirectory.Length)
-                    relativePath = string.Empty;
-                else relativePath = fullPath.Substring(RootWorkingDirectory.Length + 1);
-                return true;
-            }
-            else
-            {
-                relativePath = null;
-                return false;
-            }
-        }
-        internal bool TryGetRelativePath(string sourceFile, string reference, out string relativePath)
-        {
-            string relative;
-
-            if (reference.StartsWith('~'))
-                reference = reference.Substring(1);
-
-            if (reference.Contains(':'))
-            {
-                relativePath = reference;
-                return true;
-            }
-            else if (reference.StartsWith('#'))
-                relative = sourceFile + reference;
-            else if (reference.StartsWith('/'))
-                relative = reference.Substring(0, reference.Length - 1);
-            else if (reference.OrdinalEquals("."))
-                relative = Path.GetDirectoryName(sourceFile);
-            else
-                relative = Path.Combine(Path.GetDirectoryName(sourceFile), reference);
-
-            return TryGetRelativePath(Path.GetFullPath(relative, RootWorkingDirectory), out relativePath);
-        }
-        /// <summary>
-         /// Throws <see cref="PathNotInContextException"/>
-         /// </summary>
-        internal void EnsurePathIsValidForContext(string path, out string fullPath, out string relativePath)
-        {
-            fullPath = Path.GetFullPath(path, RootWorkingDirectory);
-            if (!TryGetRelativePath(fullPath, out relativePath))
-                throw new ArgumentException($"{path} is not a child path of the root working directory of the context");
-        }
 
         /// <summary>
         /// A custom <see cref="MarkdownPipelineBuilder"/> provider
@@ -116,12 +69,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
         private WebIOConfig _webIO = new WebIOConfig();
 
-        public HashSet<string> ExtensionAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        public HashSet<string> DisabledWarnings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        public HashSet<int> DisabledWarningIDs = new HashSet<int>();
-
         public bool DisableExternalParsers;
+        public HashSet<string> ExtensionAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         internal void Initialize()
         {
@@ -132,6 +81,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 ? Environment.CurrentDirectory
                 : Path.GetFullPath(RootWorkingDirectory).TrimEnd('\\', '/');
 
+            PathHelper = new PathHelper(RootWorkingDirectory);
+
             if (!DisableExternalParsers)
             {
                 ExtensionAssemblies.Add("MarkdownValidator.ExternalParsers.dll");
@@ -139,12 +90,11 @@ namespace MihaZupan.MarkdownValidator.Configuration
                     ExtensionLoader.Load(this, assembly, out _);
             }
 
-            Parsing.Initialize();
-
             ParsingController = new ParsingController(this);
             WebIOController = new WebIOController(this);
             UrlProcessor = new UrlProcessor(this);
         }
+        internal PathHelper PathHelper;
         internal ParsingController ParsingController;
         internal WebIOController WebIOController;
         internal UrlProcessor UrlProcessor;

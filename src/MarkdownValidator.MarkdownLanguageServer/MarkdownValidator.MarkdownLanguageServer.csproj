@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if $(ConfigurationName) == Release dotnet publish $(ProjectPath) --no-build -c Release -o $(SolutionDir)\src\extensions\vscode\bin" />
+    <Exec Command="if $(ConfigurationName) == Release dotnet publish $(ProjectPath) --no-build -c Release -o $(SolutionDir)\src\extensions\vscode\bin&#xD;&#xA;if $(ConfigurationName) == Release python $(ProjectDir)\CopyToExtension-post.py $(SolutionDir)\src\extensions\vscode\bin" />
   </Target>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 
@@ -24,8 +25,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
         {
             string urlString = reference.RawReference;
 
-            if (urlString.Length < 3 ||
-                urlString.StartsWith(':') ||
+            if (urlString.StartsWith(':') ||
                 urlString.EndsWith(':') ||
                 !Uri.TryCreate(urlString, UriKind.RelativeOrAbsolute, out Uri url))
             {

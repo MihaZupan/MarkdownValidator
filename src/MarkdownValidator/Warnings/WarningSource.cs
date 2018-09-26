@@ -21,6 +21,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         LinkReferenceProcessor = InternalParser | 1 << 20,
         ParsingResultFinalize = InternalParser | 1 << 22,
         Validator = InternalParser | 1 << 23,
+        RefreshInternalContext = InternalParser | 1 << 24,
 
         InternalCodeBlockParser = InternalParser | CodeBlockParser,
         ExternalCodeBlockParser = ExternalParser | CodeBlockParser,

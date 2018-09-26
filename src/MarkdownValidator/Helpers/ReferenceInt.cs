@@ -8,7 +8,7 @@
 using System;
 using System.Diagnostics;
 
-namespace MihaZupan.MarkdownValidator
+namespace MihaZupan.MarkdownValidator.Helpers
 {
     [DebuggerDisplay("{Value}")]
     internal sealed class ReferenceInt : IEquatable<ReferenceInt>, IComparable<ReferenceInt>

@@ -8,7 +8,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MihaZupan.MarkdownValidator
+namespace MihaZupan.MarkdownValidator.Helpers
 {
     public static class LinqHelper
     {
@@ -46,6 +46,27 @@ namespace MihaZupan.MarkdownValidator
                 count++;
             }
             return -1;
+        }
+        public static bool All<T>(this IEnumerable<T> enumerable, Predicate<T> predicate)
+        {
+            foreach (var element in enumerable)
+            {
+                if (!predicate(element))
+                    return false;
+            }
+            return true;
+        }
+        public static bool All<ElementType>(this IEnumerable<object> enumerable, Predicate<ElementType> predicate)
+        {
+            foreach (var element in enumerable)
+            {
+                if (!(element is ElementType castElement))
+                    return false;
+
+                if (!predicate(castElement))
+                    return false;
+            }
+            return true;
         }
     }
 }

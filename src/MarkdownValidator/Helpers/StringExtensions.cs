@@ -7,7 +7,7 @@
 */
 using System;
 
-namespace MihaZupan.MarkdownValidator
+namespace MihaZupan.MarkdownValidator.Helpers
 {
     public static class StringExtensions
     {

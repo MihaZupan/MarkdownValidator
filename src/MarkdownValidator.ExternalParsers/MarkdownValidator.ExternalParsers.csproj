@@ -17,13 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.15.3" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Markdig">
-      <HintPath>..\..\..\markdig\src\Markdig\bin\Release\netstandard2.0\Markdig.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

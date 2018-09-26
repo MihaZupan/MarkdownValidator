@@ -19,7 +19,7 @@ namespace MihaZupan.MarkdownValidator.Tests
             // UnresolvedReference maps to the entire reference
             string source = @"[text](foo/bar)";
             SingleFileTest.AssertWarning(source,
-                WarningIDs.UnresolvedReference, 0, 14, "foo/bar");
+                WarningIDs.UnresolvedReference, 7, 13, "foo/bar");
         }
 
         [Fact]

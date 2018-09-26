@@ -20,6 +20,11 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             SourceFile = sourceFile;
         }
+        public ReferenceDefinition(string reference, string globalReference, MarkdownObject markdownObject, MarkdownFile sourceFile)
+            : base(reference, globalReference, markdownObject.Span, markdownObject.Line)
+        {
+            SourceFile = sourceFile;
+        }
 
         public override int GetHashCode()
         {

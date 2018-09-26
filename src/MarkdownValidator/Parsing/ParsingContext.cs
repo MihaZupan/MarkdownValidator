@@ -10,6 +10,7 @@ using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
+using static MihaZupan.MarkdownValidator.Helpers.PathHelper;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
@@ -58,29 +59,38 @@ namespace MihaZupan.MarkdownValidator.Parsing
             ParserIdentifier = parserIdentifier;
         }
 
-        public bool TryGetRelativePath(string reference, out string relativePath)
-            => Configuration.TryGetRelativePath(SourceFile.RelativePath, reference, out relativePath);
-        public bool TryGetRelativeHtmlPath(string reference, out string relativePath)
-            => Configuration.TryGetRelativePath(SourceFile.HtmlPath, reference, out relativePath);
+        internal PathProcessingResult ProcessRelativePath(string reference, out string relativePath)
+            => Configuration.PathHelper.ProcessRelativePath(SourceFile.RelativePath, reference, out relativePath);
+        internal PathProcessingResult ProcessRelativeHtmlPath(string reference, out string relativePath)
+            => Configuration.PathHelper.ProcessRelativePath(SourceFile.HtmlPath, reference, out relativePath);
 
         public bool TryAddReference(string reference, SourceSpan span, int line, bool isImage = false, bool canBeUrl = true, SourceSpan? errorSpan = null)
         {
-            if (TryGetRelativePath(reference, out string relativePath))
-            {
-                ParsingResult.AddReference(
-                    new Reference(
-                        reference,
-                        relativePath,
-                        span,
-                        line,
-                        isImage,
-                        canBeUrl));
-                return true;
-            }
-            else
+            var result = ProcessRelativePath(reference, out string relativePath);
+
+            if (result.HasFlag(PathProcessingResult.NotInContext))
             {
                 ReportPathOutOfContext(reference, errorSpan ?? span);
                 return false;
+            }
+            else if (result.HasFlag(PathProcessingResult.IsFsSpecific))
+            {
+                ReportPathIsFsSpecific(reference, errorSpan ?? span);
+                return false;
+            }
+            else
+            {
+                bool isUrl = result.HasFlag(PathProcessingResult.IsUrl);
+                ParsingResult.AddReference(
+                    new Reference(
+                        reference,
+                        isUrl ? reference : relativePath,
+                        span,
+                        line,
+                        isImage,
+                        isUrl,
+                        isUrl && canBeUrl));
+                return true;
             }
         }
         public void AddLocalReferenceDefinition(LinkReferenceDefinition referenceDefinition)
@@ -106,6 +116,15 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 span,
                 path,
                 "Path `{0}` is not in the validator's working directory",
+                path);
+        }
+        private void ReportPathIsFsSpecific(string path, SourceSpan span)
+        {
+            ReportWarning(
+                WarningIDs.PathIsFsSpecific,
+                span,
+                path,
+                "`{0}` is not a relative path to the markdown context",
                 path);
         }
         

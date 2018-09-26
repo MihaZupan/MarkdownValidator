@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using MihaZupan.MarkdownValidator.Helpers;
 using System;
 using System.Collections.Generic;
 

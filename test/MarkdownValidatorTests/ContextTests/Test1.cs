@@ -31,7 +31,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
                 .AssertNoWarnings()
                 .Update("\n[Bar](foo.md#tes)")
                 // ToDo: report accurate LinkReferenceDefinition locations (6, 16)
-                .Assert(WarningIDs.UnresolvedReference, 1, 17, "foo.md#tes")
+                .Assert(WarningIDs.UnresolvedReference, 7, 16, "foo.md#tes")
                 .Update("[Bar]: foo.md#test")
                 .Assert(WarningIDs.UnusedDefinedReference, 0, 17, "Bar")
                 .RemoveEntity("fOo.mD")

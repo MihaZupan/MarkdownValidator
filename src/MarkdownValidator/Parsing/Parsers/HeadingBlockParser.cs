@@ -7,6 +7,7 @@
 */
 using Markdig.Helpers;
 using Markdig.Syntax;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 
@@ -67,7 +68,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     rawText);
             }
 
-            context.TryGetRelativePath(headerUrl, out string relative);
+            context.ProcessRelativePath(headerUrl, out string relative);
             if (context.ParsingResult.HeadingDefinitions.ContainsAny(h =>
                 h.GlobalReference.Equals(relative, StringComparison.OrdinalIgnoreCase),
                 out ReferenceDefinition definition))
@@ -85,17 +86,15 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     new ReferenceDefinition(
                         rawText,
                         relative,
-                        heading.Span,
-                        heading.Line,
+                        context.Object,
                         context.SourceFile));
 
-                context.TryGetRelativeHtmlPath(headerUrl, out string relativeHtml);
+                context.ProcessRelativeHtmlPath(headerUrl, out string relativeHtml);
                 context.ParsingResult.HeadingDefinitions.Add(
                     new ReferenceDefinition(
                         rawText,
                         relativeHtml,
-                        heading.Span,
-                        heading.Line,
+                        context.Object,
                         context.SourceFile));
             }
         }

@@ -8,9 +8,16 @@ export function activate(context: ExtensionContext) {
     const exec = require('child_process').exec;
     const semver = require('semver');
     
-    exec('dotnet --version', function(error, data) {
-        if (!error && semver.satisfies(data, '>=2.1.0')) startExtension(context);
-        else showMissingDotnetCoreWarning();
+    exec('dotnet --info', function(error, data) {
+        let missingDotnet: boolean = true;
+        if (!error) {
+            let match = data.match(/Host.*[\r\n]*?.*?Version: (.*?)$/m);
+            if (match != null && semver.satisfies(match[1], ">=2.1.0"))
+                missingDotnet = false;
+        }
+
+        if (missingDotnet) showMissingDotnetCoreWarning();
+        else startExtension(context);
     });
 }
 
@@ -22,7 +29,7 @@ function showMissingDotnetCoreWarning()
 
     window.showErrorMessage(message, getDotNetMessage).then(value => {
         if (value == getDotNetMessage) {
-            require('open')(dotnetUrl);
+            require('opn')(dotnetUrl);
         }
     });
 
@@ -34,7 +41,7 @@ function showMissingDotnetCoreWarning()
 
 function startExtension(context: ExtensionContext)
 {
-    let dllPath = context.extensionPath + '\\bin\\MarkdownValidator.MarkdownLanguageServer.dll';
+    let dllPath = context.extensionPath + '/bin/MarkdownValidator.MarkdownLanguageServer.dll';
     let serverOptions: ServerOptions = {
         run: { command: 'dotnet', args: [dllPath] },
         debug: { command: 'dotnet', args: [dllPath]

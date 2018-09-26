@@ -7,6 +7,7 @@
 */
 using Markdig.Helpers;
 using Markdig.Syntax;
+using MihaZupan.MarkdownValidator.Helpers;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {

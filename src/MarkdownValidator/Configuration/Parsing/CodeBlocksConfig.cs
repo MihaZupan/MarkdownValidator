@@ -27,7 +27,6 @@ namespace MihaZupan.MarkdownValidator.Configuration
         {
             Parsers.Add(parser);
         }
-        public HashSet<string> DisabledParsers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Parser lists for these languages will be pre-prepared to improve performance
@@ -64,16 +63,5 @@ namespace MihaZupan.MarkdownValidator.Configuration
             "pascal",
             "matlab",
         };
-
-        internal void Initialize()
-        {
-            List<ICodeBlockParser> allowedParsers = new List<ICodeBlockParser>();
-            foreach (var parser in Parsers)
-            {
-                if (!DisabledParsers.Contains(parser.Identifier))
-                    allowedParsers.Add(parser);
-            }
-            Parsers = allowedParsers;
-        }
     }
 }

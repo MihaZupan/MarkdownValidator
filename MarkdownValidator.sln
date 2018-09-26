@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.MarkdownL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.ExternalParsers", "src\MarkdownValidator.ExternalParsers\MarkdownValidator.ExternalParsers.csproj", "{EBF81003-6090-4052-984E-9A0591C044AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fuzzer", "test\Fuzzer\Fuzzer.csproj", "{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fuzzer", "test\Fuzzer\Fuzzer.csproj", "{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

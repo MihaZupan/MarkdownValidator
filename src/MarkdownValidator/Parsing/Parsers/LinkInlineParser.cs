@@ -7,6 +7,7 @@
 */
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 
@@ -65,7 +66,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 if (link.Url.IsEffectivelyEmpty()) ReportEmptyReference(context);
                 else
                 {
-                    context.TryAddReference(link.Url, link.Span, link.Line, link.IsImage, canBeUrl, link.UrlSpan);
+                    context.TryAddReference(link.Url, link.UrlSpan.Value, link.Line, link.IsImage, canBeUrl, link.UrlSpan);
 
                     if (context.Source.OrdinalContains("( ") || context.Source.OrdinalContains(" )"))
                         ReportExcessSpace(context);

@@ -7,7 +7,7 @@
 */
 using System;
 
-namespace MihaZupan.MarkdownValidator
+namespace MihaZupan.MarkdownValidator.Helpers
 {
     internal static class HostnameHelper
     {

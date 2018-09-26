@@ -9,9 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MihaZupan.MarkdownValidator
+namespace MihaZupan.MarkdownValidator.Helpers
 {
-    internal static class DiffHelper
+    public static class DiffHelper
     {
         public static (List<T> removed, List<T> added) Diff<T>(ICollection<T> previous, ICollection<T> current, IEqualityComparer<T> comparer = null)
             => Diff(previous, current, previous.Count, comparer);
