@@ -5,7 +5,7 @@
   "description": "Extensible Markdown validator and analyzer",
   "author": "Miha Zupan",
   "license": "BSD-2-Clause",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "MihaZupan",
   "engines": {
     "vscode": "^1.25.0"
@@ -40,5 +40,23 @@
   },
   "dependencies": {
     "vscode-languageclient": "^5.0.3"
+  },
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "markdown_validator/workingDirView",
+          "name": "Markdown working directory",
+          "when": "markdown_validator/active"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "category": "MarkdownValidator",
+        "title": "Change Markdown Validator working directory",
+        "command": "markdown_validator/changeWorkingDirectory"
+      }
+    ]
   }
 }

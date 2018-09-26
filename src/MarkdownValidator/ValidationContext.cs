@@ -82,9 +82,9 @@ namespace MihaZupan.MarkdownValidator
             var node = unprocessedEntities.First;
             while (node != null)
             {
+                var next = node.Next;
                 bool allReferencesAreGood = true;
 
-                var next = node.Next;
                 if (ContextReferenceableEntities.TryGetValue(node.Value,
                     out (ReferenceDefinition Definition, LinkedList<MarkdownFile> Files) entity))
                 {

@@ -1,24 +1,49 @@
 'use strict';
 
-import { window, workspace, ExtensionContext } from 'vscode';
+import { ExtensionContext, window, commands, workspace, TreeDataProvider, TreeItem, OpenDialogOptions } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient';
+import { exec } from 'child_process';
+import { satisfies } from 'semver';
+
+var MarkdownContext: ExtensionContext;
+var LanguageServer: LanguageClient;
+var CurrentDirectory: string = process.cwd();
 
 export function activate(context: ExtensionContext) {
+    MarkdownContext = context;
 
-    const exec = require('child_process').exec;
-    const semver = require('semver');
-    
     exec('dotnet --info', function(error, data) {
         let missingDotnet: boolean = true;
         if (!error) {
             let match = data.match(/Host.*[\r\n]*?.*?Version: (.*?)$/m);
-            if (match != null && semver.satisfies(match[1], ">=2.1.0"))
+            if (match != null && satisfies(match[1], ">=2.1.0"))
                 missingDotnet = false;
         }
-
+        
         if (missingDotnet) showMissingDotnetCoreWarning();
-        else startExtension(context);
+        else startExtension();
     });
+
+    registerChangeDirectoryCommand();
+}
+
+function registerChangeDirectoryCommand() {
+    commands.registerCommand('markdown_validator/changeWorkingDirectory', async => {
+        let options: OpenDialogOptions = {
+            "canSelectMany": false,
+            "canSelectFiles": false,
+            "canSelectFolders": true,
+            "openLabel": "Choose a markdown working directory"
+        };
+        window.showOpenDialog(options).then(folder => {
+            if (folder != undefined)
+            {
+                CurrentDirectory = folder[0].fsPath;
+                console.log("Changing Markdown Validator working directory to " + CurrentDirectory);
+                LanguageServer.sendRequest('markdown_validator/changeWorkingDirectory', { "NewDirectory": CurrentDirectory });
+            }
+        });
+    })
 }
 
 function showMissingDotnetCoreWarning()
@@ -39,9 +64,9 @@ function showMissingDotnetCoreWarning()
     outputChannel.show();
 }
 
-function startExtension(context: ExtensionContext)
+function startExtension()
 {
-    let dllPath = context.extensionPath + '/bin/MarkdownValidator.MarkdownLanguageServer.dll';
+    let dllPath = MarkdownContext.extensionPath + '/bin/MarkdownValidator.MarkdownLanguageServer.dll';
     let serverOptions: ServerOptions = {
         run: { command: 'dotnet', args: [dllPath] },
         debug: { command: 'dotnet', args: [dllPath]
@@ -55,13 +80,31 @@ function startExtension(context: ExtensionContext)
             }
         ],
         synchronize: {
-            configurationSection: 'markdown_validator',
-            fileEvents: workspace.createFileSystemWatcher('**/*.md')
+            fileEvents: workspace.createFileSystemWatcher('**')
         },
     }
     
-    const client = new LanguageClient('markdown-validator', 'Markdown Validator', serverOptions, clientOptions);
-    let disposable = client.start();
+    LanguageServer = new LanguageClient('markdown-validator', 'Markdown Validator', serverOptions, clientOptions);
+    let disposable = LanguageServer.start();
     
-    context.subscriptions.push(disposable);
+    window.registerTreeDataProvider('markdown_validator/workingDirView', new MarkdownValidatorTreeViewProvider());
+    commands.executeCommand('setContext', 'markdown_validator/active', true);
+    
+    MarkdownContext.subscriptions.push(disposable);
+}
+
+export class MarkdownValidatorTreeViewProvider implements TreeDataProvider<TreeItem> {
+
+    getTreeItem(element) {
+		return element;
+    }
+    
+    getChildren()
+    {
+        let changeDirectory = new TreeItem('Change directory');
+        changeDirectory.tooltip = 'Choose a new root directory for the Markdown Validator';
+        changeDirectory.command = { title: '', command: 'markdown_validator/changeWorkingDirectory'};
+
+        return Promise.resolve([changeDirectory]);
+    }
 }

@@ -16,6 +16,7 @@ using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using Newtonsoft.Json;
 using OmniSharp.Extensions.Embedded.MediatR;
+using OmniSharp.Extensions.JsonRpc;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
@@ -24,7 +25,15 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Server.Capabilities;
 
 namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
 {
-    class MarkdownDocumentHandler : ITextDocumentSyncHandler, IDidChangeWatchedFilesHandler
+    class CDParams : IRequest
+    {
+        public string NewDirectory { get; set; }
+    }
+
+    [Method("markdown_validator/changeWorkingDirectory")]
+    interface IChangeDirectoryRequestHandler : IJsonRpcNotificationHandler<CDParams> { }
+
+    class MarkdownDocumentHandler : ITextDocumentSyncHandler, IDidChangeWatchedFilesHandler, IChangeDirectoryRequestHandler
     {
         public TextDocumentSyncKind Change => TextDocumentSyncKind.Full;
         private static readonly DocumentSelector _documentSelector = new DocumentSelector(
@@ -49,13 +58,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             string text = request.ContentChanges.Single().Text;
             string path = PathHelper.GetPathFromFileUri(request.TextDocument.Uri);
 
-            if (text.Length == 0)
-            {
-                _router.Window.LogWarning("Empty");
-            }
-
-            if (!_validator.UpdateMarkdownFile(path, text))
-                _validator.AddMarkdownFile(path, text);
+            TryUpdate(path, text);
 
             Validate();
 
@@ -66,8 +69,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             string text = request.TextDocument.Text;
             string path = PathHelper.GetPathFromFileUri(request.TextDocument.Uri);
 
-            if (!_validator.UpdateMarkdownFile(path, text))
-                _validator.AddMarkdownFile(path, text);
+            TryUpdate(path, text);
 
             Validate();
 
@@ -80,8 +82,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             string text = request.Text;
             string path = PathHelper.GetPathFromFileUri(request.TextDocument.Uri);
 
-            if (!_validator.UpdateMarkdownFile(path, text))
-                _validator.AddMarkdownFile(path, text);
+            TryUpdate(path, text);
 
             Validate();
 
@@ -89,18 +90,22 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         }
         public Task<Unit> Handle(DidChangeWatchedFilesParams request, CancellationToken cancellationToken)
         {
-            bool deleted = false;
+            bool shouldRevalidate = false;
             foreach (var change in request.Changes)
             {
                 if (change.Type == FileChangeType.Deleted)
                 {
-                    _validator.RemoveEntity(PathHelper.GetPathFromFileUri(change.Uri));
-                    deleted = true;
-                    break;
+                    TryRemove(PathHelper.GetPathFromFileUri(change.Uri));
+                    shouldRevalidate = true;
+                }
+                else if (change.Type == FileChangeType.Created)
+                {
+                    TryAdd(PathHelper.GetPathFromFileUri(change.Uri));
+                    shouldRevalidate = true;
                 }
             }
 
-            if (deleted)
+            if (shouldRevalidate)
                 Validate();
 
             return Unit.Task;
@@ -119,11 +124,16 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         public const string ConfigurationFileName = ".markdown-validator.json";
 
         private readonly ILanguageServer _router;
-        private readonly MarkdownContextValidator _validator;
+        private MarkdownContextValidator _validator;
 
         public MarkdownDocumentHandler(ILanguageServer router)
         {
             _router = router;
+            Init();
+            RevalidationTimer = new Timer(s => Validate());
+        }
+        private void Init()
+        {
 
             Config configuration = null;
 
@@ -177,17 +187,22 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
                 }
             }
 
-            Task.Run(() =>
+            Parallel.ForEach(files, new ParallelOptions() { MaxDegreeOfParallelism = 2 },
+                file =>
+                {
+                    string source = File.ReadAllText(file);
+                    _validator.AddMarkdownFile(file, source);
+                });
+        }
+        private void Clear()
+        {
+            var diagnostics = Array.Empty<Diagnostic>();
+            foreach (string file in PreviousReport.WarningsByFile.Keys)
             {
-                Parallel.ForEach(files, new ParallelOptions() { MaxDegreeOfParallelism = 2 },
-                    file =>
-                    {
-                        string source = File.ReadAllText(file);
-                        _validator.AddMarkdownFile(file, source);
-                    });
-            });
-
-            RevalidationTimer = new Timer(s => Validate());
+                string path = Path.Combine(PreviousReport.Configuration.RootWorkingDirectory, file);
+                PublishDiagnostics(diagnostics, path);
+            }
+            PreviousReport = ValidationReport.Empty;
         }
         private static bool IsMarkdownFile(string path)
             => path.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
@@ -205,6 +220,45 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             }
         }
         private string WasMarkdownConfigurationInvalid = null;
+
+        private void TryAdd(string path)
+        {
+            try
+            {
+                _validator.AddEntity(path);
+            }
+            catch
+            {
+                OnFailed(path);
+            }
+        }
+        private void TryRemove(string path)
+        {
+            try
+            {
+                _validator.RemoveEntity(path);
+            }
+            catch
+            {
+                OnFailed(path);
+            }
+        }
+        private void TryUpdate(string path, string source)
+        {
+            try
+            {
+                if (!_validator.UpdateMarkdownFile(path, source))
+                    _validator.AddEntity(path);
+            }
+            catch
+            {
+                OnFailed(path);
+            }
+        }
+        private void OnFailed(string path)
+        {
+            _router.Window.LogError("This file is not in the current working directory!");
+        }
 
         private readonly Timer RevalidationTimer;
         private ValidationReport PreviousReport = ValidationReport.Empty;
@@ -264,17 +318,22 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
                         fileDiagnostics = Array.Empty<Diagnostic>();
                     }
 
-                    if (path[0] != '/') // It is already there on linux, has to be added on windows
-                        path = '/' + path;
-
-                    _router.Document.PublishDiagnostics(new PublishDiagnosticsParams()
-                    {
-                        Uri = new Uri("file://" + path),
-                        Diagnostics = new Container<Diagnostic>(fileDiagnostics)
-                    });
+                    PublishDiagnostics(fileDiagnostics, path);
                 }
             }
         }
+        private void PublishDiagnostics(Diagnostic[] diagnostics, string path)
+        {
+            if (path[0] != '/') // It is already there on linux, has to be added on windows
+                path = '/' + path;
+
+            _router.Document.PublishDiagnostics(new PublishDiagnosticsParams()
+            {
+                Uri = new Uri("file://" + path),
+                Diagnostics = new Container<Diagnostic>(diagnostics)
+            });
+        }
+
         private static DiagnosticSeverity ToDiagnosticSeverity(Warning warning)
         {
             if (warning.IsError) return DiagnosticSeverity.Error;
@@ -292,6 +351,15 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             {
                 return new Range(new Position(0, 0), new Position(0, 0));
             }
+        }
+
+        public Task<Unit> Handle(CDParams request, CancellationToken cancellationToken)
+        {
+            Environment.CurrentDirectory = Path.GetFullPath(request.NewDirectory);
+            Clear();
+            Init();
+            Validate();
+            return Unit.Task;
         }
     }
 }
