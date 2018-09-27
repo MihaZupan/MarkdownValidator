@@ -18,6 +18,7 @@ namespace MihaZupan.MarkdownValidator.Helpers
     public class PathHelper
     {
         private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        private static readonly char Separator = IsWindows ? '\\' : '/';
 
         private readonly string RootDirectory;
         private readonly int RootDirectoryLength;
@@ -32,14 +33,10 @@ namespace MihaZupan.MarkdownValidator.Helpers
         {
             if (fullPath.Length > RootDirectoryLength)
             {
-                char separator = fullPath[RootDirectoryLength];
-                if (separator == '/' || separator == '\\')
+                if (fullPath.StartsWith(RootDirectory, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (fullPath.StartsWith(RootDirectory, StringComparison.OrdinalIgnoreCase))
-                    {
-                        relativePath = fullPath.Substring(RootDirectoryLength + 1);
-                        return true;
-                    }
+                    relativePath = fullPath.Substring(RootDirectoryLength);
+                    return true;
                 }
             }
             else if (fullPath.Equals(RootDirectory, StringComparison.OrdinalIgnoreCase))
@@ -90,6 +87,13 @@ namespace MihaZupan.MarkdownValidator.Helpers
             NotInContext = 1,
             IsUrl = 2,
             IsFsSpecific = 4,
+        }
+
+        public static string GetDirectoryWithSeparator(string path)
+        {
+            return path.Length == 0
+                ? Environment.CurrentDirectory + Separator
+                : Path.GetFullPath(path).TrimEnd('\\', '/') + Separator;
         }
 
         public static bool IsFsSpecific(string path)

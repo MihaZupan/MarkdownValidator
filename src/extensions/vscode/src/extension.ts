@@ -80,7 +80,7 @@ function startExtension()
             }
         ],
         synchronize: {
-            fileEvents: workspace.createFileSystemWatcher('**')
+            fileEvents: workspace.createFileSystemWatcher('**', false, true, false)
         },
     }
     

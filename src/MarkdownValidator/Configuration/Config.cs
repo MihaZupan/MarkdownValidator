@@ -12,7 +12,6 @@ using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using MihaZupan.MarkdownValidator.WebIO;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace MihaZupan.MarkdownValidator.Configuration
 {
@@ -77,9 +76,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
             if (RootWorkingDirectory is null)
                 throw new ArgumentNullException(nameof(RootWorkingDirectory));
 
-            RootWorkingDirectory = RootWorkingDirectory.Length == 0
-                ? Environment.CurrentDirectory
-                : Path.GetFullPath(RootWorkingDirectory).TrimEnd('\\', '/');
+            RootWorkingDirectory = PathHelper.GetDirectoryWithSeparator(RootWorkingDirectory);
 
             PathHelper = new PathHelper(RootWorkingDirectory);
 
