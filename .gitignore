@@ -1,6 +1,8 @@
 .vs
+.vscode
 bin
 obj
 packages
 
 test-data
+*.bat

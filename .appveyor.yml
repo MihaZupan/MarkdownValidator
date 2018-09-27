@@ -1,0 +1,25 @@
+version: '{build}'
+max_jobs: 1
+
+branches:
+  only:
+    - master
+
+image: Visual Studio 2017
+configuration: Release
+
+install:
+  - dotnet tool install -g coveralls.net --version 1.0.0
+
+before_build:
+  - nuget restore -verbosity quiet
+
+build:
+  project: MarkdownValidator.sln
+  verbosity: minimal
+
+test_script:
+  - dotnet test ./test/MarkdownValidatorTests -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../../coverage.xml
+ 
+after_test:
+  - csmacnz.Coveralls --opencover -i ./coverage.xml --useRelativePaths

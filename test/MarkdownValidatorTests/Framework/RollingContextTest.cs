@@ -44,15 +44,22 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
             return this;
         }
 
-        public RollingContextTest AddEntity(string path)
+        public RollingContextTest AddMarkdownFile(string source, string fileName = DefaultFileName, bool assertReturn = true)
         {
-            Validator.AddEntity(path);
+            source = SourceHelper.CleanSource(source);
+            Xunit.Assert.Equal(assertReturn, Validator.AddMarkdownFile(fileName, source));
             return this;
         }
 
-        public RollingContextTest RemoveEntity(string path)
+        public RollingContextTest AddEntity(string path, bool assertReturn = true)
         {
-            Validator.RemoveEntity(path);
+            Xunit.Assert.Equal(assertReturn, Validator.AddEntity(path));
+            return this;
+        }
+
+        public RollingContextTest RemoveEntity(string path, bool assertReturn = true)
+        {
+            Xunit.Assert.Equal(assertReturn, Validator.RemoveEntity(path));
             return this;
         }
 
@@ -120,6 +127,12 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         public RollingContextTest AssertNoWarnings()
         {
             Xunit.Assert.Empty(Validator.Validate(ValidateFully).WarningsByFile);
+            return this;
+        }
+
+        public RollingContextTest AssertHasWarnings()
+        {
+            Xunit.Assert.NotEmpty(Validator.Validate(ValidateFully).WarningsByFile);
             return this;
         }
 

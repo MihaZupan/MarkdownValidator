@@ -101,9 +101,10 @@ namespace MihaZupan.MarkdownValidator.Helpers
             if (path.Length != 0 && (path[0] == '/' || path[0] == '~'))
                 return true;
 
-            return IsWindows
-                ? path.Length > 1 && path[1] == ':'
-                : false;
+            if (path.Length > 1 && path[1] == ':')
+                return true;
+
+            return false;
         }
 
         public static string GetPathFromFileUri(Uri fileUri)
