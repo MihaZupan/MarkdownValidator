@@ -27,7 +27,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public List<ReferenceDefinition> LocalReferenceDefinitions = new List<ReferenceDefinition>();
         public readonly Dictionary<string, List<Reference>> References = new Dictionary<string, List<Reference>>(StringComparer.OrdinalIgnoreCase);
         public readonly LinkedList<string> UnprocessedReferences = new LinkedList<string>();
-        public readonly LinkedList<AsyncProgress> AsyncOperations = new LinkedList<AsyncProgress>();
+        public readonly LinkedList<PendingOperation> PendingOperations = new LinkedList<PendingOperation>();
 
         public ParsingResult(string source, Config configuration)
         {
@@ -61,12 +61,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
                         (definedReferences[definition.RawReference].Line + 1).ToString());
                 }
             }
-
             Span<int> headingLines = stackalloc int[HeadingDefinitions.Count];
             for (int i = 0; i < HeadingDefinitions.Count; i++)
                 headingLines[i] = HeadingDefinitions[i].Line;
-
-            context.SetWarningSource(WarningSource.LinkReferenceProcessor);
 
             foreach (var referenceList in References.Values)
             {
@@ -114,15 +111,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
                         definition.RawReference);
                 }
             }
-
-            // Release some resources
-            if (AsyncOperations.Count == 0) // If there are any async operations left, source might be needed
-            {
-                Source = null;
-                SyntaxTree = null;
-            }
-            LocalReferenceDefinitions = null;
-            ParserStorage = null;
         }
         public void AddReference(Reference referencedEntity)
         {
@@ -134,6 +122,14 @@ namespace MihaZupan.MarkdownValidator.Parsing
             {
                 References.Add(referencedEntity.GlobalReference, new List<Reference>() { referencedEntity });
             }
+        }
+
+        public void Release()
+        {
+            Source = null;
+            SyntaxTree = null;
+            LocalReferenceDefinitions = null;
+            ParserStorage = null;
         }
     }
 }

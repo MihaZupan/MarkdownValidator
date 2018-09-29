@@ -13,15 +13,11 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
     public class Url
     {
-        [Fact]
-        public void NoWarning()
-        {
-            SingleFileTest.AssertNoWarnings("http://test.com", false);
-        }
-
         [Theory]
         [InlineData("[foo](://test.com)")]
         [InlineData("[foo](http://test.com:)")]
+        [InlineData("[foo](http://1.2.3.-4)")]
+        [InlineData("[foo](`https://`)")]
         public void InvalidFormat(string value)
         {
             SingleFileTest.AssertContainsWarning(value, WarningIDs.InvalidUrlFormat, false);
@@ -46,6 +42,12 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("[foo](http://198.51.100.55/)")]
         [InlineData("[foo]: http://[2001:DB8::]")]
         [InlineData("http://gugl/.../")]
+        [InlineData("http://google.com/.../")]
+        [InlineData("[Foo](http://google.com/<search>)")]
+        [InlineData("[Foo](http://127.0.0.1)")]
+        [InlineData("[Foo](http://10.5.10.15)")]
+        [InlineData("[Foo](http://192.168.1.1)")]
+        [InlineData("[Foo](http://172.20.233.255)")]
         public void DocumentationReserved(string value)
         {
             SingleFileTest.AssertNotPresent(value,

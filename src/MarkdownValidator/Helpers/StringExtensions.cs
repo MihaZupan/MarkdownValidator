@@ -86,11 +86,5 @@ namespace MihaZupan.MarkdownValidator.Helpers
 
         public static bool OrdinalStartsWith(this string source, string value)
             => source.StartsWith(value, StringComparison.Ordinal);
-
-        public static string SubstringAfter(this string source, char value)
-        {
-            int charIndex = source.IndexOf(value);
-            return source.Substring(charIndex + 1);
-        }
     }
 }

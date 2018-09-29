@@ -19,15 +19,21 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public static void AssertWarnings(
             string source,
-            params (WarningID ID, int Start, int End, string Value)[] warnings)
+            List<(WarningID ID, int Start, int End, string Value)> warnings,
+            bool fully)
         {
-            var report = ValidationReportProvider.GetReport(DefaultFileName, source);
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
             Assert.True(report.WarningsByFile.TryGetValue(DefaultFileName, out List<Warning> reportWarnings));
-            WarningComparer.AssertMatch(reportWarnings, warnings.ToList(), DefaultFileName);
+            WarningComparer.AssertMatch(reportWarnings, warnings, DefaultFileName);
         }
 
-        public static void AssertWarning(string source, WarningID id, int start, int end, string value)
-            => AssertWarnings(source, (id, start, end, value));
+        public static void AssertWarnings(
+            string source,
+            params (WarningID ID, int Start, int End, string Value)[] warnings)
+            => AssertWarnings(source, warnings.ToList(), false);
+
+        public static void AssertWarning(string source, WarningID id, int start, int end, string value, bool fully = true)
+            => AssertWarnings(source, new[] {(id, start, end, value)}.ToList(), fully);
 
         public static void AssertNoWarnings(string source, bool fully = true)
         {
@@ -55,6 +61,12 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
             var report = ValidationReportProvider.GetReport(DefaultFileName, source);
             foreach (var id in ids)
                 WarningComparer.AssertNotContains(report.WarningsByFile, id);
+        }
+
+        public static void AssertWarningsPresent(string source, bool fully = true)
+        {
+            var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
+            Assert.NotEmpty(report.WarningsByFile);
         }
     }
 }

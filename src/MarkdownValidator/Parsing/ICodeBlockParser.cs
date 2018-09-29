@@ -6,6 +6,8 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 
+using MihaZupan.MarkdownValidator.Configuration;
+
 namespace MihaZupan.MarkdownValidator.Parsing
 {
     public interface ICodeBlockParser
@@ -19,6 +21,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         /// <param name="info">The language info specified at the start of the code block</param>
         /// <returns></returns>
         bool SupportsLanguage(string info);
+        void Initialize(Config configuration);
         void ParseCodeBlock(CodeBlockInfo codeBlock, ParsingContext context);
     }
 }

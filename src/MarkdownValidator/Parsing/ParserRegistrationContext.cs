@@ -27,5 +27,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public void RegisterFinalizer(Action<ParsingContext> action)
             => ParsingController.RegisterFinalizer(ParserIdentifier, action);
+
+        public void RegisterUrlRewriter(string hostname, Func<Uri, Uri> rewriter)
+            => Configuration.WebIO.RegisterUrlRewriter(hostname, rewriter);
     }
 }

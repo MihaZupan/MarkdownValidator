@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
-using Newtonsoft.Json;
 using OmniSharp.Extensions.Embedded.MediatR;
 using OmniSharp.Extensions.JsonRpc;
 using OmniSharp.Extensions.LanguageServer.Protocol;
@@ -134,34 +133,7 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         }
         private void Init()
         {
-
-            Config configuration = null;
-
-            string path = ConfigurationFileName;
-            if (File.Exists(path))
-            {
-                configuration = TryLoadConfiguration(path);
-            }
-            if (configuration != null)
-            {
-                path = Path.Combine(Path.GetDirectoryName(Environment.CurrentDirectory), ConfigurationFileName);
-                if (File.Exists(path))
-                {
-                    configuration = TryLoadConfiguration(path);
-                }
-            }
-            if (configuration != null)
-            {
-                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ConfigurationFileName);
-                if (File.Exists(path))
-                {
-                    configuration = TryLoadConfiguration(path);
-                }
-            }
-
-            if (configuration == null) configuration = new Config(string.Empty);
-            else configuration.RootWorkingDirectory = string.Empty;
-            _validator = new MarkdownContextValidator(configuration);
+            _validator = new MarkdownContextValidator(new Config(string.Empty));
 
             List<string> files = new List<string>();
             Stack<string> directories = new Stack<string>();
@@ -206,20 +178,6 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         }
         private static bool IsMarkdownFile(string path)
             => path.EndsWith(".md", StringComparison.OrdinalIgnoreCase);
-        private Config TryLoadConfiguration(string path)
-        {
-            string json = File.ReadAllText(path);
-            try
-            {
-                return JsonConvert.DeserializeObject<Config>(json);
-            }
-            catch
-            {
-                WasMarkdownConfigurationInvalid = path;
-                return null;
-            }
-        }
-        private string WasMarkdownConfigurationInvalid = null;
 
         private void TryAdd(string path)
         {
@@ -227,9 +185,9 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             {
                 _validator.AddEntity(path);
             }
-            catch
+            catch (ArgumentException ae)
             {
-                OnFailed(path);
+                OnOutOfContext(path, ae);
             }
         }
         private void TryRemove(string path)
@@ -238,9 +196,9 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
             {
                 _validator.RemoveEntity(path);
             }
-            catch
+            catch (ArgumentException ae)
             {
-                OnFailed(path);
+                OnOutOfContext(path, ae);
             }
         }
         private void TryUpdate(string path, string source)
@@ -250,14 +208,18 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
                 if (!_validator.UpdateMarkdownFile(path, source))
                     _validator.AddEntity(path);
             }
-            catch
+            catch (ArgumentException ae)
             {
-                OnFailed(path);
+                OnOutOfContext(path, ae);
             }
         }
-        private void OnFailed(string path)
+        private void OnOutOfContext(string path, ArgumentException ae)
         {
-            _router.Window.LogError("This file is not in the current working directory!");
+            if (ae.Message.EndsWith("is not a child path of the root working directory of the context", StringComparison.Ordinal))
+            {
+                _router.Window.LogError($"{path} is not in the current working directory!");
+            }
+            else throw ae;
         }
 
         private readonly Timer RevalidationTimer;
@@ -266,21 +228,10 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
         {
             lock (RevalidationTimer)
             {
-                if (WasMarkdownConfigurationInvalid != null)
-                {
-                    WasMarkdownConfigurationInvalid = Path.GetFullPath(WasMarkdownConfigurationInvalid);
-                    _router.Window.ShowError($"Invalid configuration format at `{WasMarkdownConfigurationInvalid}`");
-                    string defaultConfigName =
-                        Path.GetFileNameWithoutExtension(ConfigurationFileName) + "-default" + Path.GetExtension(ConfigurationFileName);
-                    string path = Path.Combine(Path.GetDirectoryName(WasMarkdownConfigurationInvalid), defaultConfigName);
-                    File.WriteAllText(path, JsonConvert.SerializeObject(new Config(null), Formatting.Indented));
-                    WasMarkdownConfigurationInvalid = null;
-                }
-
                 var report = _validator.Validate();
 
                 if (report.IsComplete) RevalidationTimer.Change(Timeout.Infinite, Timeout.Infinite);
-                else RevalidationTimer.Change(Math.Max(report.SuggestedWait, 100), Timeout.Infinite);
+                else RevalidationTimer.Change(200, Timeout.Infinite);
 
                 if (report == PreviousReport)
                     return;

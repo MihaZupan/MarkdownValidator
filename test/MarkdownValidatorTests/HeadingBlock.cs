@@ -14,6 +14,14 @@ namespace MihaZupan.MarkdownValidator.Tests
     public class HeadingBlock
     {
         [Fact]
+        public void ReferenceInHeading()
+        {
+            // References defined on heading lines are ignored
+            string source = @"# Foo Hello [World] Bar";
+            SingleFileTest.AssertNoWarnings(source);
+        }
+
+        [Fact]
         public void Empty_Single()
         {
             string source = @"#";

@@ -22,9 +22,10 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public static readonly WarningID EmptyMarkdownFile              = new WarningID(0,  nameof(EmptyMarkdownFile));
         public static readonly WarningID UnusedDefinedReference         = new WarningID(1,  nameof(UnusedDefinedReference));
         public static readonly WarningID UnusedDefinedFootnote          = new WarningID(2,  nameof(UnusedDefinedFootnote));
-        public static readonly WarningID HeadingEndsWithWhitespace      = new WarningID(2,  nameof(HeadingEndsWithWhitespace));
-        public static readonly WarningID ReferenceHasExcessWhitespace   = new WarningID(3,  nameof(ReferenceHasExcessWhitespace));
+        public static readonly WarningID HeadingEndsWithWhitespace      = new WarningID(3,  nameof(HeadingEndsWithWhitespace));
+        public static readonly WarningID ReferenceHasExcessWhitespace   = new WarningID(4,  nameof(ReferenceHasExcessWhitespace));
         public static readonly WarningID FileReferenceCaseMismatch      = new WarningID(5,  nameof(FileReferenceCaseMismatch));
+        public static readonly WarningID RedirectChain                  = new WarningID(6,  nameof(RedirectChain));
 
         //
         // Errors
@@ -47,5 +48,10 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public static readonly WarningID EmptyLinkContent               = new WarningID(ErrorID + 14,   nameof(EmptyLinkContent));
         public static readonly WarningID EmptyFootnoteDefinition        = new WarningID(ErrorID + 15,   nameof(EmptyFootnoteDefinition));
         public static readonly WarningID UnclosedCodeBlock              = new WarningID(ErrorID + 16,   nameof(UnclosedCodeBlock));
+        public static readonly WarningID UnresolvableHostname           = new WarningID(ErrorID + 17,   nameof(UnresolvableHostname));
+        public static readonly WarningID WebRequestFailed               = new WarningID(ErrorID + 18,   nameof(WebRequestFailed));
+        public static readonly WarningID TooManyRedirects               = new WarningID(ErrorID + 19,   nameof(TooManyRedirects));
+        public static readonly WarningID WebRequestReturnedErrorCode    = new WarningID(ErrorID + 20,   nameof(WebRequestReturnedErrorCode));
+        public static readonly WarningID WebRequestTimedOut             = new WarningID(ErrorID + 21,   nameof(WebRequestTimedOut));
     }
 }

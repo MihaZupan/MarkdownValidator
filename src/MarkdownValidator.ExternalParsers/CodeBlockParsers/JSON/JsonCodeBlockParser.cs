@@ -5,6 +5,7 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Parsing;
 using System;
 
@@ -18,6 +19,8 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers.CodeBlockParsers.JSON
 
         public bool SupportsLanguage(string info)
             => info.Equals("json", StringComparison.OrdinalIgnoreCase);
+
+        public virtual void Initialize(Config configuration) { }
 
         public abstract void ParseCodeBlock(CodeBlockInfo codeBlock, ParsingContext context);
     }

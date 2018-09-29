@@ -80,13 +80,12 @@ namespace MihaZupan.MarkdownValidator.Helpers
                 throw new ArgumentException($"{path} is not a child path of the root working directory of the context");
         }
 
-        [Flags]
         internal enum PathProcessingResult
         {
-            OK = 0,
-            NotInContext = 1,
-            IsUrl = 2,
-            IsFsSpecific = 4,
+            OK,
+            NotInContext,
+            IsUrl,
+            IsFsSpecific,
         }
 
         public static string GetDirectoryWithSeparator(string path)

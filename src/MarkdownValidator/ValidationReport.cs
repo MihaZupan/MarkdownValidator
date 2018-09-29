@@ -22,12 +22,6 @@ namespace MihaZupan.MarkdownValidator
         /// </summary>
         public readonly bool IsComplete;
 
-        /// <summary>
-        /// Indicates how many milliseconds to wait before calling <see cref="MarkdownContextValidator.Validate"/> again (in case <see cref="IsComplete"/> is false
-        /// <para>If <see cref="IsComplete"/> is set to true, <see cref="SuggestedWait"/> will have a value of -1</para>
-        /// </summary>
-        public readonly int SuggestedWait;
-
         public readonly Config Configuration;
 
         /// <summary>
@@ -36,11 +30,10 @@ namespace MihaZupan.MarkdownValidator
         public readonly Dictionary<string, List<Warning>> WarningsByFile = new Dictionary<string, List<Warning>>(StringComparer.Ordinal);
         public int WarningCount { get; private set; } = 0;
 
-        internal ValidationReport(Config configuration, bool complete, int suggestedWait = -1)
+        internal ValidationReport(Config configuration, bool complete)
         {
             Configuration = configuration;
             IsComplete = complete;
-            SuggestedWait = IsComplete ? -1 : suggestedWait;
         }
 
         internal ValidationReport AddWarning(WarningID id, WarningLocation location, string value, string messageFormat, params string[] messageArgs)
@@ -89,6 +82,8 @@ namespace MihaZupan.MarkdownValidator
         {
             if (other is null)
                 return false;
+            if (IsComplete != other.IsComplete) return false;
+            if (WarningCount != other.WarningCount) return false;
             return Diff(other).NoChange;
         }
         public static bool operator ==(ValidationReport a, ValidationReport b)

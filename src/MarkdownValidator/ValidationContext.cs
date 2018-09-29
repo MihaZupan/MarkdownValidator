@@ -11,6 +11,8 @@ using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 
 namespace MihaZupan.MarkdownValidator
@@ -32,8 +34,8 @@ namespace MihaZupan.MarkdownValidator
             new Dictionary<string, MarkdownFile>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<MarkdownFile> UnfinishedMarkdownFiles =
             new HashSet<MarkdownFile>();
-        private readonly Dictionary<MarkdownFile, LinkedList<AsyncProgress>> AsyncOperations =
-            new Dictionary<MarkdownFile, LinkedList<AsyncProgress>>();
+        private readonly Dictionary<MarkdownFile, LinkedList<PendingOperation>> PendingOperations =
+            new Dictionary<MarkdownFile, LinkedList<PendingOperation>>();
 
         // Dictionary names, file names, fragment identifiers and a corresponding list of markdown files that reference them
         // Each reference shouldn't get too many files pointing at it, so using a HashSet here is not necesarry
@@ -54,27 +56,30 @@ namespace MihaZupan.MarkdownValidator
                 UnfinishedMarkdownFiles.Add(file);
             }
         }
-        private void AddAsyncOperations(MarkdownFile file)
+        private void AddPendingOperations(MarkdownFile file, bool clearFirst = false)
         {
-            if (file.ParsingResult.AsyncOperations.Count == 0)
+            if (clearFirst)
+                PendingOperations.Remove(file);
+
+            if (file.ParsingResult.PendingOperations.Count == 0)
                 return;
 
-            if (AsyncOperations.TryGetValue(file, out LinkedList<AsyncProgress> asyncOperations))
+            if (PendingOperations.TryGetValue(file, out LinkedList<PendingOperation> operations))
             {
-                foreach (var asyncOperation in file.ParsingResult.AsyncOperations)
+                foreach (var operation in file.ParsingResult.PendingOperations)
                 {
-                    asyncOperations.AddLast(asyncOperation);
+                    operations.AddLast(operation);
                 }
             }
             else
             {
-                AsyncOperations.Add(file, file.ParsingResult.AsyncOperations);
+                PendingOperations.Add(file, file.ParsingResult.PendingOperations);
             }
         }
 
         private void ReparseMarkdownFile(MarkdownFile file)
         {
-            UpdateInternalContext(file, file.Update());
+            UpdateInternalContext(file, file.Update(), true);
         }
         private bool RefreshInternalContext(MarkdownFile file, ValidationReport report)
         {
@@ -138,6 +143,7 @@ namespace MihaZupan.MarkdownValidator
                 ContextReferenceableEntities.Add(
                     file.HtmlPath,
                     (null, new LinkedList<MarkdownFile>()));
+                IndexedEntities.Add(file.HtmlPath);
             }
 
             foreach (var definedReference in file.ParsingResult.HeadingDefinitions)
@@ -147,7 +153,7 @@ namespace MihaZupan.MarkdownValidator
                     (definedReference, new LinkedList<MarkdownFile>()));
             }
 
-            AddAsyncOperations(file);
+            AddPendingOperations(file);
             UnfinishedMarkdownFiles.Add(file);
         }
         private void RemoveMarkdownFileFromInternalContext(MarkdownFile file)
@@ -167,10 +173,10 @@ namespace MihaZupan.MarkdownValidator
                     entity.Files.Remove(file);
                 }
             }
-            AsyncOperations.Remove(file);
+            PendingOperations.Remove(file);
             UnfinishedMarkdownFiles.Remove(file);
         }
-        private void UpdateInternalContext(MarkdownFile file, ParsingResultGlobalDiff diff)
+        private void UpdateInternalContext(MarkdownFile file, ParsingResultGlobalDiff diff, bool reparsing = false)
         {
             foreach (var removedHeadingDefinition in diff.RemovedHeadingDefinitions)
             {
@@ -192,8 +198,50 @@ namespace MihaZupan.MarkdownValidator
                 }
             }
 
-            AddAsyncOperations(file);
+            AddPendingOperations(file, !reparsing);
             UnfinishedMarkdownFiles.Add(file);
+        }
+
+        private void TryProcessPendingOperations(bool getFullReport, CancellationToken cancellationToken)
+        {
+            // Check async operations and reparse updated files
+            List<MarkdownFile> filesToReparse = new List<MarkdownFile>();
+            foreach (var operations in PendingOperations.Values)
+            {
+                bool reparse = false;
+                var node = operations.First;
+                MarkdownFile file = node.Value.File;
+                Debug.Assert(file.ParsingResult.SyntaxTree != null);
+
+                while (node != null)
+                {
+                    var next = node.Next;
+                    var operation = node.Value;
+
+                    if (!operation.Finished && getFullReport)
+                    {
+                        if (cancellationToken == default) operation.MRE.WaitOne();
+                        else WaitHandle.WaitAny(new[] { operation.MRE, cancellationToken.WaitHandle });
+                    }
+
+                    if (operation.Finished)
+                    {
+                        reparse = true;
+                        operations.Remove(node);
+                    }
+
+                    node = next;
+                }
+
+                if (reparse)
+                    filesToReparse.Add(file);
+            }
+            foreach (var file in filesToReparse)
+            {
+                ReparseMarkdownFile(file);
+                if (PendingOperations[file].Count == 0)
+                    PendingOperations.Remove(file);
+            }
         }
 
         #region Public
@@ -257,6 +305,7 @@ namespace MihaZupan.MarkdownValidator
                 {
                     IndexedMarkdownFiles.Remove(path);
                     RemoveMarkdownFileFromInternalContext(file);
+                    IndexedEntities.Remove(Path.ChangeExtension(path, ".html"));
                 }
                 else
                 {
@@ -271,7 +320,7 @@ namespace MihaZupan.MarkdownValidator
         public void Clear()
         {
             Lock();
-            AsyncOperations.Clear();
+            PendingOperations.Clear();
             IndexedEntities.Clear();
             IndexedMarkdownFiles.Clear();
             UnfinishedMarkdownFiles.Clear();
@@ -283,46 +332,15 @@ namespace MihaZupan.MarkdownValidator
         {
             Lock();
 
-            // Check async operations and reparse updated files
-            int suggestedWait = -1;
-            List<MarkdownFile> filesToReparse = new List<MarkdownFile>();
-            foreach (var asyncOperations in AsyncOperations.Values)
+            do
             {
-                bool reparse = false;
-                var node = asyncOperations.First;
-                MarkdownFile file = node.Value.File;
-
-                while (node != null)
-                {
-                    var next = node.Next;
-                    var progress = node.Value;
-                    suggestedWait = Math.Max(suggestedWait, progress.SuggestedWait);
-
-                    if (!progress.Finished && getFullReport)
-                    {
-                        if (cancellationToken == default) progress.MRE.WaitOne();
-                        else WaitHandle.WaitAny(new[] { progress.MRE, cancellationToken.WaitHandle });
-                    }
-
-                    if (progress.Finished)
-                    {
-                        reparse = true;
-                        asyncOperations.Remove(node);
-                    }
-                    node = next;
-                }
-
-                if (reparse)
-                    filesToReparse.Add(file);
+                TryProcessPendingOperations(getFullReport, cancellationToken);
             }
-            foreach (var file in filesToReparse)
-            {
-                ReparseMarkdownFile(file);
-                if (AsyncOperations[file].Count == 0)
-                    AsyncOperations.Remove(file);
-            }
+            while (PendingOperations.Count != 0 && !cancellationToken.IsCancellationRequested);
 
-            ValidationReport report = new ValidationReport(Configuration, AsyncOperations.Count == 0, suggestedWait);
+            Debug.Assert(!getFullReport || PendingOperations.Count == 0 || cancellationToken.IsCancellationRequested);
+
+            ValidationReport report = new ValidationReport(Configuration, PendingOperations.Count == 0);
 
             // Refresh references
             List<MarkdownFile> finishedFiles = new List<MarkdownFile>();
@@ -335,7 +353,10 @@ namespace MihaZupan.MarkdownValidator
                 }
             }
             foreach (var finishedFile in finishedFiles)
+            {
+                finishedFile.ParsingResult.Release();
                 UnfinishedMarkdownFiles.Remove(finishedFile);
+            }
 
             // Find unresolved references
             foreach (var file in UnfinishedMarkdownFiles)

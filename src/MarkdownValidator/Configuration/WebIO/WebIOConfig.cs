@@ -5,12 +5,18 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
+using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
+using MihaZupan.MarkdownValidator.WebIO;
 using System;
+using System.Net;
 
 namespace MihaZupan.MarkdownValidator.Configuration
 {
     public class WebIOConfig
     {
+        public bool Enabled = true;
+
         /// <summary>
         /// Defaults to 16
         /// </summary>
@@ -30,5 +36,35 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Defaults to 4</para>
         /// </summary>
         public int MaximumRedirectCount = 4;
+
+        /// <summary>
+        /// Defaults to 5000
+        /// </summary>
+        public int RequestTimeout
+        {
+            get => _requestTimeout;
+            set
+            {
+                _requestTimeout = Math.Max(-1, value);
+            }
+        }
+        private int _requestTimeout = 5000;
+
+        public IWebProxy Proxy = null;
+
+        internal Config Configuration;
+        internal void Initialize(Config configuration)
+        {
+            Configuration = configuration;
+            WebIOController = new WebIOController(this);
+            UrlProcessor = new UrlProcessor(this);
+        }
+        internal WebIOController WebIOController;
+        internal UrlProcessor UrlProcessor;
+
+        public void RegisterDownloadableContent(string hostname, string contentType, bool isText)
+            => WebIOController.AddDownloadableContentType(hostname, contentType, isText);
+        public void RegisterUrlRewriter(string hostname, Func<Uri, Uri> rewriter)
+            => WebIOController.AddUrlRewriter(hostname, rewriter);
     }
 }

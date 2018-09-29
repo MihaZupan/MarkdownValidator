@@ -8,8 +8,6 @@
 using Markdig;
 using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Parsing;
-using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
-using MihaZupan.MarkdownValidator.WebIO;
 using System;
 using System.Collections.Generic;
 
@@ -17,6 +15,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
 {
     public class Config
     {
+        public static readonly Version Version = new Version(1, 2, 0);
+
         /// <summary>
         /// Initializes a new <see cref="Config"/> based on the root working directory
         /// </summary>
@@ -33,7 +33,6 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Note that paths you provide don't have to actually exist on disk</para>
         /// <para>Setting it to an empty string is the same as <see cref="Environment.CurrentDirectory"/></para>
         /// </summary>
-        [NonSerialized]
         public string RootWorkingDirectory;
 
         /// <summary>
@@ -41,7 +40,6 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Each call to this method MUST return a NEW instance of <see cref="MarkdownPipelineBuilder"/></para>
         /// <para>Calls to this method may happen concurrently from multiple threads</para>	
         /// </summary>
-        [NonSerialized]
         public Func<MarkdownPipelineBuilder> MarkdigPipeline = null;
         internal MarkdownPipeline GetNewPipeline()
         {
@@ -80,20 +78,17 @@ namespace MihaZupan.MarkdownValidator.Configuration
 
             PathHelper = new PathHelper(RootWorkingDirectory);
 
+            WebIO.Initialize(this);
+
             if (!DisableExternalParsers)
             {
                 ExtensionAssemblies.Add("MarkdownValidator.ExternalParsers.dll");
                 foreach (var assembly in ExtensionAssemblies)
-                    ExtensionLoader.Load(this, assembly, out _);
+                    ExtensionLoader.TryLoad(this, assembly);
             }
-
             ParsingController = new ParsingController(this);
-            WebIOController = new WebIOController(this);
-            UrlProcessor = new UrlProcessor(this);
         }
         internal PathHelper PathHelper;
         internal ParsingController ParsingController;
-        internal WebIOController WebIOController;
-        internal UrlProcessor UrlProcessor;
     }
 }

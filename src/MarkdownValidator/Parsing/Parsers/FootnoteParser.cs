@@ -52,7 +52,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 {
                     context.ReportWarning(
                         WarningIDs.EmptyFootnoteDefinition,
-                        link.Span,
+                        footnote.LabelSpan,
                         string.Empty,
                         "Footnote definition for `{0}` is empty",
                         footnote.Order.ToString());

@@ -17,9 +17,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// Defaults to true
         /// </summary>
         public bool ParseUndefinedLanguages = true;
-        [NonSerialized]
         public Predicate<string> LanguageWhiteList = language => true;
-        [NonSerialized]
         public Predicate<string> LanguageBlackList = language => false;
 
         internal List<ICodeBlockParser> Parsers = new List<ICodeBlockParser>();

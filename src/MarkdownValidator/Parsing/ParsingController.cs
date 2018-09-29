@@ -61,7 +61,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             }
             else
             {
-                Parsers.Add(type, new List<(string, Action<ParsingContext>)>() { entry });
+                Parsers.Add(type, new List<(string, Action<ParsingContext>)>(1) { entry });
             }
         }
         public void RegisterFinalizer(string identifier, Action<ParsingContext> action)

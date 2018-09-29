@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using System;
 using System.IO;
 using System.Reflection;
@@ -14,9 +15,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
 {
     public static class ExtensionLoader
     {
-        public static int Load(Config configuration, string assemblyPath, out string error)
+        public static bool TryLoad(Config configuration, string assemblyPath)
         {
-            error = null;
             try
             {
                 string fullPath = Path.GetFullPath(assemblyPath);
@@ -26,14 +26,10 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 }
 
                 if (Path.GetFileName(fullPath).Equals("MarkdownValidator.dll", StringComparison.OrdinalIgnoreCase))
-                {
-                    error = "Can't load the core assembly as an extension";
-                    return -1;
-                }
+                    return false;
 
                 Assembly assembly = Assembly.LoadFile(fullPath);
 
-                int parserCount = 0;
                 foreach (Type type in assembly.ExportedTypes)
                 {
                     if (!type.IsClass || type.IsAbstract)
@@ -41,23 +37,25 @@ namespace MihaZupan.MarkdownValidator.Configuration
 
                     if (typeof(IParser).IsAssignableFrom(type))
                     {
-                        parserCount++;
                         var parser = Activator.CreateInstance(type) as IParser;
                         configuration.Parsing.AddParser(parser);
                     }
-                    else if (typeof(ICodeBlockParser).IsAssignableFrom(type))
+                    if (typeof(ICodeBlockParser).IsAssignableFrom(type))
                     {
-                        parserCount++;
                         var parser = Activator.CreateInstance(type) as ICodeBlockParser;
                         configuration.Parsing.CodeBlocks.AddParser(parser);
                     }
+                    if (typeof(IUrlPostProcessor).IsAssignableFrom(type))
+                    {
+                        var processor = Activator.CreateInstance(type) as IUrlPostProcessor;
+                        configuration.WebIO.UrlProcessor.AddUrlPostProcessor(processor);
+                    }
                 }
-                return parserCount;
+                return true;
             }
-            catch (Exception ex)
+            catch
             {
-                error = ex.ToString();
-                return -1;
+                return false;
             }
         }
     }

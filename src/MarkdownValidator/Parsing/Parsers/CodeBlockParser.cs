@@ -31,7 +31,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         {
             context.Register(typeof(FencedCodeBlock), ParseCodeBlock);
 
-            var codeBlocksConfig = context.Configuration.Parsing.CodeBlocks;
+            var configuration = context.Configuration;
+            var codeBlocksConfig = configuration.Parsing.CodeBlocks;
 
             ParseUndefinedLanguages = codeBlocksConfig.ParseUndefinedLanguages;
             LanguageWhiteListTest = codeBlocksConfig.LanguageWhiteList;
@@ -54,7 +55,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                 List<ICodeBlockParser> languageParsers = null;
                 if (LanguageWhiteListTest(language) && !LanguageBlackListTest(language))
                 {
-                    languageParsers = new List<ICodeBlockParser>();
+                    languageParsers = new List<ICodeBlockParser>(4);
                     foreach (var parser in Parsers)
                     {
                         if (parser.SupportsLanguage(language))
@@ -64,6 +65,11 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                         languageParsers = null;
                 }
                 CommonLanguages.Add(language, languageParsers);
+            }
+
+            foreach (var parser in Parsers)
+            {
+                parser.Initialize(configuration);
             }
         }
 

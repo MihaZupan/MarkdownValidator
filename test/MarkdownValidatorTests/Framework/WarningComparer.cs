@@ -96,7 +96,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         public static void AssertNotContains(Dictionary<string, List<Warning>> reportWarnings, WarningID id)
         {
             bool contains = Contains(reportWarnings, id);
-            Assert.False(contains, $"The report does contain a(n) {id} warning");
+            Assert.False(contains, $"The report does contain a(n) {id.Identifier} warning");
         }
         private static bool Contains(Dictionary<string, List<Warning>> reportWarnings, WarningID id)
             => reportWarnings.ContainsAny(f => f.Value.ContainsAny(w => w.ID == id));

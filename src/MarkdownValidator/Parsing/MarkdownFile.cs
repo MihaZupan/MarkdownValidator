@@ -9,6 +9,7 @@ using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using System.Diagnostics;
+using System.IO;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
@@ -27,10 +28,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             FullPath = fullPath;
             RelativePath = relativePath;
-            int extensionIndex = RelativePath.LastIndexOf('.');
-            HtmlPath = extensionIndex == -1 ?
-                RelativePath + ".html" :
-                RelativePath.Substring(0, extensionIndex) + ".html";
+            HtmlPath = Path.ChangeExtension(RelativePath, ".html");
             Configuration = configuration;
             ParsingContext = new ParsingContext(this);
             Parse(source);
@@ -45,6 +43,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal ParsingResultGlobalDiff Update()
         {
             var previous = ParsingResult;
+            ParsingResult = new ParsingResult(previous);
             Parse();
             return new ParsingResultGlobalDiff(previous, ParsingResult);
         }

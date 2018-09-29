@@ -9,6 +9,7 @@ using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
+using MihaZupan.MarkdownValidator.WebIO;
 using System;
 using static MihaZupan.MarkdownValidator.Helpers.PathHelper;
 
@@ -37,10 +38,12 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public StringSlice Source { get; private set; }
         public WarningSource WarningSource { get; private set; }
         public string ParserIdentifier { get; private set; }
+        public readonly WebIOController WebIO;
 
         internal ParsingContext(MarkdownFile sourceFile)
         {
             SourceFile = sourceFile;
+            WebIO = Configuration.WebIO.WebIOController;
         }
         internal void Update(MarkdownObject objectToParse)
         {
@@ -68,19 +71,19 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             var result = ProcessRelativePath(reference, out string relativePath);
 
-            if (result.HasFlag(PathProcessingResult.NotInContext))
+            if (result == PathProcessingResult.NotInContext)
             {
                 ReportPathOutOfContext(reference, errorSpan ?? span);
                 return false;
             }
-            else if (result.HasFlag(PathProcessingResult.IsFsSpecific))
+            else if (result == PathProcessingResult.IsFsSpecific)
             {
                 ReportPathIsFsSpecific(reference, errorSpan ?? span);
                 return false;
             }
             else
             {
-                bool isUrl = result.HasFlag(PathProcessingResult.IsUrl);
+                bool isUrl = result == PathProcessingResult.IsUrl;
                 ParsingResult.AddReference(
                     new Reference(
                         reference,
@@ -128,8 +131,11 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 path);
         }
         
-        public void RegisterAsyncOperation(AsyncProgress progress)
-            => ParsingResult.AsyncOperations.AddLast(progress);
+        public void RegisterPendingOperation(PendingOperation operation)
+        {
+            operation.File = SourceFile;
+            ParsingResult.PendingOperations.AddLast(operation);
+        }
 
         #region Report Warning
         /// <summary>
@@ -174,6 +180,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
         #endregion
 
         internal void ProcessLinkReference(Reference reference)
-            => Configuration.UrlProcessor.ProcessUrl(this, reference);
+            => Configuration.WebIO.UrlProcessor.ProcessUrl(this, reference);
     }
 }
