@@ -20,6 +20,9 @@ namespace MihaZupan.MarkdownValidator.Helpers
         public static StringSlice Reposition(this StringSlice slice, SourceSpan span)
             => new StringSlice(slice.Text, span.Start, span.End);
 
+        public static StringSlice Reposition(this StringSlice slice, int start, int end)
+            => new StringSlice(slice.Text, start, end);
+
         public static string Substring(this StringSlice source, SourceSpan span, int cutFromEnd = 0)
             => source.Text.Substring(span.Start, span.Length - cutFromEnd);
 

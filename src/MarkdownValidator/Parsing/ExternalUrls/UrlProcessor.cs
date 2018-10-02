@@ -22,18 +22,20 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
         private readonly Dictionary<string, List<IUrlPostProcessor>> UrlPostProcessors;
         internal void AddUrlPostProcessor(IUrlPostProcessor processor)
         {
-            string hostname = processor.Hostname;
-            if (UrlPostProcessors.TryGetValue(hostname, out var processors))
+            foreach (var hostname in processor.Hostnames)
             {
-                processors.Add(processor);
-            }
-            else
-            {
-                UrlPostProcessors.Add(hostname,
-                    new List<IUrlPostProcessor>(4)
-                    {
+                if (UrlPostProcessors.TryGetValue(hostname, out var processors))
+                {
+                    processors.Add(processor);
+                }
+                else
+                {
+                    UrlPostProcessors.Add(hostname,
+                        new List<IUrlPostProcessor>(4)
+                        {
                         processor
-                    });
+                        });
+                }
             }
 
             processor.Initialize(WebConfig.Configuration);
