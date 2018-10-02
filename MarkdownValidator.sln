@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.ExternalP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fuzzer", "test\Fuzzer\Fuzzer.csproj", "{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownValidator.WebSocketApi", "src\MarkdownValidator.WebSocketApi\MarkdownValidator.WebSocketApi.csproj", "{6A195328-D09B-4774-B679-30BF6FF53804}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +62,10 @@ Global
 		{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A195328-D09B-4774-B679-30BF6FF53804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A195328-D09B-4774-B679-30BF6FF53804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A195328-D09B-4774-B679-30BF6FF53804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A195328-D09B-4774-B679-30BF6FF53804}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,6 +77,7 @@ Global
 		{828D2F8A-AED0-4DCA-BB3F-28050C9353C7} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 		{EBF81003-6090-4052-984E-9A0591C044AB} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 		{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED} = {4852AF3C-1608-422B-91FA-854C0E13F92A}
+		{6A195328-D09B-4774-B679-30BF6FF53804} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2453E80D-F679-4574-B13C-79556F121B35}
