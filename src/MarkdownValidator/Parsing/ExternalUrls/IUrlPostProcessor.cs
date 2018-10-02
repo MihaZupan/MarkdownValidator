@@ -12,7 +12,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
     public interface IUrlPostProcessor
     {
         string Identifier { get; }
-        string Hostname { get; }
+        string[] Hostnames { get; }
         void Initialize(Config configuration);
         void Process(UrlPostProcessorContext context);
     }
