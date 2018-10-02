@@ -1,0 +1,66 @@
+﻿<html>
+
+<head>
+    <style>
+        #markdownInput {
+            resize: none;
+            width: 800px;
+            margin: 10px;
+        }
+
+        #markdownFlex {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="markdownFlex">
+        <textarea rows="32" type="text" id="markdownInput" oninput="onMarkdownChanged()">
+# Markdown Validator
+
+Visit the project on [GitHub]!
+If you see something weird happening, please open an [isue]
+
+[GitHub]: https://github.com/MihaZupan/MarkdownValidator
+[Issue]: https://github.com/MihaZupan/MarkdownValidator/issues
+        </textarea>
+        <div id="markdownHtml"></div>
+    </div>
+
+    <ul id="markdownWarnings"></ul>
+
+    <script>
+        var socket = new WebSocket("ws://markdown-validator.ml:6300");
+        var version = 0;
+
+        function onMarkdownChanged() {
+            socket.send(JSON.stringify({
+                'Markdown': document.getElementById("markdownInput").value,
+                'Version': version++
+            }));
+        }
+
+        var lastVersion = -1;
+        socket.onmessage = function (event) {
+            let message = JSON.parse(event.data);
+            console.log(message.Version);
+            if (lastVersion > message.Version) return;
+            lastVersion = message.Version;
+            document.getElementById("markdownHtml").innerHTML = message.Html;
+            document.getElementById("markdownWarnings").innerHTML = "";
+            let warningsList = document.getElementById("markdownWarnings");
+            for (let i = 0; i < message.Warnings.length; i++) {
+                let warning = message.Warnings[i];
+                let warningText = "Line " + warning.Line + ":\t" + warning.Message;
+                let entry = document.createElement('li');
+                entry.appendChild(document.createTextNode(warningText));
+                warningsList.appendChild(entry);
+            }
+        }
+
+        window.onload = onMarkdownChanged;
+    </script>
+</body>
+
+</html>
