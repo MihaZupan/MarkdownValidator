@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.15.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarkdownValidator.ExternalParsers\MarkdownValidator.ExternalParsers.csproj" />
+    <ProjectReference Include="..\MarkdownValidator\MarkdownValidator.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="python $(ProjectDir)CopyToWebServer.py $(ProjectDir)index.html C:/xampp/htdocs/MarkdownValidatorAPI" />
+  </Target>
+
+</Project>
