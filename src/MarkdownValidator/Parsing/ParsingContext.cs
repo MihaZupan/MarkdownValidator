@@ -8,6 +8,7 @@
 using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using MihaZupan.MarkdownValidator.WebIO;
 using System;
@@ -19,6 +20,24 @@ namespace MihaZupan.MarkdownValidator.Parsing
     {
         public Config Configuration => SourceFile.Configuration;
         public string RelativePath => SourceFile.RelativePath;
+
+        public StringSlice GetSourceLine()
+        {
+            int line = Object.Line;
+            int startIndex = ParsingResult.LineStartIndexes[line];
+            int endIndex;
+
+            if (ParsingResult.LineStartIndexes.Count == line + 1)
+            {
+                endIndex = Source.Length;
+            }
+            else
+            {
+                endIndex = ParsingResult.LineStartIndexes[line + 1];
+            }
+
+            return Source.Reposition(startIndex, endIndex);
+        }
 
         public ObjectType GetParserState<ParserType, ObjectType>(Func<ObjectType> init)
         {

@@ -86,5 +86,8 @@ namespace MihaZupan.MarkdownValidator.Helpers
 
         public static bool OrdinalStartsWith(this string source, string value)
             => source.StartsWith(value, StringComparison.Ordinal);
+
+        public static int OrdinalIndexOf(this string source, string value, int startIndex = 0)
+            => source.IndexOf(value, startIndex, StringComparison.Ordinal);
     }
 }

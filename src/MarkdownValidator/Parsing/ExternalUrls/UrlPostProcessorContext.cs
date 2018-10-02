@@ -20,6 +20,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
         public string AbsoluteUrlWithoutFragment => SiteInfo.Url.AbsoluteUrlWithoutFragment;
         public Config Configuration => Context.Configuration;
+        public WebIOController WebIO => Context.WebIO;
 
         internal UrlPostProcessorContext(ParsingContext context, Reference reference, SiteInfo siteInfo)
         {

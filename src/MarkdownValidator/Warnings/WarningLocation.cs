@@ -111,7 +111,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         }
         public override bool Equals(object obj)
         {
-            if (obj is SourceSpan other)
+            if (obj is WarningLocation other)
             {
                 return Equals(other);
             }
