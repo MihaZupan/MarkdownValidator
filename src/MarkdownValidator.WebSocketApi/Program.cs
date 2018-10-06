@@ -11,9 +11,11 @@ using MihaZupan.MarkdownValidator.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketSharp;
+using WebSocketSharp.Net;
 using WebSocketSharp.Server;
 
 namespace MarkdownValidator.WebSocketApi
@@ -27,7 +29,11 @@ namespace MarkdownValidator.WebSocketApi
         {
             Validator = new MarkdownContextValidator(new Config(""));
             Validator.AddMarkdownFile("Test.md", "");
-            Server = new WebSocketServer(6300, false);
+            Server = new WebSocketServer(6300, true)
+            {
+                SslConfiguration = new ServerSslConfiguration(
+                    new X509Certificate2(@"C:\xampp\apache\conf\ssl.pfx\markdown-validator.ml.pfx"))
+            };
             Server.AddWebSocketService<MarkdownBehaviour>("/");
             Server.Start();
             while (true) Thread.Sleep(10000);
@@ -66,7 +72,7 @@ namespace MarkdownValidator.WebSocketApi
 
             private void HandleRequest(MarkdownRequest request)
             {
-                var html = Markdown.ToHtml(request.Markdown);
+                var html = Markdown.ToHtml(request.Markdown, new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
 
                 while (!_token.IsCancellationRequested)
                 {

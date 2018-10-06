@@ -9,7 +9,7 @@ A lightning fast, [CommonMark] compliant, extensible .NET Core library and a set
 * A [Visual Studio Code extension]
 * Standalone tool
   * Looks for file system changes and emits warnings whenever you save a file
-* POC test site: [markdown-validator.ml](http://markdown-validator.ml)
+* POC test site: [markdown-validator.ml](https://markdown-validator.ml)
 
 **ToDo**
 * Visual Studio extension
