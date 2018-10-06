@@ -248,7 +248,8 @@ namespace MihaZupan.MarkdownValidator.MarkdownLanguageServer
                     {
                         path = warnings.First().Location.FullFilePath;
                         path = Path.Combine(report.Configuration.RootWorkingDirectory, affectedFile.Key);
-                        fileDiagnostics = new Diagnostic[warnings.Count];
+                        int warningCount = Math.Min(warnings.Count, 20);
+                        fileDiagnostics = new Diagnostic[warningCount];
                         for (int i = 0; i < fileDiagnostics.Length; i++)
                         {
                             var warning = warnings[i];
