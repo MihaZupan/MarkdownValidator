@@ -102,6 +102,7 @@ namespace MarkdownValidator.WebSocketApi
                 {
                     warnings = new WarningSlim[report.WarningCount];
                     var reportWarnings = report.WarningsByFile.Values.Single();
+                    reportWarnings.Sort();
                     for (int i = 0; i < warnings.Length; i++)
                     {
                         var reportWarning = reportWarnings[i];
