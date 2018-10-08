@@ -25,7 +25,6 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 
         [Theory]
         [InlineData("http://1.2.3.4/")]
-        [InlineData("http://[::]/")]
         [InlineData("[foo](http://1.2.3.4/)")]
         [InlineData("[foo](http://[::]/)")]
         public void IPHostname(string value)
