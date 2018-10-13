@@ -1,11 +1,19 @@
-language: csharp
+sudo: required
 dist: trusty
-sudo: false
+services:
+  - docker
+
+language: csharp
 mono: none
 dotnet: 2.1.400
+
+before_install:
+  - docker run -d -p 80:80 kennethreitz/httpbin
+
 script: >
   dotnet build -c Release &&
   cd test/MarkdownValidatorTests &&
   dotnet test -c Release --no-build
+
 notifications:
   email: false

@@ -11,7 +11,6 @@ using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
-    [Trait("Category", "WebIO")]
     public class WebRequestFailed
     {
         [Fact]
@@ -26,7 +25,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [Fact]
         public void FailedAfterRedirect()
         {
-            string url = "https://httpbin.org/redirect-to?url=https%3A%2F%2Fexpired.badssl.com";
+            string url = $"{Constants.TEST_HOST}/redirect-to?url=https%3A%2F%2Fexpired.badssl.com";
             string source = $"[Foo]({url})";
             SingleFileTest.AssertWarning(source,
                 WarningIDs.WebRequestFailed, 6, 6 + url.Length - 1, url);

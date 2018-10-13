@@ -33,7 +33,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                     UrlPostProcessors.Add(hostname,
                         new List<IUrlPostProcessor>(4)
                         {
-                        processor
+                            processor
                         });
                 }
             }

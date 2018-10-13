@@ -17,7 +17,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void RemoveFileWithHeaderReference()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .Update("# Foo", "bar.md")
                 .Update("[Foo](bar.md#foo)", "foo.md")
                 .AssertNoWarnings()
@@ -33,7 +33,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void RemoveHeaderReference()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .Update("# Foo\n# Bar", "test.md")
                 .Update("[Bar](test.md#bar) [Foo](test.md#foo)")
                 .AssertNoWarnings()

@@ -17,7 +17,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void TestContext()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .Update(@"
 1. Test
 	1. Foo

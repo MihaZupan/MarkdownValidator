@@ -17,6 +17,10 @@
     <PackageTags>markdown;markdown-parser;validation;documentation;documentation-tool</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Markdig" Version="0.15.4" />
   </ItemGroup>

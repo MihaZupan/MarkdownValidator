@@ -19,7 +19,7 @@ namespace MihaZupan.MarkdownValidator.Tests
         [Fact]
         public void ValidationReport_Equals_Empty()
         {
-            var validator = new MarkdownContextValidator(new Config(""));
+            var validator = new MarkdownContextValidator();
 
             Assert.Equal(validator.Validate(), validator.ValidateFully());
         }

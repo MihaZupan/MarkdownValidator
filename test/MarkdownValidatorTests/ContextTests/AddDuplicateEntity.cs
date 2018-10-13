@@ -17,7 +17,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void DuplicateMarkdownFile()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .Update("[Some error]")
                 .AssertContains(WarningIDs.UnresolvedReference)
                 .AddMarkdownFile("[Not an error anymore](.)", assertReturn: false)
@@ -27,7 +27,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void DuplicateEntity()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .AddEntity("foo.bar")
                 .Update("[Foo](foo.bar)")
                 .AssertNoWarnings()

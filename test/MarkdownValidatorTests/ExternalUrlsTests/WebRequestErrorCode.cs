@@ -11,14 +11,13 @@ using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
-    [Trait("Category", "WebIO")]
     public class WebRequestErrorCode
     {
         [Theory]
-        [InlineData("https://httpbin.org/status/100")]
-        [InlineData("https://httpbin.org/status/400")]
-        [InlineData("https://httpbin.org/status/500")]
-        [InlineData("https://httpbin.org/status/504")]
+        [InlineData(Constants.TEST_HOST + "/status/100")]
+        [InlineData(Constants.TEST_HOST + "/status/400")]
+        [InlineData(Constants.TEST_HOST + "/status/500")]
+        [InlineData(Constants.TEST_HOST + "/status/504")]
         public void ErrorCode(string url)
         {
             string source = $"[Foo]({url})";
@@ -26,11 +25,12 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
                 WarningIDs.WebRequestReturnedErrorCode, 6, 6 + url.Length - 1, url);
         }
 
+        private const string RedirectUrl = Constants.TEST_HOST + "/redirect-to?url=" + Constants.TEST_HOST_ENCODED + "%2Fstatus%2F";
         [Theory]
-        [InlineData("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fstatus%2F100")]
-        [InlineData("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fstatus%2F400")]
-        [InlineData("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fstatus%2F500")]
-        [InlineData("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fstatus%2F504")]
+        [InlineData(RedirectUrl + "100")]
+        [InlineData(RedirectUrl + "400")]
+        [InlineData(RedirectUrl + "500")]
+        [InlineData(RedirectUrl + "504")]
         public void ErrorCodeAfterRedirect(string url)
         {
             string source = $"[Foo]({url})";

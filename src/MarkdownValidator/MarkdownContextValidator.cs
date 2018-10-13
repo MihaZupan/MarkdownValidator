@@ -23,6 +23,12 @@ namespace MihaZupan.MarkdownValidator
         private readonly ValidationContext Context;
 
         /// <summary>
+        /// Constructs a new validation context, using <see cref="Config.Default"/>
+        /// </summary>
+        public MarkdownContextValidator()
+            : this(Config.Default) { }
+
+        /// <summary>
         /// Constructs a new validation context with the specified <see cref="Config"/>
         /// </summary>
         /// <param name="configuration">The configuration to use when constructing, parsing and validating the context</param>

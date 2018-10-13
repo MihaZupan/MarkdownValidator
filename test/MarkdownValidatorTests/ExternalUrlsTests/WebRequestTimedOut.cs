@@ -11,20 +11,19 @@ using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
-    [Trait("Category", "WebIO")]
     public class WebRequestTimedOut
     {
         [Fact]
-        public void Google()
+        public void NoTimeout()
         {
-            string source = "[Foo](https://www.google.com)";
+            string source = $"[Foo]({Constants.TEST_HOST})";
             SingleFileTest.AssertNotPresent(source, WarningIDs.WebRequestTimedOut);
         }
 
         [Fact]
         public void Timeout()
         {
-            string url = "https://httpbin.org/delay/7";
+            string url = $"{Constants.TEST_HOST}/delay/7";
             string source = $"[Foo]({url})";
             SingleFileTest.AssertWarning(source,
                 WarningIDs.WebRequestTimedOut, 6, 6 + url.Length - 1, url);
@@ -33,7 +32,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [Fact]
         public void TimeoutAfterRedirect()
         {
-            string url = "https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fdelay%2F7";
+            string url = $"{Constants.TEST_HOST}/redirect-to?url={Constants.TEST_HOST_ENCODED}%2Fdelay%2F7";
             string source = $"[Foo]({url})";
             SingleFileTest.AssertWarning(source,
                 WarningIDs.WebRequestTimedOut, 6, 6 + url.Length - 1, url);

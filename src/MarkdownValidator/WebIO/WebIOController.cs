@@ -37,6 +37,7 @@ namespace MihaZupan.MarkdownValidator.WebIO
             var clientHandler = new HttpClientHandler()
             {
                 AllowAutoRedirect = false,
+                UseCookies = false,
                 AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
             };
             if (WebConfig.Proxy != null)
@@ -53,6 +54,7 @@ namespace MihaZupan.MarkdownValidator.WebIO
                 "Accept-Encoding", "gzip, deflate");
             HttpClient.DefaultRequestHeaders.Add(
                 "Accept-Language", "en-GB,en;q=0.9");
+            HttpClient.Timeout = TimeSpan.FromMilliseconds(WebConfig.RequestTimeout);
 
             DnsUnresolvableHostNames        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             KnownGoodHostNames              = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -390,44 +392,40 @@ namespace MihaZupan.MarkdownValidator.WebIO
             try
             {
                 using (var httpRequest = new HttpRequestMessage(HttpMethod.Get, cleanUrl.AbsoluteUrlWithoutFragment)) // ToDo: Use HEAD instead?
+                using (var response = HttpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead).Result)
                 {
-                    var responseTask = HttpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
-                    if (responseTask.Wait(WebConfig.RequestTimeout))
-                    {
-                        var response = responseTask.Result;
-                        siteInfo.StatusCode = response.StatusCode;
-                        siteInfo.Is2xxStatusCode = response.IsSuccessStatusCode;
-                        siteInfo.Headers = response.Headers;
-                        siteInfo.ContentHeaders = response.Content.Headers;
-                        siteInfo.HttpVersion = response.Version;
+                    siteInfo.StatusCode = response.StatusCode;
+                    siteInfo.Is2xxStatusCode = response.IsSuccessStatusCode;
+                    siteInfo.Headers = response.Headers;
+                    siteInfo.ContentHeaders = response.Content.Headers;
+                    siteInfo.HttpVersion = response.Version;
 
-                        if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
-                        {
-                            siteInfo.IsRedirect = true;
-                            Uri redirectUrl = response.Headers.Location;
-                            if (!redirectUrl.IsAbsoluteUri)
-                                redirectUrl = new Uri(url.GetLeftPart(UriPartial.Authority) + redirectUrl);
-                            siteInfo.RedirectTarget = new CleanUrl(redirectUrl);
-                        }
-                        else if (siteInfo.ContentType != null && TryGetDownloadableContentType(url.Host, siteInfo.ContentType, out bool isText))
-                        {
-                            siteInfo.ContentPresent = true;
-                            siteInfo.ContentIsText = isText;
-                            if (isText)
-                            {
-                                siteInfo.ContentText = response.Content.ReadAsStringAsync().Result;
-                            }
-                            else
-                            {
-                                siteInfo.ContentBytes = response.Content.ReadAsByteArrayAsync().Result;
-                            }
-                        }
-                    }
-                    else // Timed out
+                    if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
                     {
-                        siteInfo.RequestTimedOut = true;
+                        siteInfo.IsRedirect = true;
+                        Uri redirectUrl = response.Headers.Location;
+                        if (!redirectUrl.IsAbsoluteUri)
+                            redirectUrl = new Uri(url.GetLeftPart(UriPartial.Authority) + redirectUrl);
+                        siteInfo.RedirectTarget = new CleanUrl(redirectUrl);
+                    }
+                    else if (siteInfo.ContentType != null && TryGetDownloadableContentType(url.Host, siteInfo.ContentType, out bool isText))
+                    {
+                        siteInfo.ContentPresent = true;
+                        siteInfo.ContentIsText = isText;
+                        if (isText)
+                        {
+                            siteInfo.ContentText = response.Content.ReadAsStringAsync().Result;
+                        }
+                        else
+                        {
+                            siteInfo.ContentBytes = response.Content.ReadAsByteArrayAsync().Result;
+                        }
                     }
                 }
+            }
+            catch (AggregateException ae) when (ae.InnerException is TaskCanceledException taskCanceledException)
+            {
+                siteInfo.RequestTimedOut = true;
             }
             catch (AggregateException ae) when (ae.InnerException is HttpRequestException httpException)
             {

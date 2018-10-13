@@ -11,7 +11,6 @@ using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
-    [Trait("Category", "WebIO")]
     public class UrlRewriter
     {
         [Fact]

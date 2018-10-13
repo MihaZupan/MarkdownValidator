@@ -17,7 +17,7 @@ namespace MihaZupan.MarkdownValidator.Tests.WarningTests.Path
         [Fact]
         public void Test()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .AddEntity("Foo.bar")
                 .Update("[Stuff](foo.bar)")
                 .AssertContains(WarningIDs.FileReferenceCaseMismatch, 8, 14, "foo.bar")

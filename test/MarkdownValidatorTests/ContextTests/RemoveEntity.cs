@@ -16,7 +16,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void RemoveNonMarkdownFile()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .AddEntity("foo.bar")
                 .Update("[Foo](foo.bar)")
                 .AssertNoWarnings()
@@ -27,7 +27,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
         [Fact]
         public void RemoveNonExistantEntity()
         {
-            var test = new RollingContextTest(new Config(""))
+            var test = new RollingContextTest()
                 .RemoveEntity("foo.bar", false);
         }
     }

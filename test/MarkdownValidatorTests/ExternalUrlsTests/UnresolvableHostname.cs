@@ -11,7 +11,6 @@ using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
-    [Trait("Category", "WebIO")]
     public class UnresolvableHostname
     {
         [Fact]
@@ -26,7 +25,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [Fact]
         public void UnresolvableAfterRedirect()
         {
-            string url = "https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.notorg";
+            string url = $"{Constants.TEST_HOST}/redirect-to?url=https%3A%2F%2Fhttpbin.notorg";
             string source = $"[Foo]({url})";
             SingleFileTest.AssertWarning(source,
                 WarningIDs.UnresolvableHostname, 6, 6 + url.Length - 1, url);

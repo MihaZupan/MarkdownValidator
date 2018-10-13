@@ -22,7 +22,7 @@ namespace MihaZupan.Fuzzer
 
         public static void Fuzz(int iterations, int stringSizeMin, int stringSizeMax, string alphabet, string fileAlphabet, int maxFileNameLength)
         {
-            MarkdownContextValidator validator = new MarkdownContextValidator(new Config(""));
+            MarkdownContextValidator validator = new MarkdownContextValidator();
             Random seedRandom = new Random();
 
 #if RELEASE

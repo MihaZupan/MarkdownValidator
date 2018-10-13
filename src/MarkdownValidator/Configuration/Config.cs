@@ -27,6 +27,11 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
 
         /// <summary>
+        /// Returns a new <see cref="Config"/>
+        /// </summary>
+        public static Config Default => new Config("");
+
+        /// <summary>
         /// The root directory for all files and directories referenced in your markdown files
         /// <para>It must be a parent to all files and directories added to the context</para>
         /// <para>It can be the root of the file system, if you want, but it must not be a subdirectory of any added files/directories</para>

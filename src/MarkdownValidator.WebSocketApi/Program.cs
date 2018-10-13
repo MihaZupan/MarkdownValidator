@@ -29,7 +29,7 @@ namespace MarkdownValidator.WebSocketApi
 
         static void Main(string[] args)
         {
-            Validator = new MarkdownContextValidator(new Config(""));
+            Validator = new MarkdownContextValidator();
             Validator.AddMarkdownFile("Test.md", "");
             Server = new WebSocketServer(6300, true)
             {

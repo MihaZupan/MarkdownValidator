@@ -6,11 +6,11 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Tests.Framework;
+using System;
 using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
-    [Trait("Category", "WebIO")]
     public class MultipleSame
     {
         [Fact]
@@ -19,12 +19,12 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
             string source = @"
 [Stuff] [Things]
 
-[Foo](https://www.youtube.com/watch?v=gkTb9GP9lVI)
-[Bar](https://www.youtube.com/watch?v=YtbJ8ZsiktI)
+[Foo](TEST_HOST)
+[Bar](TEST_HOST/spec.json)
 
-[Stuff]: https://www.youtube.com/watch?v=68ugkg9RePc
-[Things]: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-";
+[Stuff]: TEST_HOST/static/favicon.ico
+[Things]: TEST_HOST/forms/post#123
+".Replace("TEST_HOST", Constants.TEST_HOST, StringComparison.Ordinal);
             SingleFileTest.AssertNoWarnings(source);
         }
 
@@ -34,12 +34,12 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
             string source = @"
 [Stuff] [Things]
 
-[Foo](https://www.google.com/search?q=Hello+world)
-[Bar](https://www.google.com/search?q=Hello+world)
+[Foo](TEST_HOST/forms/post)
+[Bar](TEST_HOST/forms/post)
 
-[Stuff]: https://www.google.com/search?q=Hello+world#123
-[Things]: https://www.google.com/search?q=Hello+world
-";
+[Stuff]: TEST_HOST/forms/post#123
+[Things]: TEST_HOST/forms/post
+".Replace("TEST_HOST", Constants.TEST_HOST, StringComparison.Ordinal);
             SingleFileTest.AssertNoWarnings(source);
         }
     }
