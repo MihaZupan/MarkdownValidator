@@ -28,8 +28,9 @@ If you see something weird happening, please open an [isue]
 </textarea>
             <div id="markdownHtml"></div>
         </div>
-
         <ul id="markdownWarnings"></ul>
+        <br>
+        <pre id="markdownRawHtml"></pre>
 
         <script>
             var socket = new WebSocket("wss://markdown-validator.ml:6300");
@@ -50,6 +51,7 @@ If you see something weird happening, please open an [isue]
                 if (lastVersion > message.Version) return;
                 lastVersion = message.Version;
                 document.getElementById("markdownHtml").innerHTML = message.Html;
+                document.getElementById("markdownRawHtml").innerText = message.Html;
                 document.getElementById("markdownWarnings").innerHTML = "";
                 let warningsList = document.getElementById("markdownWarnings");
                 for (let i = 0; i < message.Warnings.length; i++) {

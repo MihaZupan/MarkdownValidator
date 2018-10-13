@@ -9,6 +9,8 @@ using Markdig;
 using MihaZupan.MarkdownValidator;
 using MihaZupan.MarkdownValidator.Configuration;
 using Newtonsoft.Json;
+using NUglify;
+using NUglify.Html;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -72,7 +74,16 @@ namespace MarkdownValidator.WebSocketApi
 
             private void HandleRequest(MarkdownRequest request)
             {
-                var html = Markdown.ToHtml(request.Markdown, new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+                var html = Markdown.ToHtml(
+                    request.Markdown,
+                    new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+
+                var settings = HtmlSettings.Pretty();
+                settings.IsFragmentOnly = true;
+                settings.MinifyCss = false;
+                settings.MinifyCssAttributes = false;
+                settings.MinifyJs = false;
+                html = Uglify.Html(html, settings).Code;
 
                 while (!_token.IsCancellationRequested)
                 {
@@ -133,8 +144,8 @@ namespace MarkdownValidator.WebSocketApi
         }
         class MarkdownRequest
         {
-            public string Markdown;
-            public int Version;
+            public string Markdown { get; set; }
+            public int Version { get; set; }
         }
         class MarkdownResponse
         {
