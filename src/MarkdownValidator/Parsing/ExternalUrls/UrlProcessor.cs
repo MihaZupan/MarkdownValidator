@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 
 namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 {
@@ -111,7 +112,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 return;
 
             Uri url = info.Url.Url;
-            string absoluteUrlWithoutFragment = info.Url.AbsoluteUrlWithoutFragment;
+            string cleanUrl = info.Url.AbsoluteUrlWithoutFragment;
 
             if (cacheState == SiteCacheState.Unknown)
             {
@@ -121,11 +122,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
             if (cacheState == SiteCacheState.UnresolvableHostname)
             {
-                context.ReportWarning(
-                    WarningIDs.UnresolvableHostname,
-                    reference,
-                    "Could not resolve the hostname `{0}`",
-                    url.Host);
+                Report_UnresolvableHostname(context, reference, url.Host);
                 return;
             }
 
@@ -133,22 +130,13 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
             if (info.RequestFailed)
             {
-                context.ReportWarning(
-                    WarningIDs.WebRequestFailed,
-                    reference,
-                    "Web request to `{0}` failed",
-                    absoluteUrlWithoutFragment);
+                Report_WebRequestFailed(context, reference, cleanUrl);
                 return;
             }
 
             if (info.RequestTimedOut)
             {
-                context.ReportWarning(
-                    WarningIDs.WebRequestTimedOut,
-                    reference,
-                    "Web request to `{0}` timed out ({1} ms)",
-                    absoluteUrlWithoutFragment,
-                    context.Configuration.WebIO.RequestTimeout.ToString());
+                Report_WebRequestTimedOut(context, reference, cleanUrl);
                 return;
             }
 
@@ -164,12 +152,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
                     if (cacheState == SiteCacheState.UnresolvableHostname)
                     {
-                        context.ReportWarning(
-                            WarningIDs.UnresolvableHostname,
-                            reference,
-                            "`{0}` redirected to a hostname (`{1}`) that could not be resolved",
-                            absoluteUrlWithoutFragment,
-                            nextUrl.Url.Host);
+                        Report_UnresolvableHostname(context, reference, nextUrl.Url.Host, cleanUrl);
                         return;
                     }
 
@@ -183,24 +166,13 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
                     if (nextInfo.RequestFailed)
                     {
-                        context.ReportWarning(
-                            WarningIDs.WebRequestFailed,
-                            reference,
-                            "Web request to `{0}` (redirect from `{1}`) failed",
-                            nextUrl.AbsoluteUrlWithoutFragment,
-                            absoluteUrlWithoutFragment);
+                        Report_WebRequestFailed(context, reference, nextUrl.AbsoluteUrlWithoutFragment, cleanUrl);
                         return;
                     }
 
                     if (nextInfo.RequestTimedOut)
                     {
-                        context.ReportWarning(
-                            WarningIDs.WebRequestTimedOut,
-                            reference,
-                            "Web request to `{0}` (redirect from `{1}`) timed out ({2} ms)",
-                            nextInfo.Url.AbsoluteUrlWithoutFragment,
-                            absoluteUrlWithoutFragment,
-                            context.Configuration.WebIO.RequestTimeout.ToString());
+                        Report_WebRequestTimedOut(context, reference, nextInfo.Url.AbsoluteUrlWithoutFragment, cleanUrl);
                         return;
                     }
 
@@ -212,13 +184,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
                     if (!nextInfo.Is2xxStatusCode)
                     {
-                        context.ReportWarning(
-                            WarningIDs.WebRequestReturnedErrorCode,
-                            reference,
-                            "Request to `{0}` (redirect from `{1}`) returned a non-successful status code ({1})",
-                            nextUrl.AbsoluteUrlWithoutFragment,
-                            absoluteUrlWithoutFragment,
-                            ((int)info.StatusCode).ToString());
+                        Report_WebRequestReturnedErrorCode(context, reference, nextUrl.AbsoluteUrlWithoutFragment, info.StatusCode, cleanUrl);
                         return;
                     }
                     else break;
@@ -230,7 +196,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                         WarningIDs.TooManyRedirects,
                         reference,
                         "`{0}` redirected more times than is allowed by the config ({1})",
-                        absoluteUrlWithoutFragment,
+                        cleanUrl,
                         maximumRedirects.ToString());
                     return;
                 }
@@ -246,19 +212,14 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                     WarningIDs.RedirectChain,
                     reference,
                     message,
-                    absoluteUrlWithoutFragment,
+                    cleanUrl,
                     info.RedirectTarget.AbsoluteUrlWithoutFragment);
                 return;
             }
 
             if (!info.Is2xxStatusCode)
             {
-                context.ReportWarning(
-                    WarningIDs.WebRequestReturnedErrorCode,
-                    reference,
-                    "Request to `{0}` returned a non-successful status code ({1})",
-                    absoluteUrlWithoutFragment,
-                    ((int)info.StatusCode).ToString());
+                Report_WebRequestReturnedErrorCode(context, reference, cleanUrl, info.StatusCode);
                 return;
             }
 
@@ -271,6 +232,92 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                     context.SetWarningSource(WarningSource.UrlPostProcessor, postProcessor.Identifier);
                     postProcessor.Process(postProcessorContext);
                 }
+            }
+        }
+
+        private void Report_WebRequestReturnedErrorCode(ParsingContext context, Reference reference, string url, HttpStatusCode code, string redirectedFrom = null)
+        {
+            if (redirectedFrom == null)
+            {
+                context.ReportWarning(
+                    WarningIDs.WebRequestReturnedErrorCode,
+                    reference,
+                    "Request to `{0}` returned a non-successful status code ({1})",
+                    url,
+                    ((int)code).ToString());
+            }
+            else
+            {
+                context.ReportWarning(
+                    WarningIDs.WebRequestReturnedErrorCode,
+                    reference,
+                    "Request to `{0}` (redirect from `{1}`) returned a non-successful status code ({1})",
+                    url,
+                    redirectedFrom,
+                    ((int)code).ToString());
+            }
+        }
+        private void Report_WebRequestTimedOut(ParsingContext context, Reference reference, string url, string redirectedFrom = null)
+        {
+            if (redirectedFrom == null)
+            {
+                context.ReportWarning(
+                    WarningIDs.WebRequestTimedOut,
+                    reference,
+                    "Web request to `{0}` timed out ({1} ms)",
+                    url,
+                    context.Configuration.WebIO.RequestTimeout.ToString());
+            }
+            else
+            {
+                context.ReportWarning(
+                    WarningIDs.WebRequestTimedOut,
+                    reference,
+                    "Web request to `{0}` (redirect from `{1}`) timed out ({2} ms)",
+                    url,
+                    redirectedFrom,
+                    context.Configuration.WebIO.RequestTimeout.ToString());
+            }
+        }
+        private void Report_UnresolvableHostname(ParsingContext context, Reference reference, string host, string redirectedFrom = null)
+        {
+            if (redirectedFrom == null)
+            {
+                context.ReportWarning(
+                    WarningIDs.UnresolvableHostname,
+                    reference,
+                    "Could not resolve the hostname `{0}`",
+                    host);
+            }
+            else
+            {
+                context.ReportWarning(
+                    WarningIDs.UnresolvableHostname,
+                    reference,
+                    "`{0}` redirected to a hostname (`{1}`) that could not be resolved",
+                    redirectedFrom,
+                    host);
+            }
+        }
+        private void Report_WebRequestFailed(ParsingContext context, Reference reference, string url, string redirectedFrom = null)
+        {
+            if (redirectedFrom == null)
+            {
+                context.ReportWarning(
+                    WarningIDs.WebRequestFailed,
+                    reference,
+                    "Web request to `{0}` failed",
+                    url);
+
+            }
+            else
+            {
+                context.ReportWarning(
+                    WarningIDs.WebRequestFailed,
+                    reference,
+                    "Web request to `{0}` (redirect from `{1}`) failed",
+                    url,
+                    redirectedFrom);
             }
         }
     }
