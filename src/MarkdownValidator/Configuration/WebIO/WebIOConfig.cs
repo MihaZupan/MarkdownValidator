@@ -48,7 +48,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 _requestTimeout = Math.Max(-1, value);
             }
         }
-        private int _requestTimeout = 5000;
+        private int _requestTimeout = 2000;
 
         public IWebProxy Proxy = null;
 
