@@ -38,7 +38,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         public int MaximumRedirectCount = 4;
 
         /// <summary>
-        /// Defaults to 5000
+        /// Defaults to 2000
         /// </summary>
         public int RequestTimeout
         {
