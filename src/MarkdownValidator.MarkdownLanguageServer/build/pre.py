@@ -1,8 +1,5 @@
 ﻿import sys, os, os.path
 
-if os.getenv('CI') is not None:
-	exit()
-
 if sys.argv[1] != 'Release':
 	exit()
 

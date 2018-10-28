@@ -7,7 +7,6 @@
 */
 using Markdig;
 using MihaZupan.MarkdownValidator;
-using MihaZupan.MarkdownValidator.Configuration;
 using Newtonsoft.Json;
 using NUglify;
 using NUglify.Html;

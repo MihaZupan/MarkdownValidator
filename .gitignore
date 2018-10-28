@@ -3,6 +3,7 @@
 bin
 obj
 packages
+Temp
 
 test-data
 *.bat

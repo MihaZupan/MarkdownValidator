@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="python $(ProjectDir)CopyToWebServer.py $(ProjectDir)index.html C:/xampp/htdocs/MarkdownValidatorAPI" />
+    <Exec Command="if %25MihaZupan%25 == true python .\post-build.py $(ProjectDir)index.html C:/xampp/htdocs/MarkdownValidatorAPI" />
   </Target>
 
 </Project>

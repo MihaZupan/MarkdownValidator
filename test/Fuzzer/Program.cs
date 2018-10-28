@@ -6,7 +6,6 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator;
-using MihaZupan.MarkdownValidator.Configuration;
 using System;
 using System.IO;
 using System.Threading.Tasks;

@@ -17,11 +17,11 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="python $(ProjectDir)/build/CopyToExtension-post.py $(ConfigurationName) $(ProjectPath) $(SolutionDir)/src/extensions/vscode/bin" />
+    <Exec Command="if %25MihaZupan%25 == true python build/post.py $(ConfigurationName) $(ProjectPath) $(SolutionDir)/src/extensions/vscode/bin" />
   </Target>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="python $(ProjectDir)/build/CopyToExtension-pre.py $(ConfigurationName) $(SolutionDir)/src/extensions/vscode/bin" />
+    <Exec Command="if %25MihaZupan%25 == true python build/pre.py $(ConfigurationName) $(SolutionDir)/src/extensions/vscode/bin" />
   </Target>
 
 </Project>
