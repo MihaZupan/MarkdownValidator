@@ -9,13 +9,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
     public static class Constants
     {
-#if TRAVIS
-        // We can run a docker httpbin instance when using Travis
-        public const string TEST_HOST = "http://localhost";
-        public const string TEST_HOST_ENCODED = "http%3A%2F%2Flocalhost";
-#else
         public const string TEST_HOST = "http://markdown-validator.ml:6400";
         public const string TEST_HOST_ENCODED = "http%3A%2F%2Fmarkdown-validator.ml%3A6400";
-#endif
     }
 }

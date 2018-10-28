@@ -7,10 +7,6 @@
     <RootNamespace>MihaZupan.MarkdownValidator.Tests</RootNamespace>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TRAVIS)' != '' ">
-	<DefineConstants>TRAVIS</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="2.3.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

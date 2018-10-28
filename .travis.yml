@@ -1,14 +1,9 @@
 sudo: required
 dist: trusty
-services:
-  - docker
 
 language: csharp
 mono: none
-dotnet: 2.1.400
-
-before_install:
-  - docker run -d -p 80:80 kennethreitz/httpbin
+dotnet: 2.1.403
 
 script: >
   dotnet build -c Release &&
