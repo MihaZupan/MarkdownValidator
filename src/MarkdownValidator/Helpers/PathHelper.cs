@@ -36,6 +36,7 @@ namespace MihaZupan.MarkdownValidator.Helpers
                 if (fullPath.StartsWith(RootDirectory, StringComparison.OrdinalIgnoreCase))
                 {
                     relativePath = fullPath.Substring(RootDirectoryLength);
+                    relativePath = relativePath.TrimEnd('/', '\\');
                     return true;
                 }
             }
