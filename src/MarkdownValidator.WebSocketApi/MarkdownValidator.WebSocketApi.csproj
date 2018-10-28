@@ -25,8 +25,4 @@
     <ProjectReference Include="..\MarkdownValidator\MarkdownValidator.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if %25MihaZupan%25 == true python .\post-build.py $(ProjectDir)index.html C:/xampp/htdocs/MarkdownValidatorAPI" />
-  </Target>
-
 </Project>
