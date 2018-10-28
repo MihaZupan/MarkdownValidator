@@ -38,7 +38,18 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         public static void AssertNoWarnings(string source, bool fully = true)
         {
             var report = ValidationReportProvider.GetReport(DefaultFileName, source, fully);
-            Assert.Empty(report.WarningsByFile);
+            bool isEmpty = report.WarningCount == 0;
+            if (!isEmpty)
+            {
+                var warnings = new List<Warning>(report.WarningCount);
+                foreach (var file in report.WarningsByFile)
+                    warnings.AddRange(file.Value);
+
+                string message = $"The report contains {report.WarningCount} warnings:\n";
+                message += string.Join('\n', warnings.Select(w => w.ToString()));
+
+                Assert.True(isEmpty, message);
+            }
         }
 
         public static void AssertGlobalWarning(string source, WarningID id, string value = "")

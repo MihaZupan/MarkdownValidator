@@ -104,5 +104,16 @@ namespace MihaZupan.MarkdownValidator.Warnings
         }
         public static bool operator !=(Warning a, Warning b)
             => !(a == b);
+
+        public override string ToString()
+        {
+            return string.Format("{0}, {1}-{2}, {3}-{4}, {5}",
+                ID.Identifier,
+                Location.StartLine,
+                Location.EndLine,
+                Location.Span.Start,
+                Location.Span.End,
+                Message);
+        }
     }
 }
