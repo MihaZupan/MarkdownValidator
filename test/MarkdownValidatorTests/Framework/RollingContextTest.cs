@@ -21,6 +21,14 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         private readonly MarkdownContextValidator Validator;
         public bool ValidateFully { get; private set; } = true;
 
+        private ValidationReport Validate()
+        {
+            var report = Validator.Validate(ValidateFully);
+            if (ValidateFully)
+                Xunit.Assert.True(report.IsComplete);
+            return report;
+        }
+
         public RollingContextTest(string workingDirectory = "")
             : this(new Config(workingDirectory))
         { }
@@ -78,14 +86,14 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public RollingContextTest Assert(params (string FileName, WarningID ID, int Start, int End, string Value)[] warnings)
         {
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
             WarningComparer.AssertMatch(report.WarningsByFile, warnings);
             return this;
         }
 
         public RollingContextTest AssertContains(params WarningID[] ids)
         {
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
             foreach (var id in ids)
                 WarningComparer.AssertContains(report.WarningsByFile, id);
             return this;
@@ -101,7 +109,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
                     (fileName == null || warning.Location.RelativeFilePath.OrdinalEquals(fileName));
             }
 
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
 
             if (fileName != null)
             {
@@ -118,7 +126,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public RollingContextTest AssertNotPresent(params WarningID[] ids)
         {
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
             foreach (var id in ids)
                 WarningComparer.AssertNotContains(report.WarningsByFile, id);
             return this;
@@ -126,19 +134,21 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public RollingContextTest AssertNoWarnings()
         {
-            Xunit.Assert.Empty(Validator.Validate(ValidateFully).WarningsByFile);
+            var report = Validate();
+            Xunit.Assert.Empty(report.WarningsByFile);
             return this;
         }
 
         public RollingContextTest AssertHasWarnings()
         {
-            Xunit.Assert.NotEmpty(Validator.Validate(ValidateFully).WarningsByFile);
+            var report = Validate();
+            Xunit.Assert.NotEmpty(report.WarningsByFile);
             return this;
         }
 
         public RollingContextTest AssertSingle(Predicate<Warning> warningPredicate)
         {
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
             Xunit.Assert.Single(report.WarningsByFile);
             Xunit.Assert.Single(report.WarningsByFile.Single().Value);
             Xunit.Assert.True(warningPredicate(report.WarningsByFile.Single().Value.Single()));
@@ -147,14 +157,14 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
 
         public RollingContextTest AssertContains(Predicate<Warning> warningPredicate)
         {
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
             Xunit.Assert.True(report.WarningsByFile.ContainsAny(f => f.Value.ContainsAny(warningPredicate)));
             return this;
         }
 
         public RollingContextTest AssertWarningCount(int count)
         {
-            var report = Validator.Validate(ValidateFully);
+            var report = Validate();
             Xunit.Assert.Equal(count, report.WarningCount);
             return this;
         }

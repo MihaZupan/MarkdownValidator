@@ -5,7 +5,6 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Tests.Framework;
 using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
