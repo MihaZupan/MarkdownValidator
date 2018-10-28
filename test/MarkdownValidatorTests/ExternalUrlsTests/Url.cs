@@ -49,6 +49,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("[foo](http://[::]/)")]
         [InlineData("[foo](http://[0::0]/)")]
         [InlineData("[foo](http://0.0.0.0/)")]
+        [InlineData("[foo](http://localhost)")]
+        [InlineData("[foo](https://localhost:8080/)")]
         public void DocumentationReserved(string value)
         {
             SingleFileTest.AssertNoWarnings(value);
