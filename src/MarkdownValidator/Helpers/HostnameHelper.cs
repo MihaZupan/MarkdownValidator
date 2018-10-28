@@ -14,9 +14,13 @@ namespace MihaZupan.MarkdownValidator.Helpers
         public static bool IsDocumentationHostname(Uri url)
         {
             string host = url.Host;
+            string dnsHost = url.DnsSafeHost;
 
             if (url.HostNameType == UriHostNameType.Dns)
             {
+                if (host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+                    return true;
+
                 if (host.ContainsAny(StringComparison.OrdinalIgnoreCase,
                     "example.com",  // RFC2606
                     "example.org",  // RFC2606
@@ -28,6 +32,12 @@ namespace MihaZupan.MarkdownValidator.Helpers
             }
             else if (url.HostNameType == UriHostNameType.IPv4)
             {
+                if (host.OrdinalEquals("127.0.0.1"))
+                    return true;
+
+                if (dnsHost.OrdinalEquals("0.0.0.0"))
+                    return true;
+
                 if (host.StartsWithAny(StringComparison.Ordinal,
                     "192.168.",     // RFC1918
                     "10.",          // RFC1918
@@ -40,12 +50,12 @@ namespace MihaZupan.MarkdownValidator.Helpers
                     int.TryParse(host.Split('.')[1], out int secondPart) &&
                     secondPart >= 16 && secondPart <= 32)
                     return true;
-
-                if (host.OrdinalEquals("127.0.0.1"))
-                    return true;
             }
             else if (url.HostNameType == UriHostNameType.IPv6)
             {
+                if (dnsHost.OrdinalEquals("::"))
+                    return true;
+
                 if (host.ContainsAny(StringComparison.OrdinalIgnoreCase,
                     "2001:DB8::"))  // RFC3849
                     return true;

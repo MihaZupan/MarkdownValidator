@@ -26,7 +26,6 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [Theory]
         [InlineData("http://1.2.3.4/")]
         [InlineData("[foo](http://1.2.3.4/)")]
-        [InlineData("[foo](http://[::]/)")]
         public void IPHostname(string value)
         {
             SingleFileTest.AssertContainsWarning(value, WarningIDs.UrlHostnameIsIP, false);
@@ -47,12 +46,12 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("[Foo](http://10.5.10.15)")]
         [InlineData("[Foo](http://192.168.1.1)")]
         [InlineData("[Foo](http://172.20.233.255)")]
+        [InlineData("[foo](http://[::]/)")]
+        [InlineData("[foo](http://[0::0]/)")]
+        [InlineData("[foo](http://0.0.0.0/)")]
         public void DocumentationReserved(string value)
         {
-            SingleFileTest.AssertNotPresent(value,
-                WarningIDs.InvalidUrlFormat,
-                WarningIDs.UrlHostnameIsIP,
-                WarningIDs.UnresolvedReference);
+            SingleFileTest.AssertNoWarnings(value);
         }
     }
 }
