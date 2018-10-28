@@ -17,8 +17,13 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
     {
         private static readonly string RootDirectory = Path.GetFullPath("TestDirectory");
 
-        private static readonly MarkdownContextValidator Validator =
-            new MarkdownContextValidator(new Config(RootDirectory));
+        private static readonly MarkdownContextValidator Validator;
+        static ValidationReportProvider()
+        {
+            var config = new Config(RootDirectory);
+            config.WebIO.RequestTimeout = 2000;
+            Validator = new MarkdownContextValidator(config);
+        }
 
         public static ValidationReport GetReport(IEnumerable<(string Name, string Source)> files, IEnumerable<string> entities, bool fully)
         {

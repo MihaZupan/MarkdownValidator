@@ -5,7 +5,6 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using MihaZupan.MarkdownValidator.WebIO;
 using System;
@@ -38,7 +37,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         public int MaximumRedirectCount = 4;
 
         /// <summary>
-        /// Defaults to 2000
+        /// Defaults to 5000
         /// </summary>
         public int RequestTimeout
         {
@@ -48,7 +47,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 _requestTimeout = Math.Max(-1, value);
             }
         }
-        private int _requestTimeout = 2000;
+        private int _requestTimeout = 5000;
 
         public IWebProxy Proxy = null;
 

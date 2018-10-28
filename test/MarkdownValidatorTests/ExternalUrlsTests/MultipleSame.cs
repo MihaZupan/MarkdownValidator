@@ -22,7 +22,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 [Foo](TEST_HOST)
 [Bar](TEST_HOST/spec.json)
 
-[Stuff]: TEST_HOST/static/favicon.ico
+[Stuff]: TEST_HOST/cookies
 [Things]: TEST_HOST/forms/post#123
 ".Replace("TEST_HOST", Constants.TEST_HOST, StringComparison.Ordinal);
             SingleFileTest.AssertNoWarnings(source);
