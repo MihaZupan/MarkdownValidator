@@ -38,7 +38,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [InlineData("[foo](http://www.example.org?a=b)")]
         [InlineData("[foo](http://test.example.net)")]
         [InlineData("[foo](http://198.51.100.55/)")]
-        [InlineData("[foo]: http://[2001:DB8::]")]
+        [InlineData("[foo](http://[2001:DB8::])")]
         [InlineData("http://gugl/.../")]
         [InlineData("http://google.com/.../")]
         [InlineData("[Foo](http://google.com/<search>)")]
