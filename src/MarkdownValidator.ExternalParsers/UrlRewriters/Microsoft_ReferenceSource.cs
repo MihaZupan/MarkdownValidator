@@ -10,14 +10,14 @@ using MihaZupan.MarkdownValidator.Helpers;
 using System;
 using System.IO;
 
-namespace MihaZupan.MarkdownValidator.ExternalParsers
+namespace MihaZupan.MarkdownValidator.ExternalParsers.UrlRewriters
 {
     /// <summary>
     /// Refers to https://referencesource.microsoft.com/scripts.js
     /// </summary>
-    public class UrlRewriter_Microsoft_ReferenceSource : IParser
+    public class Microsoft_ReferenceSource : IParser
     {
-        public string Identifier => nameof(UrlRewriter_Microsoft_ReferenceSource);
+        public string Identifier => nameof(Microsoft_ReferenceSource);
 
         public void Initialize(ParserRegistrationContext context)
         {

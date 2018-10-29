@@ -31,7 +31,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
             var internalParsers = new IParser[]
             {
-                new MarkdownDocumentParser(),
                 new LiteralInlineParser(),
                 new LinkInlineParser(),
                 new LinkReferenceDefinitionParser(),

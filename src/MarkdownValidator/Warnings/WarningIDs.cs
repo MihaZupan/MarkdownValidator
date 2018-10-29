@@ -12,14 +12,12 @@ namespace MihaZupan.MarkdownValidator.Warnings
         //
         // Suggestions
         //
-        public static readonly WarningID HugeMarkdownFile               = new WarningID(-1, nameof(HugeMarkdownFile));
-        public static readonly WarningID SameLabelAndTargetReference    = new WarningID(-2, nameof(SameLabelAndTargetReference));
-        public static readonly WarningID UrlHostnameIsIP                = new WarningID(-3, nameof(UrlHostnameIsIP));
+        public static readonly WarningID SameLabelAndTargetReference    = new WarningID(-1, nameof(SameLabelAndTargetReference));
+        public static readonly WarningID UrlHostnameIsIP                = new WarningID(-2, nameof(UrlHostnameIsIP));
 
         //
         // Warnings
         //
-        public static readonly WarningID EmptyMarkdownFile              = new WarningID(0,  nameof(EmptyMarkdownFile));
         public static readonly WarningID UnusedDefinedReference         = new WarningID(1,  nameof(UnusedDefinedReference));
         public static readonly WarningID UnusedDefinedFootnote          = new WarningID(2,  nameof(UnusedDefinedFootnote));
         public static readonly WarningID HeadingEndsWithWhitespace      = new WarningID(3,  nameof(HeadingEndsWithWhitespace));

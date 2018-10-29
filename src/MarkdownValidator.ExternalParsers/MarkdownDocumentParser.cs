@@ -6,11 +6,11 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
-using MihaZupan.MarkdownValidator.Warnings;
+using MihaZupan.MarkdownValidator.Parsing;
 
-namespace MihaZupan.MarkdownValidator.Parsing.Parsers
+namespace MihaZupan.MarkdownValidator.ExternalParsers
 {
-    internal sealed class MarkdownDocumentParser : IParser
+    public sealed class MarkdownDocumentParser : IParser
     {
         public string Identifier => nameof(MarkdownDocumentParser);
 
@@ -22,19 +22,18 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseDocument(ParsingContext context)
         {
             var document = context.Object as MarkdownDocument;
-            context.SetWarningSource(WarningSource.InternalParser);
 
             if (document.Count == 0)
             {
                 context.ReportGeneralWarning(
-                    WarningIDs.EmptyMarkdownFile,
+                    ExternalWarningIDs.EmptyMarkdownFile,
                     string.Empty,
                     "Empty markdown file");
             }
             else if (document.LineCount >= context.Configuration.Parsing.Warnings_HugeFile_LineCount)
             {
                 context.ReportGeneralWarning(
-                    WarningIDs.HugeMarkdownFile,
+                    ExternalWarningIDs.HugeMarkdownFile,
                     $"{document.LineCount} >= {context.Configuration.Parsing.Warnings_HugeFile_LineCount}",
                     "Markdown file is huge! Consider moving some content into other files.");
             }
