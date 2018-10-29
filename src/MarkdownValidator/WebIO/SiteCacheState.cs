@@ -22,6 +22,9 @@ namespace MihaZupan.MarkdownValidator.WebIO
         /// DNS resolve failed
         /// </summary>
         UnresolvableHostname,
+        /// <summary>
+        /// WebIO is disabled (see <see cref="Configuration.WebIOConfig.Enabled"/>)
+        /// </summary>
         WebIODisabled
     }
 }

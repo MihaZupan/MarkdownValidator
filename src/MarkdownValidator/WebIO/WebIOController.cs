@@ -62,7 +62,7 @@ namespace MihaZupan.MarkdownValidator.WebIO
             PendingRequests                 = new Dictionary<string, PendingRequest>(StringComparer.OrdinalIgnoreCase);
             RequestsInProgress              = new Dictionary<string, PendingRequest>(StringComparer.OrdinalIgnoreCase);
             CachedSites                     = new Dictionary<string, SiteInfo>(StringComparer.OrdinalIgnoreCase);
-            DownloadableContentByHostname   = new Dictionary<string, List<(string, bool)>>();
+            DownloadableContentByHostname   = new Dictionary<string, List<(string, bool)>>(StringComparer.OrdinalIgnoreCase);
             UrlRewriters                    = new Dictionary<string, Func<Uri, Uri>>(StringComparer.OrdinalIgnoreCase);
 
             SchedulerMRE = new ManualResetEvent(false);
@@ -403,7 +403,7 @@ namespace MihaZupan.MarkdownValidator.WebIO
                     if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
                     {
                         siteInfo.IsRedirect = true;
-                        Uri redirectUrl = response.Headers.Location;
+                        Uri redirectUrl = response.Headers.Location; // ToDo: handle 3xx responses without a location header
                         if (!redirectUrl.IsAbsoluteUri)
                             redirectUrl = new Uri(url.GetLeftPart(UriPartial.Authority) + redirectUrl);
                         siteInfo.RedirectTarget = new CleanUrl(redirectUrl);

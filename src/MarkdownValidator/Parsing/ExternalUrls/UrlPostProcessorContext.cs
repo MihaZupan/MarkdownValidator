@@ -8,6 +8,7 @@
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using MihaZupan.MarkdownValidator.WebIO;
+using System;
 
 namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 {
@@ -18,7 +19,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
         public readonly ParsingContext Context;
         public readonly SiteInfo SiteInfo;
 
-        public string AbsoluteUrlWithoutFragment => SiteInfo.Url.AbsoluteUrlWithoutFragment;
+        public Uri Url => SiteInfo.Url.Url;
         public Config Configuration => Context.Configuration;
         public WebIOController WebIO => Context.WebIO;
 
