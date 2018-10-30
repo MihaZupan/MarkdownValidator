@@ -22,6 +22,12 @@ namespace MihaZupan.MarkdownValidator.Parsing
             Configuration = configuration;
         }
 
+        public TCustomConfig ReadConfig<TCustomConfig>(bool writeIfDefault = false) where TCustomConfig : class, ICustomConfig, new()
+            => Configuration.ReadConfig<TCustomConfig>(ParserIdentifier, writeIfDefault);
+
+        public void WriteConfig(ICustomConfig config)
+            => Configuration.CustomConfigurations[ParserIdentifier] = config;
+
         public void Register(Type type, Action<ParsingContext> action)
             => ParsingController.Register(type, ParserIdentifier, action);
 

@@ -6,12 +6,14 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Parsing;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace MihaZupan.MarkdownValidator.Configuration
 {
     public class ParsingConfig
     {
+        [JsonProperty(Required = Required.DisallowNull)]
         public CodeBlocksConfig CodeBlocks = new CodeBlocksConfig();
 
         internal List<IParser> Parsers = new List<IParser>();
@@ -19,11 +21,5 @@ namespace MihaZupan.MarkdownValidator.Configuration
         {
             Parsers.Add(parser);
         }
-
-        /// <summary>
-        /// If you wish to disable this warning, set this to a huge value
-        /// <para>Defaults to 1500</para>
-        /// </summary>
-        public int Warnings_HugeFile_LineCount = 1500;
     }
 }

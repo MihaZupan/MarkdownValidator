@@ -6,6 +6,7 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Parsing;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -17,7 +18,9 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// Defaults to true
         /// </summary>
         public bool ParseUndefinedLanguages = true;
+        [JsonIgnore]
         public Predicate<string> LanguageWhiteList = language => true;
+        [JsonIgnore]
         public Predicate<string> LanguageBlackList = language => false;
 
         internal List<ICodeBlockParser> Parsers = new List<ICodeBlockParser>();

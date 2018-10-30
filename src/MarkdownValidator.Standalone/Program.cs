@@ -6,13 +6,13 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MihaZupan.MarkdownValidator.Standalone
 {
@@ -30,6 +30,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
             //location = Path.Combine(Environment.CurrentDirectory, "../../../../../");
             location = "test";
             //location = @"C:\Users\Mihu\Downloads\docs-master\docs-master";
+            location = @"C:\MihaZupan\Telegram\Telegram.Bot.Wiki";
 
             if (location == "")
                 location = Environment.CurrentDirectory;
@@ -39,7 +40,10 @@ namespace MihaZupan.MarkdownValidator.Standalone
             if (Environment.UserInteractive)
                 Console.Title = "Markdown Validator - " + location;
 
-            Validator = new MarkdownContextValidator(new Config(location));
+            var config = new Config(location);
+            Validator = new MarkdownContextValidator(config);
+            File.WriteAllText(".markdown-validator", JsonConvert.SerializeObject(config, Formatting.Indented));
+
             FSWatcher = new FileSystemWatcher(location);
             FSWatcher.IncludeSubdirectories = true;
 

@@ -14,7 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests
 {
     public class MarkdownDocument
     {
-        private static readonly int HugeLineCount = Config.Default.Parsing.Warnings_HugeFile_LineCount;
+        private static readonly int HugeLineCount = new MarkdownDocumentParser.CustomConfig().HugeFile_LineCount;
 
         [Fact]
         public void LargeFile()

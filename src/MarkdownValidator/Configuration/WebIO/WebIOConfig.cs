@@ -7,6 +7,7 @@
 */
 using MihaZupan.MarkdownValidator.Parsing.ExternalUrls;
 using MihaZupan.MarkdownValidator.WebIO;
+using Newtonsoft.Json;
 using System;
 using System.Net;
 
@@ -49,6 +50,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
         private int _requestTimeout = 5000;
 
+        [JsonIgnore]
         public IWebProxy Proxy = null;
 
         internal Config Configuration;

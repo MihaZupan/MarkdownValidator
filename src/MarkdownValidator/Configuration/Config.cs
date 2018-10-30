@@ -8,6 +8,7 @@
 using Markdig;
 using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Parsing;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
 {
     public class Config
     {
+        [JsonIgnore]
         public static readonly Version Version = new Version(1, 2, 0);
 
         /// <summary>
@@ -29,6 +31,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <summary>
         /// Returns a new <see cref="Config"/>
         /// </summary>
+        [JsonIgnore]
         public static Config Default => new Config("");
 
         /// <summary>
@@ -38,13 +41,15 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <para>Note that paths you provide don't have to actually exist on disk</para>
         /// <para>Setting it to an empty string is the same as <see cref="Environment.CurrentDirectory"/></para>
         /// </summary>
-        public string RootWorkingDirectory;
+        [JsonProperty(Required = Required.DisallowNull)]
+        public string RootWorkingDirectory = "";
 
         /// <summary>
         /// A custom <see cref="MarkdownPipelineBuilder"/> provider
         /// <para>Each call to this method MUST return a NEW instance of <see cref="MarkdownPipelineBuilder"/></para>
         /// <para>Calls to this method may happen concurrently from multiple threads</para>	
         /// </summary>
+        [JsonIgnore]
         public Func<MarkdownPipelineBuilder> MarkdigPipeline = null;
         internal MarkdownPipeline GetNewPipeline()
         {
@@ -58,12 +63,14 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 .Build();
         }
 
+        [JsonProperty(Required = Required.DisallowNull)]
         public ParsingConfig Parsing
         {
             get => _parsing;
             set => _parsing = value ?? throw new NullReferenceException(nameof(Parsing));
         }
         private ParsingConfig _parsing = new ParsingConfig();
+        [JsonProperty(Required = Required.DisallowNull)]
         public WebIOConfig WebIO
         {
             get => _webIO;
@@ -72,6 +79,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         private WebIOConfig _webIO = new WebIOConfig();
 
         public bool DisableExternalParsers;
+        [JsonProperty(Required = Required.DisallowNull)]
         public HashSet<string> ExtensionAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         internal void Initialize()
@@ -95,5 +103,30 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
         internal PathHelper PathHelper;
         internal ParsingController ParsingController;
+
+        #region Custom Configurations
+
+        [JsonProperty(Required = Required.DisallowNull)]
+        public Dictionary<string, ICustomConfig> CustomConfigurations = new Dictionary<string, ICustomConfig>(StringComparer.OrdinalIgnoreCase);
+
+        public TCustomConfig ReadConfig<TCustomConfig>(string identifier, bool writeIfDefault) where TCustomConfig : class, ICustomConfig, new()
+        {
+            if (CustomConfigurations.TryGetValue(identifier, out ICustomConfig customConfigObj))
+            {
+                if (customConfigObj is TCustomConfig customConfig)
+                {
+                    return customConfig;
+                }
+            }
+
+            var newConfig = new TCustomConfig();
+
+            if (writeIfDefault)
+                CustomConfigurations[identifier] = newConfig;
+
+            return newConfig;
+        }
+
+        #endregion Custom Configurations
     }
 }
