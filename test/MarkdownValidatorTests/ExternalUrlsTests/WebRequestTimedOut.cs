@@ -23,7 +23,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [Fact]
         public void Timeout()
         {
-            string url = $"{Constants.TEST_HOST}/delay/3";
+            string url = $"{Constants.TEST_HOST}/delay/4";
             string source = $"[Foo]({url})";
             SingleFileTest.AssertWarning(source,
                 WarningIDs.WebRequestTimedOut, 6, 6 + url.Length - 1, url);
@@ -32,7 +32,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         [Fact]
         public void TimeoutAfterRedirect()
         {
-            string url = $"{Constants.TEST_HOST}/redirect-to?url={Constants.TEST_HOST_ENCODED}%2Fdelay%2F3";
+            string url = $"{Constants.TEST_HOST}/redirect-to?url={Constants.TEST_HOST_ENCODED}%2Fdelay%2F4";
             string source = $"[Foo]({url})";
             SingleFileTest.AssertWarning(source,
                 WarningIDs.WebRequestTimedOut, 6, 6 + url.Length - 1, url);

@@ -21,7 +21,7 @@ namespace MihaZupan.MarkdownValidator.Tests.Framework
         static ValidationReportProvider()
         {
             var config = new Config(RootDirectory);
-            config.WebIO.RequestTimeout = 2000;
+            config.WebIO.RequestTimeout = 3500;
             Validator = new MarkdownContextValidator(config);
         }
 
