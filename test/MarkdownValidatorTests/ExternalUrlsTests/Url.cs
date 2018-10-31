@@ -25,6 +25,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 
         [Theory]
         [InlineData("http://1.2.3.4/")]
+        [InlineData("<http://1.2.3.4/>")]
         [InlineData("[foo](http://1.2.3.4/)")]
         public void IPHostname(string value)
         {
@@ -33,7 +34,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 
         [Theory]
         [InlineData("http://something.example/")]
-        [InlineData("www.example.com#")]
+        [InlineData("<www.example.com#>")]
         [InlineData("[foo](ftp://example.com)")]
         [InlineData("[foo](http://www.example.org?a=b)")]
         [InlineData("[foo](http://test.example.net)")]

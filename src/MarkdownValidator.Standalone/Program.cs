@@ -213,7 +213,7 @@ namespace MihaZupan.MarkdownValidator.Standalone
                     return new StreamReader(fs).ReadToEndAsync().Result;
                 }
             }
-            catch // Just try again one
+            catch // Just try again once
             {
                 using (var fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {

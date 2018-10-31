@@ -36,7 +36,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         /// <remarks>
         /// If you think there is a relevant language missing from this list, please open an issue/PR on GitHub
         /// </remarks>
-        internal static readonly string[] CommonLanguages = new string[]
+        internal static readonly string[] CommonLanguages =
         {
             "text",
             "json", "diff", "csv", "xml", "yaml",

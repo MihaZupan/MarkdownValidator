@@ -23,6 +23,15 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        public void UnresolvableAutoLink()
+        {
+            string url = "https://httpbin.notorg/";
+            string source = $"<{url}>";
+            SingleFileTest.AssertWarning(source,
+                WarningIDs.UnresolvableHostname, 0, source.Length - 1, url);
+        }
+
+        [Fact]
         public void UnresolvableAfterRedirect()
         {
             string url = $"{Constants.TEST_HOST}/redirect-to?url=https%3A%2F%2Fhttpbin.notorg";

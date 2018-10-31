@@ -33,6 +33,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             {
                 new LiteralInlineParser(),
                 new LinkInlineParser(),
+                new AutoLinkInlineParser(),
                 new LinkReferenceDefinitionParser(),
                 new HeadingBlockParser(),
                 new FootnoteParser(),
