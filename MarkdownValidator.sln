@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.dockerignore = .dockerignore
 		.gitignore = .gitignore
 		.travis.yml = .travis.yml
+		CI.md = CI.md
 		Dockerfile = Dockerfile
 		LICENSE = LICENSE
 		README.md = README.md
@@ -30,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fuzzer", "test\Fuzzer\Fuzze
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.WebSocketApi", "src\MarkdownValidator.WebSocketApi\MarkdownValidator.WebSocketApi.csproj", "{6A195328-D09B-4774-B679-30BF6FF53804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownValidator.CI", "src\MarkdownValidator.CI\MarkdownValidator.CI.csproj", "{2455D7A1-C5EE-4400-8D2B-565DF3869F95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.CI", "src\MarkdownValidator.CI\MarkdownValidator.CI.csproj", "{2455D7A1-C5EE-4400-8D2B-565DF3869F95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -7,13 +7,11 @@
 A lightning fast, [CommonMark] compliant, extensible .NET Core library and a set of derived tools for markdown context analysis and validation.
 
 * A [Visual Studio Code extension]
-* Standalone tool
-  * Looks for file system changes and emits warnings whenever you save a file
+* [A Docker image that is simple to deploy and use with CI](CI.md)
 * POC test site: [markdown-validator.ml](https://markdown-validator.ml)
 
 **ToDo**
 * Visual Studio extension
-* Docker image that is simple to deploy and use with CI
 
 ### License
 

@@ -1,14 +1,17 @@
 dist: trusty
 sudo: false
 
+services:
+  - docker
+
 language: csharp
 mono: none
 dotnet: 2.1.403
 
 script: >
   dotnet build -c Release &&
-  cd test/MarkdownValidatorTests &&
-  dotnet test -c Release --no-build
+  dotnet test test/MarkdownValidatorTests -c Release --no-build &&
+  docker run --rm -t -v $(pwd):/app/md/ mihazupan/markdownvalidator:latest --threshold 5
 
 notifications:
   email: false

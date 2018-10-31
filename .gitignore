@@ -3,7 +3,9 @@
 bin
 obj
 packages
+Properties
 Temp
 
 test-data
 *.bat
+*.user
