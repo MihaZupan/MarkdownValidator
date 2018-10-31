@@ -22,15 +22,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidatorTests", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator", "src\MarkdownValidator\MarkdownValidator.csproj", "{9E885201-FBEB-4656-9394-919A95409AA9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.Standalone", "src\MarkdownValidator.Standalone\MarkdownValidator.Standalone.csproj", "{6DC3E432-A010-4AC4-AE88-D034C112F296}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.MarkdownLanguageServer", "src\MarkdownValidator.MarkdownLanguageServer\MarkdownValidator.MarkdownLanguageServer.csproj", "{828D2F8A-AED0-4DCA-BB3F-28050C9353C7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.ExternalParsers", "src\MarkdownValidator.ExternalParsers\MarkdownValidator.ExternalParsers.csproj", "{EBF81003-6090-4052-984E-9A0591C044AB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fuzzer", "test\Fuzzer\Fuzzer.csproj", "{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownValidator.WebSocketApi", "src\MarkdownValidator.WebSocketApi\MarkdownValidator.WebSocketApi.csproj", "{6A195328-D09B-4774-B679-30BF6FF53804}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.WebSocketApi", "src\MarkdownValidator.WebSocketApi\MarkdownValidator.WebSocketApi.csproj", "{6A195328-D09B-4774-B679-30BF6FF53804}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownValidator.CI", "src\MarkdownValidator.CI\MarkdownValidator.CI.csproj", "{2455D7A1-C5EE-4400-8D2B-565DF3869F95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,10 +46,6 @@ Global
 		{9E885201-FBEB-4656-9394-919A95409AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E885201-FBEB-4656-9394-919A95409AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E885201-FBEB-4656-9394-919A95409AA9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6DC3E432-A010-4AC4-AE88-D034C112F296}.Release|Any CPU.Build.0 = Release|Any CPU
 		{828D2F8A-AED0-4DCA-BB3F-28050C9353C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{828D2F8A-AED0-4DCA-BB3F-28050C9353C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{828D2F8A-AED0-4DCA-BB3F-28050C9353C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -66,6 +62,10 @@ Global
 		{6A195328-D09B-4774-B679-30BF6FF53804}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A195328-D09B-4774-B679-30BF6FF53804}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A195328-D09B-4774-B679-30BF6FF53804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,11 +73,11 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{09415B17-2D4F-4E51-AFC5-0E4F8A752E1D} = {4852AF3C-1608-422B-91FA-854C0E13F92A}
 		{9E885201-FBEB-4656-9394-919A95409AA9} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
-		{6DC3E432-A010-4AC4-AE88-D034C112F296} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 		{828D2F8A-AED0-4DCA-BB3F-28050C9353C7} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 		{EBF81003-6090-4052-984E-9A0591C044AB} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 		{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED} = {4852AF3C-1608-422B-91FA-854C0E13F92A}
 		{6A195328-D09B-4774-B679-30BF6FF53804} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
+		{2455D7A1-C5EE-4400-8D2B-565DF3869F95} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2453E80D-F679-4574-B13C-79556F121B35}

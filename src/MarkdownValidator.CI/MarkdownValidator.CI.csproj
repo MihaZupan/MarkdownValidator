@@ -3,11 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>MihaZupan.MarkdownValidator.Standalone</RootNamespace>
-    <LangVersion>7.2</LangVersion>
+    <RootNamespace>MihaZupan.MarkdownValidator.CI</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.0-alpha" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
