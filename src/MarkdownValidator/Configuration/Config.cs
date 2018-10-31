@@ -18,7 +18,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
     public class Config
     {
         [JsonIgnore]
-        public static readonly Version Version = new Version(1, 2, 0);
+        public static readonly Version Version = new Version(1, 3, 0);
 
         /// <summary>
         /// Initializes a new <see cref="Config"/> based on the root working directory

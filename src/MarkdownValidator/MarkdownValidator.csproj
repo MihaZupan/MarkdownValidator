@@ -15,6 +15,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Extensible library for markdown analysis and validation.</Description>
     <PackageTags>markdown;markdown-parser;validation;documentation;documentation-tool</PackageTags>
+    <Version>1.3.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
