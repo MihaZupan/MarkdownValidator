@@ -23,6 +23,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public readonly bool RefersToEntireFile = true;
         // Keeps us from having to have a Markdig reference on some projects
         public int Length => Span.Length;
+        public bool IsSingleLine => StartLine == EndLine;
 
         /// <summary>
         /// Will be -1 if refering to the entire file. Zero-based

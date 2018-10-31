@@ -38,7 +38,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
         public int MaximumRedirectCount = 4;
 
         /// <summary>
-        /// Defaults to 5000
+        /// Defaults to 10000
         /// </summary>
         public int RequestTimeout
         {
@@ -48,7 +48,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
                 _requestTimeout = Math.Max(-1, value);
             }
         }
-        private int _requestTimeout = 5000;
+        private int _requestTimeout = 10000;
 
         [JsonIgnore]
         public IWebProxy Proxy = null;

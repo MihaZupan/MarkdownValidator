@@ -16,7 +16,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
     {
         public string Identifier => nameof(MarkdownDocumentParser);
 
-        public class CustomConfig : ICustomConfig
+        public class CustomConfig
         {
             /// <summary>
             /// If you wish to disable this warning, set this to a huge value

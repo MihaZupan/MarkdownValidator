@@ -28,7 +28,13 @@ namespace MihaZupan.MarkdownValidator
         /// All warnings collected by the <see cref="MarkdownContextValidator"/>
         /// </summary>
         public readonly Dictionary<string, List<Warning>> WarningsByFile = new Dictionary<string, List<Warning>>(StringComparer.Ordinal);
+
+        /// <summary>
+        /// Number of all warnings, errors and suggestions
+        /// </summary>
         public int WarningCount { get; private set; } = 0;
+        public int ErrorCount { get; private set; } = 0;
+        public int SuggestionCount { get; private set; } = 0;
 
         internal ValidationReport(Config configuration, bool complete)
         {
@@ -54,6 +60,9 @@ namespace MihaZupan.MarkdownValidator
         internal void AddWarning(Warning warning)
         {
             WarningCount++;
+            if (warning.IsError) ErrorCount++;
+            else if (warning.IsSuggestion) SuggestionCount++;
+
             if (WarningsByFile.TryGetValue(warning.Location.RelativeFilePath, out List<Warning> warnings))
             {
                 warnings.Add(warning);
@@ -84,6 +93,8 @@ namespace MihaZupan.MarkdownValidator
                 return false;
             if (IsComplete != other.IsComplete) return false;
             if (WarningCount != other.WarningCount) return false;
+            if (ErrorCount != other.ErrorCount) return false;
+            if (SuggestionCount != other.SuggestionCount) return false;
             return Diff(other).NoChange;
         }
         public static bool operator ==(ValidationReport a, ValidationReport b)

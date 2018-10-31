@@ -9,6 +9,7 @@ using Markdig;
 using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Parsing;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -106,25 +107,38 @@ namespace MihaZupan.MarkdownValidator.Configuration
 
         #region Custom Configurations
 
+        private readonly object CustomConfigLock = new object();
+
         [JsonProperty(Required = Required.DisallowNull)]
-        public Dictionary<string, ICustomConfig> CustomConfigurations = new Dictionary<string, ICustomConfig>(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, JToken> CustomConfigurations = new Dictionary<string, JToken>(StringComparer.OrdinalIgnoreCase);
 
-        public TCustomConfig ReadConfig<TCustomConfig>(string identifier, bool writeIfDefault) where TCustomConfig : class, ICustomConfig, new()
+        public TCustomConfig ReadConfig<TCustomConfig>(string identifier, bool writeIfDefault) where TCustomConfig : class, new()
         {
-            if (CustomConfigurations.TryGetValue(identifier, out ICustomConfig customConfigObj))
+            lock (CustomConfigLock)
             {
-                if (customConfigObj is TCustomConfig customConfig)
+                if (CustomConfigurations.TryGetValue(identifier, out JToken customConfigObj))
                 {
-                    return customConfig;
+                    try
+                    {
+                        return customConfigObj.ToObject<TCustomConfig>();
+                    }
+                    catch { }
                 }
+
+                var newConfig = new TCustomConfig();
+
+                if (writeIfDefault)
+                    CustomConfigurations[identifier] = JToken.FromObject(newConfig);
+
+                return newConfig;
             }
-
-            var newConfig = new TCustomConfig();
-
-            if (writeIfDefault)
-                CustomConfigurations[identifier] = newConfig;
-
-            return newConfig;
+        }
+        public void WriteConfig(string identifier, object customConfig)
+        {
+            lock (CustomConfigLock)
+            {
+                CustomConfigurations[identifier] = JToken.FromObject(customConfig);
+            }
         }
 
         #endregion Custom Configurations
