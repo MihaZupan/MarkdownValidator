@@ -49,6 +49,7 @@ namespace MihaZupan.MarkdownValidator
             ContextReferenceableEntities.Remove(entity);
             foreach (var file in files)
             {
+                // Ignore file will be set if we're removing its header definition - we don't want to add it to the unfinished list
                 if (file == ignoreFile)
                     continue;
 
@@ -56,11 +57,8 @@ namespace MihaZupan.MarkdownValidator
                 UnfinishedMarkdownFiles.Add(file);
             }
         }
-        private void AddPendingOperations(MarkdownFile file, bool clearFirst = false)
+        private void AddPendingOperations(MarkdownFile file)
         {
-            if (clearFirst)
-                PendingOperations.Remove(file);
-
             if (file.ParsingResult.PendingOperations.Count == 0)
                 return;
 
@@ -79,7 +77,7 @@ namespace MihaZupan.MarkdownValidator
 
         private void ReparseMarkdownFile(MarkdownFile file)
         {
-            UpdateInternalContext(file, file.Update(), true);
+            UpdateInternalContext(file, file.Update());
         }
         private bool RefreshInternalContext(MarkdownFile file, ValidationReport report)
         {
@@ -88,11 +86,11 @@ namespace MihaZupan.MarkdownValidator
             while (node != null)
             {
                 var next = node.Next;
-                bool allReferencesAreGood = true;
 
                 if (ContextReferenceableEntities.TryGetValue(node.Value,
                     out (ReferenceDefinition Definition, LinkedList<MarkdownFile> Files) entity))
                 {
+                    bool allReferencesAreGood = true;
                     if (entity.Definition is null)
                     {
                         // This is a reference to a file/directory that seems to exist in the context
@@ -176,7 +174,7 @@ namespace MihaZupan.MarkdownValidator
             PendingOperations.Remove(file);
             UnfinishedMarkdownFiles.Remove(file);
         }
-        private void UpdateInternalContext(MarkdownFile file, ParsingResultGlobalDiff diff, bool reparsing = false)
+        private void UpdateInternalContext(MarkdownFile file, ParsingResultGlobalDiff diff)
         {
             foreach (var removedHeadingDefinition in diff.RemovedHeadingDefinitions)
             {
@@ -198,7 +196,7 @@ namespace MihaZupan.MarkdownValidator
                 }
             }
 
-            AddPendingOperations(file, !reparsing);
+            AddPendingOperations(file);
             UnfinishedMarkdownFiles.Add(file);
         }
 
@@ -206,7 +204,7 @@ namespace MihaZupan.MarkdownValidator
         {
             // Check async operations and reparse updated files
             List<MarkdownFile> filesToReparse = new List<MarkdownFile>();
-            foreach (var operations in PendingOperations.Values)
+            foreach (LinkedList<PendingOperation> operations in PendingOperations.Values)
             {
                 bool reparse = false;
                 var node = operations.First;
@@ -216,7 +214,7 @@ namespace MihaZupan.MarkdownValidator
                 while (node != null)
                 {
                     var next = node.Next;
-                    var operation = node.Value;
+                    PendingOperation operation = node.Value;
 
                     if (!operation.Finished && getFullReport)
                     {
@@ -336,9 +334,7 @@ namespace MihaZupan.MarkdownValidator
             {
                 TryProcessPendingOperations(getFullReport, cancellationToken);
             }
-            while (PendingOperations.Count != 0 && !cancellationToken.IsCancellationRequested);
-
-            Debug.Assert(!getFullReport || PendingOperations.Count == 0 || cancellationToken.IsCancellationRequested);
+            while (getFullReport && PendingOperations.Count != 0 && !cancellationToken.IsCancellationRequested);
 
             ValidationReport report = new ValidationReport(Configuration, PendingOperations.Count == 0);
 
@@ -348,7 +344,8 @@ namespace MihaZupan.MarkdownValidator
             {
                 if (RefreshInternalContext(markdownFile, report))
                 {
-                    if (markdownFile.ParsingResult.ParserWarnings.Count == 0)
+                    if (markdownFile.ParsingResult.ParserWarnings.Count == 0 &&
+                        markdownFile.ParsingResult.PendingOperations.Count == 0)
                         finishedFiles.Add(markdownFile);
                 }
             }
