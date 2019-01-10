@@ -5,78 +5,72 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
     public sealed class PendingOperation
     {
+        private PendingOperation Parent;
+
         internal MarkdownFile File;
-        internal ManualResetEvent MRE;
 
-        public bool Finished { get; private set; } = false;
+        private ManualResetEvent _mre = null;
+        internal ManualResetEvent MRE
+        {
+            get
+            {
+                return Parent?._mre ?? _mre;
+            }
+        }
 
-        private LinkedList<PendingOperation> AttachedOperations;
+        private bool _finished = false;
+        internal bool Finished
+        {
+            get
+            {
+                return Parent?._finished ?? _finished;
+            }
+        }
 
         private PendingOperation(bool finished)
         {
-            Finished = finished;
-        }
-        internal static PendingOperation New()
-        {
-            return new PendingOperation(false)
+            if (finished)
             {
-                MRE = new ManualResetEvent(false)
-            };
+                _finished = true;
+            }
+            else
+            {
+                _mre = new ManualResetEvent(false);
+            }
         }
+        private PendingOperation(PendingOperation parentOperation)
+        {
+            if (parentOperation.Finished)
+            {
+                _finished = true;
+            }
+            else
+            {
+                Parent = parentOperation.Parent ?? parentOperation;
+            }
+        }
+
+        internal static PendingOperation New()
+            => new PendingOperation(false);
         internal static PendingOperation Completed()
             => new PendingOperation(true);
         internal PendingOperation Attach()
-        {
-            lock (this)
-            {
-                if (Finished)
-                    return Completed();
+            => new PendingOperation(this);
 
-                var operation = new PendingOperation(false)
-                {
-                    MRE = this.MRE
-                };
-
-                if (AttachedOperations is null)
-                    AttachedOperations = new LinkedList<PendingOperation>();
-
-                AttachedOperations.AddLast(operation);
-
-                return operation;
-            }
-        }
-
-        internal void SignalCompletedInternal()
-        {
-            Finished = true;
-            lock (this)
-            {
-                if (AttachedOperations != null)
-                {
-                    foreach (var operation in AttachedOperations)
-                    {
-                        operation.SignalCompletedInternal();
-                    }
-                }
-            }
-        }
         public void SignalCompleted()
         {
-            if (Finished) return;
+            Debug.Assert(Parent == null, "SignalCompleted should only be called on the parent PendingOperation");
+            Debug.Assert(_finished == false, "SignalCompleted should only be called once");
 
-            lock (this)
-            {
-                Finished = true;
-                MRE.Set();
-            }
-            SignalCompletedInternal();
+            _finished = true;
+            MRE.Set();
         }
     }
 }
