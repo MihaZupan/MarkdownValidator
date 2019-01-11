@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.WebSocket
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownValidator.CI", "src\MarkdownValidator.CI\MarkdownValidator.CI.csproj", "{2455D7A1-C5EE-4400-8D2B-565DF3869F95}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "test\Benchmark\Benchmark.csproj", "{93D9E92B-3A47-4B11-87C5-7CD9664D2E66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2455D7A1-C5EE-4400-8D2B-565DF3869F95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93D9E92B-3A47-4B11-87C5-7CD9664D2E66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93D9E92B-3A47-4B11-87C5-7CD9664D2E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93D9E92B-3A47-4B11-87C5-7CD9664D2E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93D9E92B-3A47-4B11-87C5-7CD9664D2E66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +85,7 @@ Global
 		{D5A7ED5B-1000-462B-8DB6-C57F66BBF7ED} = {4852AF3C-1608-422B-91FA-854C0E13F92A}
 		{6A195328-D09B-4774-B679-30BF6FF53804} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
 		{2455D7A1-C5EE-4400-8D2B-565DF3869F95} = {07DBE5D6-A279-47A7-BD03-A5A82E9C6270}
+		{93D9E92B-3A47-4B11-87C5-7CD9664D2E66} = {4852AF3C-1608-422B-91FA-854C0E13F92A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2453E80D-F679-4574-B13C-79556F121B35}
