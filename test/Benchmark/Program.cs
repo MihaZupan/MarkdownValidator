@@ -54,16 +54,16 @@ namespace Benchmark
         [Benchmark(Baseline = true)]
         public void Markdig()
         {
+            var pipeline = new MarkdownPipelineBuilder()
+                .UsePreciseSourceLocation()
+                .UseAutoLinks()
+                .UseFootnotes()
+                .Build();
+
             for (int i = 0; i < N; i++)
             {
                 foreach (var (File, Source) in Sources)
                 {
-                    var pipeline = new MarkdownPipelineBuilder()
-                        .UsePreciseSourceLocation()
-                        .UseAutoLinks()
-                        .UseFootnotes()
-                        .Build();
-
                     Markdown.Parse(Source, pipeline);
                 }
             }
