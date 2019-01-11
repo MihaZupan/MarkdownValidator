@@ -35,7 +35,7 @@ namespace MihaZupan.MarkdownValidator.Helpers
                 if (host.OrdinalEquals("127.0.0.1"))
                     return true;
 
-                if (dnsHost.OrdinalEquals("0.0.0.0"))
+                if (dnsHost.OrdinalEquals("0.0.0.0")) // https://github.com/dotnet/corefx/issues/33094
                     return true;
 
                 if (host.StartsWithAny(StringComparison.Ordinal,
@@ -53,7 +53,7 @@ namespace MihaZupan.MarkdownValidator.Helpers
             }
             else if (url.HostNameType == UriHostNameType.IPv6)
             {
-                if (dnsHost.OrdinalEquals("::"))
+                if (dnsHost.OrdinalEquals("::")) // https://github.com/dotnet/corefx/issues/33094
                     return true;
 
                 if (host.ContainsAny(StringComparison.OrdinalIgnoreCase,

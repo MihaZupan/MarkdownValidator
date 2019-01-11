@@ -68,5 +68,15 @@ namespace MihaZupan.MarkdownValidator.Helpers
             }
             return true;
         }
+        public static T Last<T>(this List<T> source)
+        {
+            if (source.Count == 0) throw new ArgumentException("List is empty", nameof(source));
+            return source[source.Count - 1];
+        }
+        public static T Last<T>(this T[] source)
+        {
+            if (source.Length == 0) throw new ArgumentException("Array is empty", nameof(source));
+            return source[source.Length - 1];
+        }
     }
 }

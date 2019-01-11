@@ -6,13 +6,18 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MihaZupan.MarkdownValidator.Helpers
 {
     public static class StringExtensions
     {
         public static bool OrdinalEquals(this string source, string value)
-            => source.Equals(value, StringComparison.Ordinal);
+        {
+            if (source is null) return value is null;
+            else if (value is null) return false;
+            else return source.Equals(value, StringComparison.Ordinal);
+        }
 
         public static bool OrdinalContains(this string source, char value)
             => Contains(source, value, out _);
@@ -57,9 +62,9 @@ namespace MihaZupan.MarkdownValidator.Helpers
 
         public static bool IsAny(this string source, StringComparison stringComparison, params string[] values)
         {
-            foreach (string value in values)
+            for (int i = 0; i < values.Length; i++)
             {
-                if (source.Equals(value, stringComparison))
+                if (source.Equals(values[i], stringComparison))
                     return true;
             }
             return false;
@@ -67,9 +72,19 @@ namespace MihaZupan.MarkdownValidator.Helpers
 
         public static bool StartsWithAny(this string source, StringComparison stringComparison, params string[] values)
         {
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (source.StartsWith(values[i], stringComparison))
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool EndsWithAny(this string source, StringComparison stringComparison, params string[] values)
+        {
             foreach (var value in values)
             {
-                if (source.StartsWith(value, stringComparison))
+                if (source.EndsWith(value, stringComparison))
                     return true;
             }
             return false;
@@ -89,5 +104,12 @@ namespace MihaZupan.MarkdownValidator.Helpers
 
         public static int OrdinalIndexOf(this string source, string value, int startIndex = 0)
             => source.IndexOf(value, startIndex, StringComparison.Ordinal);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static char Last(this string source)
+        {
+            if (source.Length == 0) throw new ArgumentException("String is empty", nameof(source));
+            return source[0];
+        }
     }
 }

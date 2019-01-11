@@ -9,6 +9,7 @@ using Markdig.Helpers;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MihaZupan.MarkdownValidator.Helpers
 {
@@ -16,6 +17,9 @@ namespace MihaZupan.MarkdownValidator.Helpers
     {
         public static SourceSpan ToSpan(this StringSlice stringSlice)
             => new SourceSpan(stringSlice.Start, stringSlice.End);
+
+        public static bool Overlaps(this SourceSpan first, SourceSpan second)
+            => first.Start < second.End && first.End > second.Start;
 
         public static StringSlice Reposition(this StringSlice slice, SourceSpan span)
             => new StringSlice(slice.Text, span.Start, span.End);
@@ -51,9 +55,11 @@ namespace MihaZupan.MarkdownValidator.Helpers
         public static StringLine Last(this StringLineGroup lines)
             => lines.Lines[lines.Count - 1];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char First(this StringSlice source)
             => source[0];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char Last(this StringSlice source)
             => source[source.Length - 1];
     }
