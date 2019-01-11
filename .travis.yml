@@ -10,7 +10,8 @@ dotnet: 2.1.403
 
 script: >
   dotnet build -c Release &&
-  dotnet test test/MarkdownValidatorTests -c Release --no-build &&
+  dotnet test test/MarkdownValidatorTests -c Release --no-build --list-tests &&
+  dotnet test test/MarkdownValidatorTests -c Release --no-build --filter Category!=Network &&
   docker run --rm -t -v $(pwd):/app/md/ mihazupan/markdownvalidator:latest --threshold 5
 
 notifications:

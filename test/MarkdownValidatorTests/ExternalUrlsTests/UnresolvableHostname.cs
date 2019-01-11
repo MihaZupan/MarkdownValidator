@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class UnresolvableHostname
     {
         [Fact]
+        [Trait("Category", "Network")]
         public void Unresolvable()
         {
             string url = "https://httpbin.notorg/";
@@ -23,6 +24,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void UnresolvableAutoLink()
         {
             string url = "https://httpbin.notorg/";
@@ -32,6 +34,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void UnresolvableAfterRedirect()
         {
             string url = $"{Constants.TEST_HOST}/redirect-to?url=https%3A%2F%2Fhttpbin.notorg";

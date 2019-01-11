@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class MultipleSame
     {
         [Fact]
+        [Trait("Category", "Network")]
         public void MultipleSameHostname()
         {
             string source = @"
@@ -29,6 +30,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void MultipleSameUrl()
         {
             string source = @"

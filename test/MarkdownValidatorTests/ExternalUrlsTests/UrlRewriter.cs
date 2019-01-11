@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class UrlRewriter
     {
         [Fact]
+        [Trait("Category", "Network")]
         public void Microsoft_ReferenceSource()
         {
             // If there was no rewriting done here, any url would be valid (note that 'Something' has been added below)

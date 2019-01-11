@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class WebRequestTimedOut
     {
         [Fact]
+        [Trait("Category", "Network")]
         public void NoTimeout()
         {
             string source = $"[Foo]({Constants.TEST_HOST})";
@@ -21,6 +22,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void Timeout()
         {
             string url = $"{Constants.TEST_HOST}/delay/4";
@@ -30,6 +32,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void TimeoutAfterRedirect()
         {
             string url = $"{Constants.TEST_HOST}/redirect-to?url={Constants.TEST_HOST_ENCODED}%2Fdelay%2F4";

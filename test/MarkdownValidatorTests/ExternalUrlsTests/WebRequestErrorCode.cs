@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class WebRequestErrorCode
     {
         [Theory]
+        [Trait("Category", "Network")]
         [InlineData(Constants.TEST_HOST + "/status/100")]
         [InlineData(Constants.TEST_HOST + "/status/400")]
         [InlineData(Constants.TEST_HOST + "/status/500")]
@@ -27,6 +28,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 
         private const string RedirectUrl = Constants.TEST_HOST + "/redirect-to?url=" + Constants.TEST_HOST_ENCODED + "%2Fstatus%2F";
         [Theory]
+        [Trait("Category", "Network")]
         [InlineData(RedirectUrl + "100")]
         [InlineData(RedirectUrl + "400")]
         [InlineData(RedirectUrl + "500")]

@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class WebRequestFailed
     {
         [Fact]
+        [Trait("Category", "Network")]
         public void Failed()
         {
             string url = "https://expired.badssl.com";
@@ -23,6 +24,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void FailedAfterRedirect()
         {
             string url = $"{Constants.TEST_HOST}/redirect-to?url=https%3A%2F%2Fexpired.badssl.com";

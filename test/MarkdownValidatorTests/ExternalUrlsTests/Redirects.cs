@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
     public class Redirects
     {
         [Fact]
+        [Trait("Category", "Network")]
         public void NoRedirects()
         {
             string source = $"[Foo]({Constants.TEST_HOST})";
@@ -21,6 +22,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void Redirect()
         {
             string url = $"{Constants.TEST_HOST}/redirect/1";
@@ -30,6 +32,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         }
 
         [Fact]
+        [Trait("Category", "Network")]
         public void TooManyRedirects()
         {
             string url = $"{Constants.TEST_HOST}/redirect/10";
