@@ -61,7 +61,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
                 StartLine = index;
                 StartLineColumn = span.Start - lineIndexes[index];
 
-                if (++index  == lineIndexes.Count || lineIndexes[index] > span.End)
+                if (++index == lineIndexes.Count || lineIndexes[index] > span.End)
                 {
                     EndLine = index - 1;
                     EndLineColumn = StartLineColumn + span.Length;
@@ -146,7 +146,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
             if (compare == 0)
             {
                 // Sort by name
-                compare = RelativeFilePath.CompareTo(other.RelativeFilePath);
+                compare = StringComparer.OrdinalIgnoreCase.Compare(RelativeFilePath, other.RelativeFilePath);
 
                 if (compare == 0)
                 {

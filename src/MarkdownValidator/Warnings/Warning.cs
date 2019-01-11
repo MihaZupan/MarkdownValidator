@@ -78,12 +78,12 @@ namespace MihaZupan.MarkdownValidator.Warnings
                 if (compare == 0)
                 {
                     // Sort by message
-                    compare = Message.CompareTo(other.Message);
+                    compare = StringComparer.Ordinal.Compare(Message, other.Message);
 
                     if (compare == 0)
                     {
                         // Sort by Value
-                        compare = Value.CompareTo(other.Value);
+                        compare = StringComparer.Ordinal.Compare(Value, other.Value);
 
                         if (compare == 0)
                         {
