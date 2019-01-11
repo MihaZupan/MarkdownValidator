@@ -19,7 +19,7 @@ build:
   verbosity: minimal
 
 test_script:
-  - dotnet test ./test/MarkdownValidatorTests -c Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../../coverage.xml
+  - dotnet test ./test/MarkdownValidatorTests -c Release /p:CollectCoverage=true /p:Include=\"[Markdown*]*\" /p:CoverletOutputFormat=opencover /p:CoverletOutput=../../coverage.xml
  
 after_test:
   - csmacnz.Coveralls --opencover -i ./coverage.xml --useRelativePaths
