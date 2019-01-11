@@ -28,9 +28,6 @@ namespace MihaZupan.MarkdownValidator.WebIO
             Enabled = WebConfig.Enabled;
             MaxConcurrency = WebConfig.MaximumRequestConcurrency;
 
-            if (MaxConcurrency <= 0)
-                Enabled = false;
-
             if (!Enabled)
                 return;
 
@@ -403,7 +400,7 @@ namespace MihaZupan.MarkdownValidator.WebIO
                     if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
                     {
                         siteInfo.IsRedirect = true;
-                        Uri redirectUrl = response.Headers.Location; // ToDo: handle 3xx responses without a location header
+                        Uri redirectUrl = response.Headers.Location;
                         if (!redirectUrl.IsAbsoluteUri)
                             redirectUrl = new Uri(url.GetLeftPart(UriPartial.Authority) + redirectUrl);
                         siteInfo.RedirectTarget = new CleanUrl(redirectUrl);

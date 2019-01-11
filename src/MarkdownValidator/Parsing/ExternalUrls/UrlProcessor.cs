@@ -95,8 +95,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                     "Use a hostname instead of an IP address");
             }
 
-            // ToDo: Check for local addresses
-
             // ToDo: Extensible scheme parsing support
             if (url.Scheme.StartsWith(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
             {
