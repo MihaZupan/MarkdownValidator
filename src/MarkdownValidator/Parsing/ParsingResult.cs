@@ -34,7 +34,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         {
             Debug.Assert(source != null);
             Source = source;
-            SyntaxTree = Markdown.Parse(source, configuration.GetNewPipeline());
+            SyntaxTree = Markdown.Parse(source, configuration.MarkdigPipeline);
 
             Debug.Assert(SyntaxTree.LineStartIndexes != null);
             LineStartIndexes = SyntaxTree.LineStartIndexes;

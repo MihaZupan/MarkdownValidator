@@ -47,22 +47,11 @@ namespace MihaZupan.MarkdownValidator.Configuration
 
         /// <summary>
         /// A custom <see cref="MarkdownPipelineBuilder"/> provider
-        /// <para>Each call to this method MUST return a NEW instance of <see cref="MarkdownPipelineBuilder"/></para>
-        /// <para>Calls to this method may happen concurrently from multiple threads</para>	
+        /// <para>Note that Markdig parsers should be thread-safe</para>
         /// </summary>
         [JsonIgnore]
-        public Func<MarkdownPipelineBuilder> MarkdigPipeline = null;
-        internal MarkdownPipeline GetNewPipeline()
-        {
-            var builder = MarkdigPipeline?.Invoke() ?? new MarkdownPipelineBuilder();
-
-            // Add 'default' extensions
-            return builder
-                .UsePreciseSourceLocation()
-                .UseAutoLinks()
-                .UseFootnotes()
-                .Build();
-        }
+        public Func<MarkdownPipelineBuilder> MarkdigPipelineProvider = null;
+        internal MarkdownPipeline MarkdigPipeline;
 
         [JsonProperty(Required = Required.DisallowNull)]
         public ParsingConfig Parsing
@@ -91,6 +80,14 @@ namespace MihaZupan.MarkdownValidator.Configuration
             RootWorkingDirectory = PathHelper.GetDirectoryWithSeparator(RootWorkingDirectory);
 
             PathHelper = new PathHelper(RootWorkingDirectory);
+
+            var pipelineBuilder = MarkdigPipelineProvider?.Invoke() ?? new MarkdownPipelineBuilder();
+            // Add 'default' extensions
+            MarkdigPipeline = pipelineBuilder
+                .UsePreciseSourceLocation()
+                .UseAutoLinks()
+                .UseFootnotes()
+                .Build();
 
             WebIO.Initialize(this);
 
