@@ -7,6 +7,7 @@
 */
 using McMaster.Extensions.CommandLineUtils;
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace MihaZupan.MarkdownValidator.CI
 {
     class Program
     {
-        static int Main(string[] args)
+        static void Main(string[] args)
         {
             var app = new CommandLineApplication(false);
 
@@ -75,7 +76,8 @@ namespace MihaZupan.MarkdownValidator.CI
                 return exitCode;
             });
 
-            return app.Execute(args);
+            int finalExitCode = app.Execute(args);
+            Environment.Exit(finalExitCode);
         }
         static int ProcessContext(Config config, int errorThreshold, bool warningIsError)
         {
@@ -199,24 +201,15 @@ namespace MihaZupan.MarkdownValidator.CI
             => Write(value + Environment.NewLine, color);
         static readonly string[] MarkdownExtensions =
         {
-            "md",
-            "markdown",
-            "mdown",
-            "mkdn",
-            "mkd"
+            ".md",
+            ".markdown",
+            ".mdown",
+            ".mkdn",
+            ".mkd"
         };
         static bool IsMarkdownFile(string path)
         {
-            int indexOfLastDot = path.LastIndexOf('.');
-            if (indexOfLastDot == -1) return false;
-            indexOfLastDot++;
-
-            foreach (var extension in MarkdownExtensions)
-            {
-                if (path.IndexOf(extension, indexOfLastDot, StringComparison.OrdinalIgnoreCase) != -1)
-                    return true;
-            }
-            return false;
+            return path.EndsWithAny(StringComparison.OrdinalIgnoreCase, MarkdownExtensions);
         }
         static string ReadTextFile(string path)
         {

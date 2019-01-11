@@ -69,17 +69,17 @@ namespace MihaZupan.MarkdownValidator.WebIO
             Task.Run(() => SchedulerWorkInternal());
         }
 
-        private readonly Dictionary<string, List<(string, bool)>> DownloadableContentByHostname;
+        private readonly Dictionary<string, List<(string Hostname, bool IsText)>> DownloadableContentByHostname;
         internal void AddDownloadableContentType(string hostname, string contentType, bool isText)
         {
             if (DownloadableContentByHostname.TryGetValue(hostname, out var downloadableContent))
             {
                 for (int i = 0; i < downloadableContent.Count; i++)
                 {
-                    var content = downloadableContent[i];
-                    if (content.Item1.Equals(contentType, StringComparison.OrdinalIgnoreCase))
+                    var (Hostname, IsText) = downloadableContent[i];
+                    if (Hostname.Equals(contentType, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (isText && !content.Item2)
+                        if (isText && !IsText)
                             downloadableContent[i] = (contentType, true);
                         return;
                     }
@@ -99,9 +99,9 @@ namespace MihaZupan.MarkdownValidator.WebIO
         {
             if (DownloadableContentByHostname.TryGetValue(hostname, out var downloadableContent))
             {
-                if (downloadableContent.ContainsAny(c => c.Item1.Equals(contentType, StringComparison.OrdinalIgnoreCase), out var content))
+                if (downloadableContent.ContainsAny(c => c.Hostname.Equals(contentType, StringComparison.OrdinalIgnoreCase), out var content))
                 {
-                    isText = content.Item2;
+                    isText = content.IsText;
                     return true;
                 }
             }

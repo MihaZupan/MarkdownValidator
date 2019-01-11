@@ -6,7 +6,6 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
-using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Parsing;
 using Newtonsoft.Json;
 
@@ -33,7 +32,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
         public void Initialize(ParserRegistrationContext context)
         {
             context.Register(typeof(MarkdownDocument), ParseDocument);
-            ParserConfig = context.ReadConfig<CustomConfig>(true);
+            ParserConfig = context.ReadConfig<CustomConfig>(writeIfDefault: true);
         }
 
         private void ParseDocument(ParsingContext context)

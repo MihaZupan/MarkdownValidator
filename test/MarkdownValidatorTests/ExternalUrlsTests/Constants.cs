@@ -9,7 +9,7 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
 {
     public static class Constants
     {
-        public const string TEST_HOST = "http://markdown-validator.ml:6400";
-        public const string TEST_HOST_ENCODED = "http%3A%2F%2Fmarkdown-validator.ml%3A6400";
+        public const string TEST_HOST = "https://httpbin.org";
+        public const string TEST_HOST_ENCODED = "https%3A%2F%2Fhttpbin.org";
     }
 }

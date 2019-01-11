@@ -8,7 +8,6 @@
 using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Helpers;
 using System;
-using System.IO;
 
 namespace MihaZupan.MarkdownValidator.ExternalParsers.UrlRewriters
 {
@@ -39,8 +38,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers.UrlRewriters
             }
             else path = fragment.Substring(1);
 
-            string extension = Path.GetExtension(path).Substring(1);
-            if (SupportedExtensions.ContainsAny(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
+            if (path.EndsWithAny(StringComparison.OrdinalIgnoreCase, SupportedExtensions))
             {
                 return new Uri(string.Concat("https://referencesource.microsoft.com/", path.Trim(), ".html"));
             }
@@ -49,14 +47,14 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers.UrlRewriters
 
         private static readonly string[] SupportedExtensions = new string[]
         {
-            "cs",
-            "vb",
-            "ts",
-            "csproj",
-            "vbproj",
-            "targets",
-            "props",
-            "xaml"
+            ".cs",
+            ".vb",
+            ".ts",
+            ".csproj",
+            ".vbproj",
+            ".targets",
+            ".props",
+            ".xaml"
         };
     }
 }
