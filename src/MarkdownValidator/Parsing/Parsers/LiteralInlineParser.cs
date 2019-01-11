@@ -70,7 +70,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             if (firstForm)
             {
-                context.TryAddReference(name, nameSpan, inline.Line, isImage, canBeUrl);
+                context.TryAddReference(name, nameSpan, inline.Line, image: isImage, cleanUrl: canBeUrl, namedReferenceLink: true);
             }
             else
             {
@@ -115,7 +115,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                             name,
                             target);
                     }
-                    context.TryAddReference(target, targetSpan, inline.Line, isImage, canBeUrl);
+                    context.TryAddReference(target, targetSpan, inline.Line, image: isImage, cleanUrl: canBeUrl, namedReferenceLink: true, label: name);
                 }
             }
 
@@ -145,6 +145,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                         part = nameBuilder.ToString();
                         inline = literal;
                         partSpan = new SourceSpan(start, literal.Span.Start + index);
+                        nameBuilder.Length = 0;
                         return true;
                     }
                     nameBuilder.Append(literal.Content);

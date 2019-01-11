@@ -57,15 +57,14 @@ namespace MihaZupan.MarkdownValidator.Parsing
         private void Parse()
         {
             var controller = Configuration.ParsingController;
-            controller.Parse(ParsingResult.SyntaxTree, this);
+            controller.Parse(ParsingResult.SyntaxTree, ParsingContext);
             foreach (var markdownObject in ParsingResult.SyntaxTree.Descendants())
             {
-                controller.Parse(markdownObject, this);
+                controller.Parse(markdownObject, ParsingContext);
             }
 
-            controller.Finalize(this);
+            controller.Finalize(ParsingContext);
             ParsingResult.Finalize(ParsingContext);
-            StringBuilderCache.Local(); // Clear the StringBuilder buffer
         }
     }
 }

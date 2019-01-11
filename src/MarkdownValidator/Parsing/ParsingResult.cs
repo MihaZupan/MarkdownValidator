@@ -11,6 +11,7 @@ using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Warnings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace MihaZupan.MarkdownValidator.Parsing
@@ -31,8 +32,11 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public ParsingResult(string source, Config configuration)
         {
+            Debug.Assert(source != null);
             Source = source;
             SyntaxTree = Markdown.Parse(source, configuration.GetNewPipeline());
+
+            Debug.Assert(SyntaxTree.LineStartIndexes != null);
             LineStartIndexes = SyntaxTree.LineStartIndexes;
         }
         public ParsingResult(ParsingResult parsingResult)
@@ -74,7 +78,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     {
                         if (headingLines.BinarySearch(referenceList[i].Line) >= 0)
                         {
-                            referenceList.RemoveAt(i);
+                            referenceList.RemoveAt(i); // This shouldn't happen too often, List.RemoveAt is fine
                         }
                     }
                     if (referenceList.Count == 0)
@@ -88,11 +92,11 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 {
                     first.Used = true;
                 }
-                else if (reference.IsUrl)
+                else if (reference is LinkReference linkReference)
                 {
-                    context.ProcessLinkReference(reference);
+                    context.ProcessLinkReference(linkReference);
                 }
-                else if (reference.GlobalReference != string.Empty)
+                else if (reference.GlobalReference.Length != 0)
                 {
                     UnprocessedReferences.AddLast(reference.GlobalReference);
                 }

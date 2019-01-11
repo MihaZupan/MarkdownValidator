@@ -12,17 +12,20 @@ using MihaZupan.MarkdownValidator.Helpers;
 using MihaZupan.MarkdownValidator.Warnings;
 using MihaZupan.MarkdownValidator.WebIO;
 using System;
+using System.Diagnostics;
 using static MihaZupan.MarkdownValidator.Helpers.PathHelper;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
     public sealed class ParsingContext
     {
-        public Config Configuration => SourceFile.Configuration;
-        public string RelativePath => SourceFile.RelativePath;
+        public readonly Config Configuration;
+        public readonly string RelativePath;
 
         public StringSlice GetSourceLine()
         {
+            Debug.Assert(Object != null);
+
             int line = Object.Line;
             int startIndex = ParsingResult.LineStartIndexes[line];
             int endIndex;
@@ -39,19 +42,19 @@ namespace MihaZupan.MarkdownValidator.Parsing
             return Source.Reposition(startIndex, endIndex);
         }
 
-        public ObjectType GetParserState<ParserType, ObjectType>(Func<ObjectType> init)
+        public StateType GetParserState<ParserType, StateType>(Func<StateType> init)
         {
-            if (!ParsingResult.ParserStorage.TryGetValue(typeof(ParserType), out object state))
+            if (!ParsingResult.ParserStorage.TryGetValue(typeof(ParserType), out object state) || !(state is StateType))
             {
                 state = init();
-                ParsingResult.ParserStorage.Add(typeof(ParserType), state);
+                ParsingResult.ParserStorage[typeof(ParserType)] = state;
             }
-            return (ObjectType)state;
+            return (StateType)state;
         }
 
         // Only available to internal parsers
         internal readonly MarkdownFile SourceFile;
-        internal ParsingResult ParsingResult => SourceFile.ParsingResult;
+        internal ParsingResult ParsingResult => SourceFile.ParsingResult; // This can't be readonly since it changes in SourceFile
 
         public MarkdownObject Object { get; private set; }
         public StringSlice Source { get; private set; }
@@ -62,6 +65,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal ParsingContext(MarkdownFile sourceFile)
         {
             SourceFile = sourceFile;
+            Configuration = SourceFile.Configuration;
+            RelativePath = SourceFile.RelativePath;
             WebIO = Configuration.WebIO.WebIOController;
         }
         internal void Update(MarkdownObject objectToParse)
@@ -69,7 +74,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             Object = objectToParse;
             Source = Object is null
                 ? StringSlice.Empty
-                : new StringSlice(SourceFile.ParsingResult.Source, Object.Span.Start, Object.Span.End);
+                : new StringSlice(ParsingResult.Source, Object.Span.Start, Object.Span.End);
         }
         internal void SetWarningSource(WarningSource warningSource)
         {
@@ -86,7 +91,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
         internal PathProcessingResult ProcessRelativeHtmlPath(string reference, out string relativePath)
             => Configuration.PathHelper.ProcessRelativePath(SourceFile.HtmlPath, reference, out relativePath);
 
-        public bool TryAddReference(string reference, SourceSpan span, int line, bool isImage = false, bool canBeUrl = true, SourceSpan? errorSpan = null)
+        public bool TryAddReference(string reference, SourceSpan span, int line, SourceSpan? errorSpan = null,
+            bool image = false, bool cleanUrl = false, bool autoLink = false, bool namedReferenceLink = false, string label = null)
         {
             var result = ProcessRelativePath(reference, out string relativePath);
 
@@ -102,16 +108,28 @@ namespace MihaZupan.MarkdownValidator.Parsing
             }
             else
             {
-                bool isUrl = result == PathProcessingResult.IsUrl;
-                ParsingResult.AddReference(
-                    new Reference(
-                        reference,
-                        isUrl ? reference : relativePath,
-                        span,
-                        line,
-                        isImage,
-                        isUrl,
-                        isUrl && canBeUrl));
+                if (result == PathProcessingResult.IsUrl)
+                {
+                    ParsingResult.AddReference(
+                        new LinkReference(
+                            reference,
+                            span,
+                            line,
+                            image,
+                            cleanUrl,
+                            autoLink,
+                            namedReferenceLink,
+                            autoLink ? reference : label));
+                }
+                else
+                {
+                    ParsingResult.AddReference(
+                        new Reference(
+                            reference,
+                            relativePath,
+                            span,
+                            line));
+                }
                 return true;
             }
         }
@@ -198,7 +216,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     ParserIdentifier));
         #endregion
 
-        internal void ProcessLinkReference(Reference reference)
+        internal void ProcessLinkReference(LinkReference reference)
             => Configuration.WebIO.UrlProcessor.ProcessUrl(this, reference);
     }
 }

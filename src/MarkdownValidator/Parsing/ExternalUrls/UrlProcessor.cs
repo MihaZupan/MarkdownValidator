@@ -12,7 +12,6 @@ using MihaZupan.MarkdownValidator.WebIO;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 
 namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
@@ -32,7 +31,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 else
                 {
                     UrlPostProcessors.Add(hostname,
-                        new List<IUrlPostProcessor>(4)
+                        new List<IUrlPostProcessor>(2)
                         {
                             processor
                         });
@@ -48,7 +47,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
             UrlPostProcessors = new Dictionary<string, List<IUrlPostProcessor>>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public void ProcessUrl(ParsingContext context, Reference reference)
+        public void ProcessUrl(ParsingContext context, LinkReference reference)
         {
             context.SetWarningSource(WarningSource.UrlProcessor);
 
@@ -105,7 +104,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
             }
         }
 
-        private void ProcessHttpUrl(ParsingContext context, Reference reference, Uri originalUrl)
+        private void ProcessHttpUrl(ParsingContext context, LinkReference reference, Uri originalUrl)
         {
             var cacheState = context.WebIO.TryGetSiteInfo(originalUrl, out SiteInfo info);
             if (cacheState == SiteCacheState.WebIODisabled)
@@ -224,7 +223,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
             }
 
 
-            if (UrlPostProcessors.TryGetValue(url.Host, out var postProcessors) && postProcessors.Count != 0)
+            if (UrlPostProcessors.TryGetValue(url.Host, out var postProcessors))
             {
                 UrlPostProcessorContext postProcessorContext = new UrlPostProcessorContext(context, reference, info);
                 foreach (var postProcessor in postProcessors)

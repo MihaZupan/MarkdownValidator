@@ -24,7 +24,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             if (!link.IsEmail)
             {
-                context.TryAddReference(link.Url, link.Span, link.Line);
+                context.TryAddReference(link.Url, link.Span, link.Line, autoLink: true);
             }
 
             // else

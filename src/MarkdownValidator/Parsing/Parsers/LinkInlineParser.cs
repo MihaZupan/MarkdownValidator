@@ -29,44 +29,44 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             bool canBeUrl = !(link.Parent is EmphasisInline);
 
-            if (!link.UrlSpan.Value.IsEmpty &&
-                (link.UrlSpan.Value.Start < link.Span.Start || link.UrlSpan.Value.End > link.Span.End))
+            if (!link.UrlSpan.Value.IsEmpty && !link.UrlSpan.Value.Overlaps(link.Span))
             {
-                string label;
+                string target;
+                string name = null;
                 SourceSpan span;
                 if (link.Label != null)
                 {
-                    label = link.Label;
+                    target = link.Label;
                     span = link.LabelSpan.Value;
 
                     if (!span.IsEmpty && link.FirstChild is LiteralInline literal)
                     {
-                        string content = literal.Content.ToString();
-                        if (content.Equals(label, StringComparison.OrdinalIgnoreCase))
+                        name = literal.Content.ToString();
+                        if (name.Equals(target, StringComparison.OrdinalIgnoreCase))
                         {
                             context.ReportWarning(
                                 WarningIDs.SameLabelAndTargetReference,
                                 string.Empty,
                                 "You can use `[{0}]` instead of `[{0}][{1}]`",
-                                content,
-                                label);
+                                name,
+                                target);
                         }
                     }
                 }
                 else
                 {
-                    label = (link.FirstChild as LiteralInline).Content.ToString();
+                    target = (link.FirstChild as LiteralInline).Content.ToString();
                     span = link.FirstChild.Span;
                 }
 
-                context.TryAddReference(label, link.LabelSpan.Value, link.Line, link.IsImage, canBeUrl);
+                context.TryAddReference(target, link.LabelSpan.Value, link.Line, image: link.IsImage, cleanUrl: canBeUrl, namedReferenceLink: true, label: name);
             }
             else
             {
                 if (link.Url.IsEffectivelyEmpty()) ReportEmptyReference(context);
                 else
                 {
-                    context.TryAddReference(link.Url, link.UrlSpan.Value, link.Line, link.IsImage, canBeUrl, link.UrlSpan);
+                    context.TryAddReference(link.Url, link.UrlSpan.Value, link.Line, link.UrlSpan, link.IsImage, canBeUrl);
 
                     if (context.Source.OrdinalContains("( ") || context.Source.OrdinalContains(" )"))
                         ReportExcessSpace(context);
