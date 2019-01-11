@@ -6,7 +6,6 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
-using MihaZupan.MarkdownValidator.Warnings;
 
 namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {

@@ -6,12 +6,12 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using Markdig.Syntax;
-using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.Warnings;
 using Newtonsoft.Json;
 
-namespace MihaZupan.MarkdownValidator.ExternalParsers
+namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
-    public sealed class MarkdownDocumentParser : IParser
+    internal class MarkdownDocumentParser : IParser
     {
         public string Identifier => nameof(MarkdownDocumentParser);
 
@@ -22,7 +22,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
             /// <para>Defaults to 1500</para>
             /// </summary>
             [JsonProperty(Required = Required.Always)]
-            public int HugeFile_LineCount = 1500;
+            public int HugeFile_LineCount = 1500; // Update in MarkdownDocument tests if changed
 
             [JsonProperty(Required = Required.Always)]
             public bool ReportEmptyFile = true;
@@ -44,7 +44,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
                 if (ParserConfig.ReportEmptyFile)
                 {
                     context.ReportGeneralWarning(
-                        ExternalWarningIDs.EmptyMarkdownFile,
+                        WarningIDs.EmptyMarkdownFile,
                         string.Empty,
                         "Empty markdown file");
                 }
@@ -52,7 +52,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
             else if (document.LineCount >= ParserConfig.HugeFile_LineCount)
             {
                 context.ReportGeneralWarning(
-                    ExternalWarningIDs.HugeMarkdownFile,
+                    WarningIDs.HugeMarkdownFile,
                     $"{document.LineCount} >= {ParserConfig.HugeFile_LineCount}",
                     "Markdown file is huge! Consider moving some content into other files.");
             }

@@ -6,12 +6,11 @@
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
 using MihaZupan.MarkdownValidator.Configuration;
-using MihaZupan.MarkdownValidator.Parsing;
 using System;
 
-namespace MihaZupan.MarkdownValidator.ExternalParsers.CodeBlockParsers.JSON
+namespace MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.JSON
 {
-    public abstract class JsonCodeBlockParser : ICodeBlockParser
+    internal abstract class JsonCodeBlockParser : ICodeBlockParser
     {
         public abstract string Identifier { get; }
 

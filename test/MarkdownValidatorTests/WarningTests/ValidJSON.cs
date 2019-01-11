@@ -5,8 +5,8 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.ExternalParsers;
 using MihaZupan.MarkdownValidator.Tests.Framework;
+using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.WarningTests
@@ -46,7 +46,7 @@ namespace MihaZupan.MarkdownValidator.Tests.WarningTests
 ```
 ";
             SingleFileTest.AssertWarning(source,
-                ExternalWarningIDs.InvalidJsonInJsonCodeBlock, 9, 11, "1-3");
+                WarningIDs.InvalidJsonInJsonCodeBlock, 9, 11, "1-3");
         }
     }
 }

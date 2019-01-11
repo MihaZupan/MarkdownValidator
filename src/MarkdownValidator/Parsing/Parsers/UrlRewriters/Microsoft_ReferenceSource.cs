@@ -5,18 +5,17 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.Parsing;
 using MihaZupan.MarkdownValidator.Helpers;
 using System;
 
-namespace MihaZupan.MarkdownValidator.ExternalParsers.UrlRewriters
+namespace MihaZupan.MarkdownValidator.Parsing.Parsers.UrlRewriters
 {
     /// <summary>
     /// Refers to https://referencesource.microsoft.com/scripts.js
     /// </summary>
-    public class Microsoft_ReferenceSource : IParser
+    internal class MicrosoftReferenceSourceUrlRewriter : IParser
     {
-        public string Identifier => nameof(Microsoft_ReferenceSource);
+        public string Identifier => nameof(MicrosoftReferenceSourceUrlRewriter);
 
         public void Initialize(ParserRegistrationContext context)
         {

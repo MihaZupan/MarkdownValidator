@@ -5,8 +5,8 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.ExternalParsers;
 using MihaZupan.MarkdownValidator.Tests.Framework;
+using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.WarningTests
@@ -44,7 +44,7 @@ namespace MihaZupan.MarkdownValidator.Tests.WarningTests
 1. Test
 ";
             SingleFileTest.AssertWarning(source,
-                ExternalWarningIDs.InvalidListNumberOrder, 8, 13, "2-5");
+                WarningIDs.InvalidListNumberOrder, 8, 13, "2-5");
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace MihaZupan.MarkdownValidator.Tests.WarningTests
 1. Test
 ";
             SingleFileTest.AssertWarning(source,
-                ExternalWarningIDs.InvalidListNumberOrder, 15, 21, "3-1");
+                WarningIDs.InvalidListNumberOrder, 15, 21, "3-1");
         }
     }
 }

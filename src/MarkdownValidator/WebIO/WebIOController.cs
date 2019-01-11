@@ -69,6 +69,7 @@ namespace MihaZupan.MarkdownValidator.WebIO
         private readonly Dictionary<string, List<(string Hostname, bool IsText)>> DownloadableContentByHostname;
         internal void AddDownloadableContentType(string hostname, string contentType, bool isText)
         {
+            if (!Enabled) return;
             if (DownloadableContentByHostname.TryGetValue(hostname, out var downloadableContent))
             {
                 for (int i = 0; i < downloadableContent.Count; i++)
@@ -109,7 +110,10 @@ namespace MihaZupan.MarkdownValidator.WebIO
 
         private readonly Dictionary<string, Func<Uri, Uri>> UrlRewriters;
         internal void AddUrlRewriter(string hostname, Func<Uri, Uri> rewriter)
-            => UrlRewriters.Add(hostname, rewriter);
+        {
+            if (!Enabled) return;
+            UrlRewriters.Add(hostname, rewriter);
+        }
         private Uri Rewrite(Uri url)
         {
             if (UrlRewriters.TryGetValue(url.Host, out var rewriter))

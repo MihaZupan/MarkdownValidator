@@ -5,12 +5,12 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.Warnings;
 using Newtonsoft.Json.Linq;
 
-namespace MihaZupan.MarkdownValidator.ExternalParsers.CodeBlockParsers.JSON
+namespace MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.JSON
 {
-    public class ValidJsonParser : JsonCodeBlockParser
+    internal class ValidJsonParser : JsonCodeBlockParser
     {
         public override string Identifier => nameof(ValidJsonParser);
 
@@ -31,7 +31,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers.CodeBlockParsers.JSON
             if (!valid)
             {
                 context.ReportWarning(
-                    ExternalWarningIDs.InvalidJsonInJsonCodeBlock,
+                    WarningIDs.InvalidJsonInJsonCodeBlock,
                     codeBlock.ContentSpan,
                     codeBlock.Content,
                     "JSON is not valid");

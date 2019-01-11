@@ -24,7 +24,7 @@ namespace Benchmark
         private List<string> Entities = new List<string>();
         private const string Root = @"C:\MihaZupan\Telegram\Telegram.Bot.Wiki\src";
 
-        [Params(10, 100)]
+        [Params(1, 10, 100)]
         public int N;
 
         [GlobalSetup]

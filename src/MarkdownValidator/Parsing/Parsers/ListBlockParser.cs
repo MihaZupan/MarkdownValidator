@@ -7,11 +7,11 @@
 */
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Helpers;
-using MihaZupan.MarkdownValidator.Parsing;
+using MihaZupan.MarkdownValidator.Warnings;
 
-namespace MihaZupan.MarkdownValidator.ExternalParsers
+namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 {
-    public class ListBlockParser : IParser
+    internal class ListBlockParser : IParser
     {
         public string Identifier => nameof(ListBlockParser);
 
@@ -36,7 +36,7 @@ namespace MihaZupan.MarkdownValidator.ExternalParsers
                 if (++expected != listItem.Order)
                 {
                     context.ReportWarning(
-                       ExternalWarningIDs.InvalidListNumberOrder,
+                       WarningIDs.InvalidListNumberOrder,
                        listItem.Span,
                        $"{expected}-{listItem.Order}",
                        "Invalid list number order - expected {0}, not {1}",

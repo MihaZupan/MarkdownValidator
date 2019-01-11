@@ -91,9 +91,8 @@ namespace MihaZupan.MarkdownValidator.Configuration
 
             WebIO.Initialize(this);
 
-            if (!DisableExternalParsers)
+            if (!DisableExternalParsers && ExtensionAssemblies != null)
             {
-                ExtensionAssemblies.Add("MarkdownValidator.ExternalParsers.dll");
                 foreach (var assembly in ExtensionAssemblies)
                     ExtensionLoader.TryLoad(this, assembly);
             }

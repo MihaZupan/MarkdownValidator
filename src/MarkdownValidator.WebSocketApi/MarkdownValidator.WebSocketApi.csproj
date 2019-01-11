@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MarkdownValidator.ExternalParsers\MarkdownValidator.ExternalParsers.csproj" />
     <ProjectReference Include="..\MarkdownValidator\MarkdownValidator.csproj" />
   </ItemGroup>
 

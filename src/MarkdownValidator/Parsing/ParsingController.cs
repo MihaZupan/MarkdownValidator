@@ -8,7 +8,8 @@
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Parsing.Parsers;
-using MihaZupan.MarkdownValidator.Warnings;
+using MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.JSON;
+using MihaZupan.MarkdownValidator.Parsing.Parsers.UrlRewriters;
 using System;
 using System.Collections.Generic;
 
@@ -29,7 +30,12 @@ namespace MihaZupan.MarkdownValidator.Parsing
             Configuration = configuration;
             var registration = new ParserRegistrationContext(this, configuration);
 
-            var internalParsers = new IParser[]
+            Configuration.Parsing.CodeBlocks.Parsers.AddRange(new ICodeBlockParser[]
+            {
+                new ValidJsonParser(),
+            });
+
+            Configuration.Parsing.Parsers.AddRange(new IParser[]
             {
                 new LiteralInlineParser(),
                 new LinkInlineParser(),
@@ -37,14 +43,16 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 new LinkReferenceDefinitionParser(),
                 new HeadingBlockParser(),
                 new FootnoteParser(),
+                new MarkdownDocumentParser(),
+                new ListBlockParser(),
                 new CodeBlockParser(),
-            };
+            });
 
-            foreach (var parser in internalParsers)
+            Configuration.Parsing.Parsers.AddRange(new IParser[]
             {
-                registration.ParserIdentifier = parser.Identifier;
-                parser.Initialize(registration);
-            }
+                new MicrosoftReferenceSourceUrlRewriter(),
+            });
+
             foreach (var parser in Configuration.Parsing.Parsers)
             {
                 registration.ParserIdentifier = parser.Identifier;

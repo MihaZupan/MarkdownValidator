@@ -14,6 +14,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         //
         public static readonly WarningID SameLabelAndTargetReference    = new WarningID(-1, nameof(SameLabelAndTargetReference));
         public static readonly WarningID UrlHostnameIsIP                = new WarningID(-2, nameof(UrlHostnameIsIP));
+        public static readonly WarningID HugeMarkdownFile               = new WarningID(-3, nameof(HugeMarkdownFile));
 
         //
         // Warnings
@@ -24,6 +25,9 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public static readonly WarningID ReferenceHasExcessWhitespace   = new WarningID(4,  nameof(ReferenceHasExcessWhitespace));
         public static readonly WarningID FileReferenceCaseMismatch      = new WarningID(5,  nameof(FileReferenceCaseMismatch));
         public static readonly WarningID RedirectChain                  = new WarningID(6,  nameof(RedirectChain));
+        public static readonly WarningID EmptyMarkdownFile              = new WarningID(7,  nameof(EmptyMarkdownFile));
+        public static readonly WarningID InvalidListNumberOrder         = new WarningID(8,  nameof(InvalidListNumberOrder));
+        public static readonly WarningID InvalidJsonInJsonCodeBlock     = new WarningID(9,  nameof(InvalidJsonInJsonCodeBlock));
 
         //
         // Errors

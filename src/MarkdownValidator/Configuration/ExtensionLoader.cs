@@ -25,7 +25,7 @@ namespace MihaZupan.MarkdownValidator.Configuration
                     fullPath = Path.GetFullPath(assemblyPath, AppDomain.CurrentDomain.BaseDirectory);
                 }
 
-                if (Path.GetFileName(fullPath).Equals("MarkdownValidator.dll", StringComparison.OrdinalIgnoreCase))
+                if (fullPath.EndsWith("MarkdownValidator.dll", StringComparison.OrdinalIgnoreCase))
                     return false;
 
                 Assembly assembly = Assembly.LoadFile(fullPath);

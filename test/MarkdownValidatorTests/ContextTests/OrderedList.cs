@@ -5,8 +5,8 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using MihaZupan.MarkdownValidator.ExternalParsers;
 using MihaZupan.MarkdownValidator.Tests.Framework;
+using MihaZupan.MarkdownValidator.Warnings;
 using Xunit;
 
 namespace MihaZupan.MarkdownValidator.Tests.ContextTests
@@ -28,8 +28,8 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
 3. Foo
 ")
                 .Assert(
-                    (ExternalWarningIDs.InvalidListNumberOrder, 26, 32, "3-2"),
-                    (ExternalWarningIDs.InvalidListNumberOrder, 54, 59, "4-5"))
+                    (WarningIDs.InvalidListNumberOrder, 26, 32, "3-2"),
+                    (WarningIDs.InvalidListNumberOrder, 54, 59, "4-5"))
                 .Update(@"
 1. Test
 	1. Foo
@@ -39,11 +39,11 @@ namespace MihaZupan.MarkdownValidator.Tests.ContextTests
 4. Bar
 18. Foo
 ")
-                .Assert(ExternalWarningIDs.InvalidListNumberOrder, 53, 59, "5-18")
+                .Assert(WarningIDs.InvalidListNumberOrder, 53, 59, "5-18")
                 .Clear()
-                .AssertNotPresent(ExternalWarningIDs.InvalidListNumberOrder)
+                .AssertNotPresent(WarningIDs.InvalidListNumberOrder)
                 .Update("2. Foo")
-                .Assert(ExternalWarningIDs.InvalidListNumberOrder, 0, 5, "1-2")
+                .Assert(WarningIDs.InvalidListNumberOrder, 0, 5, "1-2")
                 .Update("1. Bar")
                 .AssertNoWarnings();
         }
