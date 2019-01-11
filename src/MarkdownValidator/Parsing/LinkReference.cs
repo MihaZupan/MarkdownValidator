@@ -14,7 +14,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
     internal class LinkReference : Reference, IEquatable<LinkReference>
     {
         public readonly string Label;
-        public readonly Uri Url;
+        public Uri Url; // Set in UrlProcessor
 
         public readonly bool IsImage;
         public readonly bool IsCleanUrl;
@@ -57,7 +57,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 other.IsAutoLink == IsAutoLink &&
                 other.IsNamedReferenceLink == IsNamedReferenceLink &&
                 other.Label.OrdinalEquals(Label) &&
-                other.Url.AbsoluteUri.OrdinalEquals(Url.AbsoluteUri);
+                (other.Url?.AbsoluteUri).OrdinalEquals(Url?.AbsoluteUri);
         }
     }
 }
