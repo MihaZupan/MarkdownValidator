@@ -43,8 +43,6 @@ namespace MihaZupan.MarkdownValidator
         }
 
         internal ValidationReport AddWarning(WarningID id, WarningLocation location, string value, string messageFormat, params string[] messageArgs)
-            => AddWarning(id, location, value, WarningSource.Validator, messageFormat, messageArgs);
-        internal ValidationReport AddWarning(WarningID id, WarningLocation location, string value, WarningSource source, string messageFormat, params string[] messageArgs)
         {
             AddWarning(
                 new Warning(
@@ -52,7 +50,6 @@ namespace MihaZupan.MarkdownValidator
                     location,
                     value,
                     string.Format(messageFormat, messageArgs),
-                    source,
                     nameof(ValidationContext)));
             return this;
         }

@@ -87,8 +87,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
         private void Finalize(ParsingContext context)
         {
-            context.SetWarningSource(WarningSource.InternalParserFinalize);
-
             var state = GetUsedOrders(context);
             foreach (var (Order, Location) in state.Defined)
             {

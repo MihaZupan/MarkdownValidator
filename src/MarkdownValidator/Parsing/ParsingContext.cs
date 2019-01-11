@@ -58,7 +58,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public MarkdownObject Object { get; private set; }
         public StringSlice Source { get; private set; }
-        public WarningSource WarningSource { get; private set; }
         public string ParserIdentifier { get; private set; }
         public readonly WebIOController WebIO;
 
@@ -76,13 +75,8 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 ? StringSlice.Empty
                 : new StringSlice(ParsingResult.Source, Object.Span.Start, Object.Span.End);
         }
-        internal void SetWarningSource(WarningSource warningSource)
+        internal void SetWarningSource(string parserIdentifier)
         {
-            WarningSource = warningSource;
-        }
-        internal void SetWarningSource(WarningSource warningSource, string parserIdentifier)
-        {
-            WarningSource = warningSource;
             ParserIdentifier = parserIdentifier;
         }
 
@@ -212,7 +206,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     location,
                     value,
                     message,
-                    WarningSource,
                     ParserIdentifier));
         #endregion
 

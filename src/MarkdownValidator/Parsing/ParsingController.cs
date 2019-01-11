@@ -74,7 +74,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 context.Update(objectToParse);
                 foreach (var (identifier, action) in parsers)
                 {
-                    context.SetWarningSource(WarningSource.ExternalParser, identifier);
+                    context.SetWarningSource(identifier);
                     action(context);
                 }
             }
@@ -84,7 +84,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
             context.Update(null);
             foreach (var (ParserIdentifier, Finalizer) in Finalizers)
             {
-                context.SetWarningSource(WarningSource.ExternalParserFinalize, ParserIdentifier);
+                context.SetWarningSource(ParserIdentifier);
                 Finalizer(context);
             }
         }

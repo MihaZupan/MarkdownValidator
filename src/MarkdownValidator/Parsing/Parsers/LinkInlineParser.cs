@@ -25,7 +25,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseLinkInline(ParsingContext context)
         {
             var link = context.Object as LinkInline;
-            context.SetWarningSource(WarningSource.InternalParser);
 
             bool canBeUrl = !(link.Parent is EmphasisInline);
 

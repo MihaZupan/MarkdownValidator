@@ -26,7 +26,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseLiteralInline(ParsingContext context)
         {
             var inline = context.Object as Inline;
-            context.SetWarningSource(WarningSource.InternalParser);
 
             ReferenceInt lastIndex = GetLastIndex(context);
             if (inline.Span.Start < lastIndex)

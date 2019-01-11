@@ -107,7 +107,6 @@ namespace MihaZupan.MarkdownValidator
                                     WarningIDs.FileReferenceCaseMismatch,
                                     new WarningLocation(file, reference),
                                     reference.GlobalReference,
-                                    WarningSource.RefreshInternalContext,
                                     "`{0}` is not an exact case-match for `{1}`. This could be a problem on *nix hosts.",
                                     reference.GlobalReference, originalName);
                             }

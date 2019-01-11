@@ -48,8 +48,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
 
         public void Finalize(ParsingContext context)
         {
-            context.SetWarningSource(WarningSource.ParsingResultFinalize);
-
             Dictionary<string, ReferenceDefinition> definedReferences
                 = new Dictionary<string, ReferenceDefinition>(StringComparer.OrdinalIgnoreCase);
 
@@ -101,8 +99,6 @@ namespace MihaZupan.MarkdownValidator.Parsing
                     UnprocessedReferences.AddLast(reference.GlobalReference);
                 }
             }
-
-            context.SetWarningSource(WarningSource.ParsingResultFinalize);
 
             foreach (var definition in definedReferences.Values)
             {

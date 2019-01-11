@@ -16,18 +16,16 @@ namespace MihaZupan.MarkdownValidator.Warnings
     {
         public readonly WarningLocation Location;
         public readonly WarningID ID;
-        public readonly WarningSource Source;
         public readonly string ParserIdentifier;
         public readonly string Value;
         public readonly string Message;
         public readonly bool IsError;
         public readonly bool IsSuggestion;
 
-        internal Warning(WarningID id, WarningLocation location, string value, string message, WarningSource source, string parserIdentifier)
+        internal Warning(WarningID id, WarningLocation location, string value, string message, string parserIdentifier)
         {
             Location = location;
             ID = id;
-            Source = source;
             Value = value;
             Message = message;
             IsError = id.IsError;
@@ -41,7 +39,6 @@ namespace MihaZupan.MarkdownValidator.Warnings
             return
                 other.ID.Equals(ID) &&
                 other.Location.Equals(Location) &&
-                other.Source.Equals(Source) &&
                 other.Value.OrdinalEquals(Value) &&
                 other.Message.OrdinalEquals(Message);
         }
@@ -52,7 +49,6 @@ namespace MihaZupan.MarkdownValidator.Warnings
                 int hash = Location.GetHashCode();
                 hash = (hash * 397) ^ Message.Length;
                 hash ^= ID.GetHashCode();
-                hash ^= (int)Source;
                 return hash;
             }
         }
@@ -84,12 +80,6 @@ namespace MihaZupan.MarkdownValidator.Warnings
                     {
                         // Sort by Value
                         compare = StringComparer.Ordinal.Compare(Value, other.Value);
-
-                        if (compare == 0)
-                        {
-                            // Sort by source
-                            compare = Source.CompareTo(other.Source);
-                        }
                     }
                 }
             }

@@ -49,8 +49,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
         public void ProcessUrl(ParsingContext context, LinkReference reference)
         {
-            context.SetWarningSource(WarningSource.UrlProcessor);
-
             string urlString = reference.RawReference;
 
             if (urlString.StartsWith(':') ||
@@ -226,7 +224,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 UrlPostProcessorContext postProcessorContext = new UrlPostProcessorContext(context, reference, info);
                 foreach (var postProcessor in postProcessors)
                 {
-                    context.SetWarningSource(WarningSource.UrlPostProcessor, postProcessor.Identifier);
+                    context.SetWarningSource(postProcessor.Identifier);
                     postProcessor.Process(postProcessorContext);
                 }
             }

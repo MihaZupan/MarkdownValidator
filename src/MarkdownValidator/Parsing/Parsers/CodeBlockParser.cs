@@ -76,7 +76,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseCodeBlock(ParsingContext context)
         {
             var codeBlock = context.Object as FencedCodeBlock;
-            context.SetWarningSource(WarningSource.InternalCodeBlockParser);
             var originalObject = context.Object;
 
             if (codeBlock.Lines.Count == 0)
@@ -122,7 +121,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
                     {
                         if (parser.SupportsLanguage(codeBlock.Info))
                         {
-                            context.SetWarningSource(WarningSource.ExternalCodeBlockParser, parser.Identifier);
+                            context.SetWarningSource(parser.Identifier);
                             parser.ParseCodeBlock(codeBlockInfo, context);
                         }
                     }
@@ -135,7 +134,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
 
             foreach (var parser in parsers)
             {
-                context.SetWarningSource(WarningSource.ExternalCodeBlockParser, parser.Identifier);
+                context.SetWarningSource(parser.Identifier);
                 parser.ParseCodeBlock(codeBlockInfo, context);
             }
         }

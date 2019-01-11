@@ -22,7 +22,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseLinkReferenceDefinition(ParsingContext context)
         {
             var referenceDefinition = context.Object as LinkReferenceDefinition;
-            context.SetWarningSource(WarningSource.InternalParser);
 
             context.AddLocalReferenceDefinition(referenceDefinition);
         }

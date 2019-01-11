@@ -25,7 +25,6 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
         private void ParseHeadingBlock(ParsingContext context)
         {
             var heading = context.Object as HeadingBlock;
-            context.SetWarningSource(WarningSource.InternalParser);
 
             if (heading.HeaderChar == 0) return;
             var rawText = context.Source.Substring(heading.Span);
