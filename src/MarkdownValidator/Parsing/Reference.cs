@@ -8,9 +8,11 @@
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Helpers;
 using System;
+using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
+    [DebuggerDisplay("{GlobalReference} on line {Line}")]
     internal class Reference : IEquatable<Reference>
     {
         public readonly string RawReference;

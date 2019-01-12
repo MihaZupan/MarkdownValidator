@@ -34,10 +34,8 @@ namespace MihaZupan.MarkdownValidator.Helpers
             first = default;
             return false;
         }
-        public static int FindIndex<T>(this IEnumerable<T> enumerable, T value, IEqualityComparer<T> comparer = null)
+        public static int FindIndex<T>(this IEnumerable<T> enumerable, T value, IEqualityComparer<T> comparer)
         {
-            comparer = comparer ?? EqualityComparer<T>.Default;
-
             int count = 0;
             foreach (var element in enumerable)
             {

@@ -7,9 +7,11 @@
 */
 using Markdig.Syntax;
 using System;
+using System.Diagnostics;
 
 namespace MihaZupan.MarkdownValidator.Parsing
 {
+    [DebuggerDisplay("{GlobalReference} on line {Line}")]
     internal class ReferenceDefinition : Reference, IEquatable<ReferenceDefinition>
     {
         public readonly MarkdownFile SourceFile;
@@ -41,8 +43,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
         }
         public bool Equals(ReferenceDefinition other)
         {
-            if (!other.Equals((Reference)this)) return false;
-            return SourceFile == other.SourceFile;
+            return other.Equals(this as Reference) && ReferenceEquals(SourceFile, other.SourceFile);
         }
     }
 }

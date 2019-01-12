@@ -257,7 +257,9 @@ namespace MihaZupan.MarkdownValidator
             {
                 ParsingResultGlobalDiff diff = markdownFile.Update(source);
                 UpdateInternalContext(markdownFile, diff);
-                Unlock(); // Lock the entire update context in case there are multiple update calls on the same file
+                // Lock the entire update context in case there are multiple update calls on the same file
+                // ReparseMarkdownFile could also be called from Validate with getFullReport set to true
+                Unlock();
                 return true;
             }
             Unlock();

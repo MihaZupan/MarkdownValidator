@@ -44,7 +44,9 @@ namespace MihaZupan.MarkdownValidator.Helpers
             else
             {
                 int count = 0;
-                Dictionary<T, int> previousElements = previous.ToDictionary(e => e, _ => count++, comparer);
+                Dictionary<T, int> previousElements = new Dictionary<T, int>(previousCount);
+                foreach (var element in previous) previousElements.Add(element, count++);
+
                 foreach (var element in current)
                 {
                     if (previousElements.TryGetValue(element, out int index))

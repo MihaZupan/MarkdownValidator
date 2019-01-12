@@ -53,7 +53,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
             if (urlString.StartsWith(':') ||
                 urlString.EndsWith(':') ||
-                !Uri.TryCreate(urlString, UriKind.RelativeOrAbsolute, out Uri url))
+                !Uri.TryCreate(urlString, UriKind.Absolute, out Uri url))
             {
                 context.ReportWarning(
                     WarningIDs.InvalidUrlFormat,
@@ -63,20 +63,8 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
                 return;
             }
 
-            if (url.IsAbsoluteUri && HostnameHelper.IsDocumentationHostname(url))
+            if (HostnameHelper.IsDocumentationHostname(url))
                 return;
-
-            if (!Uri.TryCreate(urlString, UriKind.Absolute, out url))
-            {
-                context.ReportWarning(
-                    WarningIDs.InvalidUrlFormat,
-                    reference,
-                    "`{0}` is not a valid url",
-                    urlString);
-                return;
-            }
-
-            Debug.Assert(url.IsAbsoluteUri);
 
             if (url.AbsoluteUri.OrdinalContains("..."))
                 return;

@@ -5,7 +5,6 @@
     For more information visit:
     https://github.com/MihaZupan/MarkdownValidator/blob/master/LICENSE
 */
-using Markdig.Helpers;
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using System.Diagnostics;
