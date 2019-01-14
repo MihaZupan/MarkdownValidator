@@ -58,5 +58,41 @@ namespace MihaZupan.MarkdownValidator.Tests.ExternalUrlsTests
         {
             SingleFileTest.AssertWarning($"[{label}]({url})", WarningIDs.NoLabelOnGitHubLineUrl, 3 + label.Length, 3 + label.Length + url.Length - 1, url);
         }
+
+        [Theory]
+        [Trait("Category", "Network")]
+        [InlineData("Chat", "https://github.com/TelegramBots/Telegram.Bot/blob/master/src/Telegram.Bot/Types/Message.cs#L42")]
+        [InlineData("Credentials", "https://github.com/MihaZupan/HttpToSocks5Proxy/blob/05f73139188c7e706020ec3bdaf86ce921d86ff0/src/HttpToSocks5Proxy/HttpToSocks5Proxy.cs#L20")]
+        public void ValidLinks_LinkReferenceDefinitions(string label, string url)
+        {
+            SingleFileTest.AssertNoWarnings($"[{label}][foo]\n\n[foo]: {url}");
+        }
+
+        [Theory]
+        [Trait("Category", "Network")]
+        [InlineData("Chatting", "https://github.com/TelegramBots/Telegram.Bot/blob/master/src/Telegram.Bot/Types/Message.cs#L14")]
+        [InlineData("*Chat*", "https://github.com/TelegramBots/Telegram.Bot/blob/master/src/Telegram.Bot/Types/Message.cs#L1")]
+        public void InvalidLinks_LinkReferenceDefinitions(string label, string url)
+        {
+            SingleFileTest.AssertWarning($"[{label}][foo]\n\n[foo]: {url}", WarningIDs.NoLabelOnGitHubLineUrl, 1, label.Length, url);
+        }
+
+        [Theory]
+        [Trait("Category", "Network")]
+        [InlineData("Chat", "https://github.com/TelegramBots/Telegram.Bot/blob/master/src/Telegram.Bot/Types/Message.cs#L42")]
+        [InlineData("Credentials", "https://github.com/MihaZupan/HttpToSocks5Proxy/blob/05f73139188c7e706020ec3bdaf86ce921d86ff0/src/HttpToSocks5Proxy/HttpToSocks5Proxy.cs#L20")]
+        public void ValidLinks_SameNameLinkReferenceDefinitions(string label, string url)
+        {
+            SingleFileTest.AssertNoWarnings($"[{label}]\n\n[{label}]: {url}");
+        }
+
+        [Theory]
+        [Trait("Category", "Network")]
+        [InlineData("Chatting", "https://github.com/TelegramBots/Telegram.Bot/blob/master/src/Telegram.Bot/Types/Message.cs#L14")]
+        [InlineData("*Chat*", "https://github.com/TelegramBots/Telegram.Bot/blob/master/src/Telegram.Bot/Types/Message.cs#L1")]
+        public void InvalidLinks_SameNameLinkReferenceDefinitions(string label, string url)
+        {
+            SingleFileTest.AssertWarning($"[{label}]\n\n[{label}]: {url}", WarningIDs.NoLabelOnGitHubLineUrl, 1, label.Length, url);
+        }
     }
 }

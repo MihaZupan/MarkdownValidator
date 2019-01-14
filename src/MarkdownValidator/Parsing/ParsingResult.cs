@@ -90,9 +90,12 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 {
                     first.Used = true;
                 }
-                else if (reference is LinkReference linkReference)
+                else if (reference is LinkReference)
                 {
-                    context.ProcessLinkReference(linkReference);
+                    foreach (LinkReference linkReference in referenceList)
+                    {
+                        context.ProcessLinkReference(linkReference);
+                    }
                 }
                 else if (reference.GlobalReference.Length != 0)
                 {

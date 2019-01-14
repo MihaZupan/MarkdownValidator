@@ -32,31 +32,27 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             {
                 string target;
                 string name = null;
-                SourceSpan span;
-                if (link.Label != null)
-                {
-                    target = link.Label;
-                    span = link.LabelSpan.Value;
 
-                    if (!span.IsEmpty && link.FirstChild is LiteralInline literal)
+                target = link.Label;
+                SourceSpan span = link.LabelSpan.Value;
+
+                if (!span.IsEmpty)
+                {
+                    name = context.Source.Substring(link.FirstChild.Span);
+                    if (name.Equals(target, StringComparison.OrdinalIgnoreCase))
                     {
-                        name = literal.Content.ToString();
-                        if (name.Equals(target, StringComparison.OrdinalIgnoreCase))
-                        {
-                            context.ReportWarning(
-                                WarningIDs.SameLabelAndTargetReference,
-                                string.Empty,
-                                "You can use `[{0}]` instead of `[{0}][{1}]`",
-                                name,
-                                target);
-                        }
+                        context.ReportWarning(
+                            WarningIDs.SameLabelAndTargetReference,
+                            string.Empty,
+                            "You can use `[{0}]` instead of `[{0}][{1}]`",
+                            name,
+                            target);
                     }
                 }
-                else
-                {
-                    target = (link.FirstChild as LiteralInline).Content.ToString();
-                    span = link.FirstChild.Span;
-                }
+                else name = target;
+
+                if (link.Url.OrdinalContains("://"))
+                    context.TryAddReference(link.Url, link.FirstChild.Span, link.Line, image: link.IsImage, cleanUrl: canBeUrl, namedReferenceLink: true, label: name);
 
                 context.TryAddReference(target, link.LabelSpan.Value, link.Line, image: link.IsImage, cleanUrl: canBeUrl, namedReferenceLink: true, label: name);
             }
