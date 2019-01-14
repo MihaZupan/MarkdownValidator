@@ -55,5 +55,6 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public static readonly WarningID TooManyRedirects               = new WarningID(ErrorID + 19,   nameof(TooManyRedirects));
         public static readonly WarningID WebRequestReturnedErrorCode    = new WarningID(ErrorID + 20,   nameof(WebRequestReturnedErrorCode));
         public static readonly WarningID WebRequestTimedOut             = new WarningID(ErrorID + 21,   nameof(WebRequestTimedOut));
+        public static readonly WarningID InvalidUrlFragment             = new WarningID(ErrorID + 22,   nameof(InvalidUrlFragment));
     }
 }

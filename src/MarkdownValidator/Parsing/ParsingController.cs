@@ -7,9 +7,10 @@
 */
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
+using MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlPostProcessors;
+using MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlRewriters;
 using MihaZupan.MarkdownValidator.Parsing.Parsers;
 using MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.JSON;
-using MihaZupan.MarkdownValidator.Parsing.Parsers.UrlRewriters;
 using System;
 using System.Collections.Generic;
 
@@ -45,12 +46,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 new FootnoteParser(),
                 new MarkdownDocumentParser(),
                 new ListBlockParser(),
-                new CodeBlockParser(),
-            });
-
-            Configuration.Parsing.Parsers.AddRange(new IParser[]
-            {
                 new MicrosoftReferenceSourceUrlRewriter(),
+                new TelegramBotApiDocsUrlPostProcessor(),
+                new CodeBlockParser(),
             });
 
             foreach (var parser in Configuration.Parsing.Parsers)

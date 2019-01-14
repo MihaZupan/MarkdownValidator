@@ -19,32 +19,27 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
     internal sealed class UrlProcessor
     {
         private readonly WebIOConfig WebConfig;
-        private readonly Dictionary<string, List<IUrlPostProcessor>> UrlPostProcessors;
-        internal void AddUrlPostProcessor(IUrlPostProcessor processor)
+        private readonly Dictionary<string, List<(string ParserIdentifier, Action<UrlPostProcessorContext> ParsingAction)>> UrlPostProcessors;
+        internal void AddUrlPostProcessor(string hostname, string parserIdentifier, Action<UrlPostProcessorContext> action)
         {
-            foreach (var hostname in processor.Hostnames)
+            if (UrlPostProcessors.TryGetValue(hostname, out var processors))
             {
-                if (UrlPostProcessors.TryGetValue(hostname, out var processors))
-                {
-                    processors.Add(processor);
-                }
-                else
-                {
-                    UrlPostProcessors.Add(hostname,
-                        new List<IUrlPostProcessor>(2)
-                        {
-                            processor
-                        });
-                }
+                processors.Add((parserIdentifier, action));
             }
-
-            processor.Initialize(WebConfig.Configuration);
+            else
+            {
+                UrlPostProcessors.Add(hostname,
+                    new List<(string ParserIdentifier, Action<UrlPostProcessorContext> ParsingAction)>(2)
+                    {
+                        (parserIdentifier, action)
+                    });
+            }
         }
 
         public UrlProcessor(WebIOConfig configuration)
         {
             WebConfig = configuration;
-            UrlPostProcessors = new Dictionary<string, List<IUrlPostProcessor>>(StringComparer.OrdinalIgnoreCase);
+            UrlPostProcessors = new Dictionary<string, List<(string ParserIdentifier, Action<UrlPostProcessorContext> ParsingAction)>>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void ProcessUrl(ParsingContext context, LinkReference reference)
@@ -211,11 +206,11 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 
             if (UrlPostProcessors.TryGetValue(url.Host, out var postProcessors))
             {
-                UrlPostProcessorContext postProcessorContext = new UrlPostProcessorContext(context, reference, info);
-                foreach (var postProcessor in postProcessors)
+                UrlPostProcessorContext postProcessorContext = new UrlPostProcessorContext(context, reference, info, originalUrl);
+                foreach (var (ParserIdentifier, ParsingAction) in postProcessors)
                 {
-                    context.SetWarningSource(postProcessor.Identifier);
-                    postProcessor.Process(postProcessorContext);
+                    context.SetWarningSource(ParserIdentifier);
+                    ParsingAction(postProcessorContext);
                 }
             }
         }

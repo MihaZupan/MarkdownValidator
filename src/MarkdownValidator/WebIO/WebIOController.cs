@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,45 +60,44 @@ namespace MihaZupan.MarkdownValidator.WebIO
             PendingRequests                 = new Dictionary<string, PendingRequest>(StringComparer.OrdinalIgnoreCase);
             RequestsInProgress              = new Dictionary<string, PendingRequest>(StringComparer.OrdinalIgnoreCase);
             CachedSites                     = new Dictionary<string, SiteInfo>(StringComparer.OrdinalIgnoreCase);
-            DownloadableContentByHostname   = new Dictionary<string, List<(string, bool)>>(StringComparer.OrdinalIgnoreCase);
+            DownloadableContentByHostname   = new Dictionary<string, List<(string ContentType, bool IsText, Func<CleanUrl, bool> UrlSelector)>>(StringComparer.OrdinalIgnoreCase);
             UrlRewriters                    = new Dictionary<string, Func<Uri, Uri>>(StringComparer.OrdinalIgnoreCase);
 
             SchedulerMRE = new ManualResetEvent(false);
             Task.Run(() => SchedulerWorkInternal());
         }
 
-        private readonly Dictionary<string, List<(string Hostname, bool IsText)>> DownloadableContentByHostname;
-        internal void AddDownloadableContentType(string hostname, string contentType, bool isText)
+        private readonly Dictionary<string, List<(string ContentType, bool IsText, Func<CleanUrl, bool> UrlSelector)>> DownloadableContentByHostname;
+        internal void AddDownloadableContentType(string hostname, string contentType, bool isText, Func<CleanUrl, bool> urlSelector)
         {
             if (!Enabled) return;
             if (DownloadableContentByHostname.TryGetValue(hostname, out var downloadableContent))
             {
                 for (int i = 0; i < downloadableContent.Count; i++)
                 {
-                    var (Hostname, IsText) = downloadableContent[i];
-                    if (Hostname.Equals(contentType, StringComparison.OrdinalIgnoreCase))
+                    var (ContentType, IsText, UrlSelector) = downloadableContent[i];
+                    if (ContentType.Equals(contentType, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (isText && !IsText)
-                            downloadableContent[i] = (contentType, true);
+                        downloadableContent[i] = (contentType, isText || IsText, (url) => UrlSelector(url) || urlSelector(url));
                         return;
                     }
                 }
-                downloadableContent.Add((contentType, isText));
+                downloadableContent.Add((contentType, isText, urlSelector));
             }
             else
             {
                 DownloadableContentByHostname.Add(hostname,
-                    new List<(string, bool)>(4)
+                    new List<(string, bool, Func<CleanUrl, bool>)>(2)
                     {
-                        (contentType, isText)
+                        (contentType, isText, urlSelector)
                     });
             }
         }
-        private bool TryGetDownloadableContentType(string hostname, string contentType, out bool isText)
+        private bool TryGetDownloadableContentType(CleanUrl url, string contentType, out bool isText)
         {
-            if (DownloadableContentByHostname.TryGetValue(hostname, out var downloadableContent))
+            if (DownloadableContentByHostname.TryGetValue(url.Url.Host, out var downloadableContent))
             {
-                if (downloadableContent.ContainsAny(c => c.Hostname.Equals(contentType, StringComparison.OrdinalIgnoreCase), out var content))
+                if (downloadableContent.ContainsAny(dc => dc.ContentType.Equals(contentType, StringComparison.OrdinalIgnoreCase) && dc.UrlSelector(url), out var content))
                 {
                     isText = content.IsText;
                     return true;
@@ -387,7 +387,6 @@ namespace MihaZupan.MarkdownValidator.WebIO
             // We are also guaranteed that this url is either targetting an IP address, or a resolvable hostname
 
             CleanUrl cleanUrl = request.Url;
-            Uri url = cleanUrl.Url;
             SiteInfo siteInfo = new SiteInfo(cleanUrl);
 
             try
@@ -406,21 +405,15 @@ namespace MihaZupan.MarkdownValidator.WebIO
                         siteInfo.IsRedirect = true;
                         Uri redirectUrl = response.Headers.Location;
                         if (!redirectUrl.IsAbsoluteUri)
-                            redirectUrl = new Uri(url.GetLeftPart(UriPartial.Authority) + redirectUrl);
+                            redirectUrl = new Uri(cleanUrl.Url.GetLeftPart(UriPartial.Authority) + redirectUrl);
                         siteInfo.RedirectTarget = new CleanUrl(redirectUrl);
                     }
-                    else if (siteInfo.ContentType != null && TryGetDownloadableContentType(url.Host, siteInfo.ContentType, out bool isText))
+                    else if (siteInfo.ContentType != null && TryGetDownloadableContentType(cleanUrl, siteInfo.ContentType, out bool isText))
                     {
                         siteInfo.ContentPresent = true;
                         siteInfo.ContentIsText = isText;
-                        if (isText)
-                        {
-                            siteInfo.ContentText = response.Content.ReadAsStringAsync().Result;
-                        }
-                        else
-                        {
-                            siteInfo.ContentBytes = response.Content.ReadAsByteArrayAsync().Result;
-                        }
+                        siteInfo.ContentBytes = response.Content.ReadAsByteArrayAsync().Result;
+                        if (isText) siteInfo.ContentText = Encoding.UTF8.GetString(siteInfo.ContentBytes);
                     }
                 }
             }

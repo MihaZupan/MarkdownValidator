@@ -45,11 +45,6 @@ namespace MihaZupan.MarkdownValidator.Configuration
                         var parser = Activator.CreateInstance(type) as ICodeBlockParser;
                         configuration.Parsing.CodeBlocks.AddParser(parser);
                     }
-                    if (typeof(IUrlPostProcessor).IsAssignableFrom(type))
-                    {
-                        var processor = Activator.CreateInstance(type) as IUrlPostProcessor;
-                        configuration.WebIO.UrlProcessor.AddUrlPostProcessor(processor);
-                    }
                 }
                 return true;
             }

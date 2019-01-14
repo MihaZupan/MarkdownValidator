@@ -62,10 +62,5 @@ namespace MihaZupan.MarkdownValidator.Configuration
         }
         internal WebIOController WebIOController;
         internal UrlProcessor UrlProcessor;
-
-        public void RegisterDownloadableContent(string hostname, string contentType, bool isText)
-            => WebIOController.AddDownloadableContentType(hostname, contentType, isText);
-        public void RegisterUrlRewriter(string hostname, Func<Uri, Uri> rewriter)
-            => WebIOController.AddUrlRewriter(hostname, rewriter);
     }
 }

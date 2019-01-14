@@ -14,22 +14,29 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
 {
     public class UrlPostProcessorContext
     {
-        private readonly Reference Reference;
+        private readonly LinkReference Reference;
 
         public readonly ParsingContext Context;
         public readonly SiteInfo SiteInfo;
 
-        public Uri Url => SiteInfo.Url.Url;
-        public Config Configuration => Context.Configuration;
-        public WebIOController WebIO => Context.WebIO;
+        public readonly CleanUrl Url;
+        public readonly Config Configuration;
+        public readonly WebIOController WebIO;
 
-        internal UrlPostProcessorContext(ParsingContext context, Reference reference, SiteInfo siteInfo)
+        internal UrlPostProcessorContext(ParsingContext context, LinkReference reference, SiteInfo siteInfo, Uri url)
         {
             Context = context;
             SiteInfo = siteInfo;
             Reference = reference;
+
+            Url = new CleanUrl(url);
+            Configuration = Context.Configuration;
+            WebIO = Context.WebIO;
         }
 
+        /// <summary>
+        /// Report a warning that applies to the entire reference
+        /// </summary>
         internal void ReportWarning(WarningID id, string messageFormat, params string[] messageArgs)
             => Context.ReportWarning(id, Reference, messageFormat, messageArgs);
     }

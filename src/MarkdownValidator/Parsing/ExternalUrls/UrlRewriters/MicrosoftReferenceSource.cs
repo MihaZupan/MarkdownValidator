@@ -8,7 +8,7 @@
 using MihaZupan.MarkdownValidator.Helpers;
 using System;
 
-namespace MihaZupan.MarkdownValidator.Parsing.Parsers.UrlRewriters
+namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlRewriters
 {
     /// <summary>
     /// Refers to https://referencesource.microsoft.com/scripts.js

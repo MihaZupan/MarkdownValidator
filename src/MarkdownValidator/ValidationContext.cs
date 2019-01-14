@@ -137,10 +137,10 @@ namespace MihaZupan.MarkdownValidator
             // We have to do this check in case markdown files don't actually end with .md, but share the name
             if (!ContextReferenceableEntities.ContainsKey(file.HtmlPath))
             {
+                IndexedEntities.Add(file.HtmlPath);
                 ContextReferenceableEntities.Add(
                     file.HtmlPath,
                     (null, new LinkedList<MarkdownFile>()));
-                IndexedEntities.Add(file.HtmlPath);
             }
 
             foreach (var definedReference in file.ParsingResult.HeadingDefinitions)
