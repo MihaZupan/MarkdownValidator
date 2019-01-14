@@ -42,7 +42,7 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlPostProcessors
 
             Debug.Assert(context.SiteInfo.ContentPresent && context.SiteInfo.ContentIsText);
 
-            string fragment = context.Url.Url.Fragment;
+            string fragment = context.UrlFragment;
             if (fragment.Length == 0)
                 return;
 

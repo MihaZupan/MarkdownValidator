@@ -19,6 +19,11 @@ namespace MihaZupan.MarkdownValidator.Helpers
             else return source.Equals(value, StringComparison.Ordinal);
         }
 
+        public static bool OrdinalEqualsAtIndex(this string source, string value, int index)
+        {
+            return source.IndexOf(value, index, value.Length, StringComparison.Ordinal) != -1;
+        }
+
         public static bool OrdinalContains(this string source, char value)
             => Contains(source, value, out _);
 

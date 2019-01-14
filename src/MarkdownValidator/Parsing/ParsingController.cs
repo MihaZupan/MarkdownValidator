@@ -8,6 +8,7 @@
 using Markdig.Syntax;
 using MihaZupan.MarkdownValidator.Configuration;
 using MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlPostProcessors;
+using MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlPostProcessors.GitHub;
 using MihaZupan.MarkdownValidator.Parsing.ExternalUrls.UrlRewriters;
 using MihaZupan.MarkdownValidator.Parsing.Parsers;
 using MihaZupan.MarkdownValidator.Parsing.Parsers.CodeBlockParsers.JSON;
@@ -48,6 +49,7 @@ namespace MihaZupan.MarkdownValidator.Parsing
                 new ListBlockParser(),
                 new MicrosoftReferenceSourceUrlRewriter(),
                 new TelegramBotApiDocsUrlPostProcessor(),
+                new GitHubUrlPostProcessor(),
                 new CodeBlockParser(),
             });
 

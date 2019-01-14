@@ -15,11 +15,17 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
     public class UrlPostProcessorContext
     {
         private readonly LinkReference Reference;
+        public readonly string Label;
+        public readonly bool IsImage;
+        public readonly bool IsCleanUrl;
+        public readonly bool IsAutoLink;
+        public readonly bool IsNamedReferenceLink;
 
         public readonly ParsingContext Context;
         public readonly SiteInfo SiteInfo;
 
         public readonly CleanUrl Url;
+        public readonly string UrlFragment;
         public readonly Config Configuration;
         public readonly WebIOController WebIO;
 
@@ -29,7 +35,15 @@ namespace MihaZupan.MarkdownValidator.Parsing.ExternalUrls
             SiteInfo = siteInfo;
             Reference = reference;
 
+            // Proxy internal fields
+            Label = reference.Label;
+            IsImage = reference.IsImage;
+            IsCleanUrl = reference.IsCleanUrl;
+            IsAutoLink = reference.IsAutoLink;
+            IsNamedReferenceLink = reference.IsNamedReferenceLink;
+
             Url = new CleanUrl(url);
+            UrlFragment = url.Fragment;
             Configuration = Context.Configuration;
             WebIO = Context.WebIO;
         }

@@ -62,16 +62,18 @@ namespace MihaZupan.MarkdownValidator.Parsing.Parsers
             }
             else
             {
+                string label = link.FirstChild == null ? null : context.Source.Substring(link.FirstChild.Span);
+
                 if (link.Url.IsEffectivelyEmpty()) ReportEmptyReference(context);
                 else
                 {
-                    context.TryAddReference(link.Url, link.UrlSpan.Value, link.Line, link.UrlSpan, link.IsImage, canBeUrl);
+                    context.TryAddReference(link.Url, link.UrlSpan.Value, link.Line, link.UrlSpan, link.IsImage, cleanUrl: canBeUrl, autoLink: link.IsAutoLink, label: label);
 
                     if (context.Source.OrdinalContains("( ") || context.Source.OrdinalContains(" )"))
                         ReportExcessSpace(context);
                 }
 
-                if (link.FirstChild == null) ReportEmptyLinkContent(context);
+                if (label == null) ReportEmptyLinkContent(context);
             }
         }
 

@@ -45,6 +45,9 @@ namespace MihaZupan.MarkdownValidator.Parsing
         public void RegisterDownloadableContent(string hostname, string contentType, bool isText, Func<CleanUrl, bool> urlSelector)
             => WebIOConfig.WebIOController.AddDownloadableContentType(hostname, contentType, isText, urlSelector);
 
+        public void RegisterDownloadableContent(string hostname, string contentType, bool isText)
+            => WebIOConfig.WebIOController.AddDownloadableContentType(hostname, contentType, isText, _ => true);
+
         public void RegisterUrlPostProcessor(string hostname, Action<UrlPostProcessorContext> action)
             => WebIOConfig.UrlProcessor.AddUrlPostProcessor(hostname, ParserIdentifier, action);
     }

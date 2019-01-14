@@ -28,6 +28,7 @@ namespace MihaZupan.MarkdownValidator.Warnings
         public static readonly WarningID EmptyMarkdownFile              = new WarningID(7,  nameof(EmptyMarkdownFile));
         public static readonly WarningID InvalidListNumberOrder         = new WarningID(8,  nameof(InvalidListNumberOrder));
         public static readonly WarningID InvalidJsonInJsonCodeBlock     = new WarningID(9,  nameof(InvalidJsonInJsonCodeBlock));
+        public static readonly WarningID NoLabelOnGitHubLineUrl         = new WarningID(10, nameof(NoLabelOnGitHubLineUrl));
 
         //
         // Errors
